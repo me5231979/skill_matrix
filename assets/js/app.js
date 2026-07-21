@@ -104,7 +104,7 @@
       ['Podcast', 'Masters of Scale', 'https://mastersofscale.com'],
       ['Podcast', 'HBR IdeaCast', 'https://hbr.org/podcasts/ideacast'],
       ['Cert', 'Project Management Professional (PMP)', 'https://www.pmi.org/certifications/project-management-pmp'],
-      ['Free', 'MIT OpenCourseWare — Sloan (free)', 'https://ocw.mit.edu']],
+      ['Free', 'MIT OpenCourseWare: Sloan (free)', 'https://ocw.mit.edu']],
     'Communication Design and Development': [
       ['Podcast', 'Design Matters with Debbie Millman', 'https://www.designmattersmedia.com'],
       ['YouTube', 'The Futur', 'https://www.youtube.com/@thefutur'],
@@ -144,7 +144,7 @@
     'Supply Chain Management': [
       ['Podcast', 'Supply Chain Now', 'https://supplychainnow.com'],
       ['Cert', 'ASCM CPIM / CSCP', 'https://www.ascm.org'],
-      ['Free', 'MIT OpenCourseWare — Supply Chain (free)', 'https://ocw.mit.edu']],
+      ['Free', 'MIT OpenCourseWare: Supply Chain (free)', 'https://ocw.mit.edu']],
     'Human Resources Management': [
       ['Podcast', 'HR Happy Hour', 'https://www.hrhappyhour.net'],
       ['Podcast', 'Honest HR (SHRM)', 'https://www.shrm.org'],
@@ -220,7 +220,7 @@
       ['Podcast', 'Future of Agriculture', 'https://www.futureofag.com'],
       ['Cert', 'ISA Certified Arborist', 'https://www.isa-arbor.com'],
       ['Cert', 'NALP Landscape Industry Certified', 'https://www.landscapeprofessionals.org'],
-      ['Free', 'Trees Are Good — ISA public resources (free)', 'https://www.treesaregood.org']],
+      ['Free', 'Trees Are Good, ISA public resources (free)', 'https://www.treesaregood.org']],
     'Mathematics and Mathematical Modeling': [
       ['Podcast', 'Data Skeptic', 'https://dataskeptic.com'],
       ['YouTube', 'StatQuest', 'https://www.youtube.com/@statquest'],
@@ -341,7 +341,7 @@
       }));
     }
 
-    html += skillGroup('AI-enabled work', 'universal — develop for every role', [
+    html += skillGroup('AI-enabled work', 'universal, develop for every role', [
       pillBtn(AI_READINESS.skill, 'pill--univ', { kind: 'univ' })
     ]);
     panel.innerHTML = html;
@@ -413,7 +413,7 @@
     if (!from || !to) { box.hidden = true; box.innerHTML = ''; return; }
     if (from === to) {
       box.hidden = false;
-      box.innerHTML = '<p class="bucket__none">That’s the role you’re already in — pick a different destination to compare.</p>';
+      box.innerHTML = '<p class="bucket__none">That’s the role you’re already in. Pick a different destination.</p>';
       return;
     }
     var a = analyze(from, to);
@@ -428,15 +428,15 @@
         (a.bridges.length ? (a.matches.length ? ' and ' : ', plus ') + a.bridges.length + ' bridge skill' + plural(a.bridges.length) : '') +
         ' toward <strong>' + esc(to.subfamily) + '</strong>. ' +
         (a.growth.length ? a.growth.length + ' skill' + plural(a.growth.length) + ' to grow.' :
-          'No brand-new skills required — deepen and certify what you have.') +
+          'No brand-new skills required. Deepen and certify what you have.') +
         '</p></div></div>' +
 
-      '<p class="ownhint">Already have some of the destination skills — from an earlier job, a degree, or life outside work? <b>Tick “I have this”</b> below. Readiness and the plan update instantly, and your first Oracle step becomes adding those skills to your Talent Profile.</p>' +
+      '<p class="ownhint">Already have some of the destination skills from an earlier job, a degree, or life outside work? <b>Tick “I have this”</b>. Readiness and the plan update instantly, and adding those skills to your Talent Profile becomes your first Oracle step.</p>' +
 
       '<div class="buckets">' +
-        bucket('bucket--match', 'Skills that carry', 'Gold — you already have these', listMatches(a, from)) +
+        bucket('bucket--match', 'Skills that carry', 'You already have these', listMatches(a, from)) +
         bucket('bucket--bridge', 'Bridge skills', 'A near neighbor in your current role', listBridges(a)) +
-        bucket('bucket--grow', 'Skills to grow', 'New ground — the learning plan covers these', listGrowth(a)) +
+        bucket('bucket--grow', 'Skills to grow', 'New ground, covered by the plan', listGrowth(a)) +
       '</div>';
 
     box.hidden = false;
@@ -449,7 +449,7 @@
 
   function bucket(cls, title, sub, items) {
     return '<div class="bucket ' + cls + '"><h4>' + title + '</h4><p class="bucket__sub">' + sub + '</p>' +
-      (items || '<p class="bucket__none">None — yet.</p>') + '</div>';
+      (items || '<p class="bucket__none">None yet.</p>') + '</div>';
   }
 
   function ownToggle(skillName, checked) {
@@ -463,7 +463,7 @@
     }).concat(a.matches.map(function (s) {
       var mine = a.owned[s.skill];
       return '<li>' + pillBtn(s.skill, 'pill--core', { kind: 'role', role: mine ? toSel.value : from.subfamily }) +
-        (mine ? '<span class="via">marked by you — ' + ownToggle(s.skill, true) + '</span>' : '') + '</li>';
+        (mine ? '<span class="via">marked by you · ' + ownToggle(s.skill, true) + '</span>' : '') + '</li>';
     }));
     return '<ul class="pills pills--matches">' + rows.join('') + '</ul>';
   }
@@ -488,7 +488,7 @@
     });
     rows.push('<li><button type="button" class="skill-link" data-skill="' + esc(AI_READINESS.skill) +
       '" data-kind="univ">' + esc(AI_READINESS.skill) + '</button>' +
-      '<span class="aihint">Universal — every role</span></li>');
+      '<span class="aihint">Universal · every role</span></li>');
     return '<ul>' + rows.join('') + '</ul>';
   }
 
@@ -529,23 +529,23 @@
         '<p class="plandoc__summary">You carry all seven core competencies' +
         (a.matches.length ? ' plus ' + a.matches.length + ' matched skill' + plural(a.matches.length) +
           (matchedNames ? ' (' + matchedNames + ')' : '') : ' into this pathway') +
-        '. This plan closes ' + (a.bridges.length + a.growth.length + 1) + ' development areas — ' +
+        '. This plan closes ' + (a.bridges.length + a.growth.length + 1) + ' development areas in three phases with Oracle checkpoints: ' +
         a.bridges.length + ' bridge skill' + plural(a.bridges.length) + ', ' + a.growth.length +
-        ' new skill' + plural(a.growth.length) + ', and AI Workforce Readiness (universal, assumed for every role) — in three phases with checkpoints in Oracle.</p>' +
+        ' new skill' + plural(a.growth.length) + ', and AI Workforce Readiness (universal).</p>' +
       '</div>' +
 
       /* --- Phase checklists --- */
       '<div class="phases">' +
         phase('01', 'Align & set up in Oracle', 'Weeks 1–4', [
           ck('<b>Meet with your manager</b>: share this printed plan, agree on the destination and timeline, and add it to your development conversation notes.'),
-          ck('In Oracle, open <b>Me &rarr; Career and Performance &rarr; Talent Profile</b> and add your current skills — matched skills, bridge skills, any destination skills you marked “I have this,” and any probable skills you genuinely have — with honest proficiency levels.'),
+          ck('In Oracle, open <b>Me &rarr; Career and Performance &rarr; Talent Profile</b>. Add your current skills with honest proficiency: matched, bridge, skills marked “I have this,” and probable skills you genuinely have.'),
           ck('In <b>Oracle Grow</b>, add <b>' + esc(to.subfamily) + '</b> as a career/role of interest so recommendations start pointing at this destination.'),
           ck('In Oracle Grow, review the AI-suggested skills for your profile and accept the ones that fit.'),
           ck('Create one <b>development goal per skill</b> in the table below, tagged to your role of interest.'),
           ck('Request an informational interview with someone in ' + esc(to.subfamily) + ' (' + esc(to.family) + ').')
         ]) +
         phase('02', 'Build the skills', 'Months 2–' + (months === 6 ? 4 : months - 3), [
-          ck('Work the development table below top to bottom — one skill at a time, starting from the <b>Oracle Learning</b> links in each row.'),
+          ck('Work the development table top to bottom, one skill at a time, starting from the <b>Oracle Learning</b> links.'),
           ck('Complete <b>AI Workforce Readiness</b> first: it compounds every other skill you build.'),
           ck('Pick one certification from the <b>skill resources</b> below and set a completion date with your manager.'),
           ck('Learning outside Oracle (podcasts, videos, certifications)? <b>Flag it in Oracle Grow</b>: add it to that skill’s development goal so it counts in your talent record.'),
@@ -557,7 +557,7 @@
           ck('In Oracle <b>Opportunity Marketplace</b>, take one gig or short assignment with the ' + esc(to.family) + ' team.'),
           ck('Shadow a ' + esc(to.subfamily) + ' colleague for a day; debrief what surprised you.'),
           ck('Update your <b>Talent Profile</b> with every completed course and new skill so recruiters and Grow can see it.'),
-          ck('Refresh your résumé in skills language — lead with matched and newly built skills.'),
+          ck('Refresh your résumé in skills language. Lead with matched and newly built skills.'),
           ck('<b>Final manager conversation</b>: confirm readiness; loop in your Engagement Consultant / HCM partner on internal openings.'),
           ck('Apply through Vanderbilt’s internal mobility process with your portfolio of completions.')
         ]) +
@@ -585,19 +585,19 @@
           oStep('Tag your skills', 'Me &rarr; Career and Performance &rarr; <b>Talent Profile</b>: add current skills with proficiency (matched, bridge, and real probable skills). This feeds every recommendation Oracle makes.') +
           oStep('Open Oracle Grow', 'Grow builds a personalized page from your role + skills. Review its suggested skills (Dynamic Skills AI) and accept what fits.') +
           oStep('Declare your destination', 'In Grow / Career Development, add <b>' + esc(to.subfamily) + '</b> as a career or role of interest. Grow then surfaces the gap between your profile and that role.') +
-          oStep('Create development goals', 'One goal per row of the table above, tagged with a development intent linked to your role of interest — so progress is visible to you and your manager.') +
-          oStep('Enroll in Oracle Learning', 'The table above deep-links straight to matched courses in Oracle Learning — enroll from there. For anything not linked, open Me &rarr; <b>Learning</b>, search the skill by name, and consider <b>learning journeys</b> and learning communities.') +
-          oStep('Work Opportunity Marketplace', 'Browse gigs and short assignments in ' + esc(to.family) + ' — real practice plus visibility with the destination team.') +
+          oStep('Create development goals', 'One goal per row of the table, tagged to your role of interest, so progress is visible to you and your manager.') +
+          oStep('Enroll in Oracle Learning', 'The table deep-links to matched courses. Enroll from there. For anything not linked, open Me &rarr; <b>Learning</b>, search the skill, and consider <b>learning journeys</b> and communities.') +
+          oStep('Work Opportunity Marketplace', 'Browse gigs and short assignments in ' + esc(to.family) + ' for real practice and visibility with the destination team.') +
           oStep('Keep the loop with people', 'Monthly manager check-ins against this plan; engage your <b>Engagement Consultant / HCM partner</b> when you need cross-department doors opened. Consider a mentor via Connections.') +
-          oStep('Close the loop', 'Completed learning updates your Talent Profile (some courses update competencies automatically — verify). Re-run this tool as your profile grows and watch readiness climb.') +
+          oStep('Close the loop', 'Completed learning updates your Talent Profile (verify: some courses update it automatically). Re-run this tool as your profile grows and watch readiness climb.') +
         '</ol>' +
       '</div>' +
 
       '<div class="plandoc__note">' +
         '<p class="plandoc__note-label">A note on outcomes</p>' +
-        '<p>This plan is a development roadmap, not a promise of placement. Completing it — including every course, goal, and gig — builds real readiness for <b>' + esc(to.subfamily) +
+        '<p>This plan is a development roadmap, not a promise of placement. Completing it, every course, goal, and gig, builds real readiness for <b>' + esc(to.subfamily) +
         '</b>, but it does not guarantee selection for, or transfer into, that role. Internal openings are filled through Vanderbilt’s standard recruitment process, and selection depends on position availability, business needs, qualifications, and the strength of the applicant pool at the time you apply.</p>' +
-        '<p>What this work does guarantee: the skills are yours. They strengthen your performance in your current role, enrich your Talent Profile, and make you a stronger candidate for this role and many others across the University — whenever the right opening appears.</p>' +
+        '<p>What this work does guarantee: the skills are yours. They strengthen your performance in your current role, enrich your Talent Profile, and make you a stronger candidate for this role and many others across the University, whenever the right opening appears.</p>' +
       '</div>' +
 
       '<div class="plan__actions">' +
@@ -635,7 +635,7 @@
       '<span class="lt-orc">' + oc.slice(0, 2).map(function (c) {
         return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">' + esc(c.n) + '</a>';
       }).join('') + '</span>' :
-      '<span class="lt-none">Not in the Oracle catalog — use the skill resources below, and log the work in Oracle Grow.</span>';
+      '<span class="lt-none">Not in the Oracle catalog. Use the skill resources below and log the work in Oracle Grow.</span>';
 
     var dk = dateKey(s.skill);
     var dv = DATES[dk] || '';
@@ -671,7 +671,7 @@
     });
     if (!cards.length) return '';
     return '<div class="skillres"><h3>Skill resources beyond Oracle</h3>' +
-      '<p>Named podcasts, channels, certifications, and free professional resources for the skill areas in this plan — direct links, no searching. These live <b>outside Oracle</b>: whenever you use one, flag that skill development in <b>Oracle Grow</b> — add or update the skill’s development goal so the work shows in your talent record.</p>' +
+      '<p>Named podcasts, channels, certifications, and free professional resources for the skill areas in this plan. Direct links, no searching. These live <b>outside Oracle</b>: when you use one, flag it in <b>Oracle Grow</b> by updating that skill’s development goal so the work shows in your talent record.</p>' +
       '<div class="skillres__grid">' + cards.join('') + '</div></div>';
   }
 
