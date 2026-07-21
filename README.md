@@ -10,9 +10,11 @@ current role and a destination role, and the matrix shows:
 - **Skills to grow** (black outline) — new ground, covered by the learning plan
 - **Probable skills** (dashed grey) — AI-inferred skills likely held in each role but not
   part of the official framework
-- **A three-phase transition plan** with recommended learning per growth skill: Vanderbilt
-  Course Library courses first, then LinkedIn Learning, YouTube, podcasts, certifications,
-  white papers, and Coursera
+- **A printable Learning & Development Plan** with recommended learning per growth skill:
+  Oracle Learning deep links first (matched from the active course catalog), then named
+  podcasts and industry certifications curated per skill category, YouTube, and white
+  papers — plus a step-by-step Oracle playbook (Talent Profile, Oracle Grow, Oracle
+  Learning, Opportunity Marketplace)
 
 Click any skill pill for its definition and expected proficiency by career level
 (Service & Support, Individual Contributor, Project Management, Management, Executive).

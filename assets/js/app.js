@@ -18,22 +18,6 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
 
-  /* ---------- Vanderbilt Course Library: live courses by the skills they build ---------- */
-  var VU_COURSES = [
-    { name: 'AI Basics', url: 'https://me5231979.github.io/AI_Classroom/',
-      skills: ['Embodies an entrepreneurial spirit and leverages data and technology', 'Artificial Intelligence', 'Digital Fluency/Information Literacy', 'Data Security'] },
-    { name: 'Navigating Difficult Conversations', url: 'https://me5231979.github.io/Difficult_Conversations/',
-      skills: ['Leads and inspires teams', 'Conflict Resolution', 'De-escalation Techniques', 'Influencing Skills'] },
-    { name: 'Coaching for Performance', url: 'https://me5231979.github.io/Coaching-for-Performance/',
-      skills: ['Grows self and others', 'Leads and inspires teams', 'Coaching Techniques', 'Leadership Development', 'Employee Engagement'] },
-    { name: 'AI 201: Beyond the Basics', url: 'https://me5231979.github.io/AI-Advanced/',
-      skills: ['Embodies an entrepreneurial spirit and leverages data and technology', 'Makes effective and ethical decisions for the University', 'Artificial Intelligence', 'Data Governance', 'Risk Management'] },
-    { name: 'Emotional Intelligence & Interpersonal Skills', url: 'https://me5231979.github.io/Emotional-Intelligence/',
-      skills: ['Grows self and others', 'Radically collaborates and cultivates belonging', 'Conflict Management', 'Communication Strategies'] },
-    { name: 'Presentation & Public Speaking', url: 'https://me5231979.github.io/Presentation-Public-Speaking/',
-      skills: ['Continuously strives for excellence', 'Public Speaking', 'Storytelling', 'Strategic Communication', 'Stakeholder Communications'] }
-  ];
-
   /* Universal AI-readiness skill: needed for every role, assumed to need development everywhere.
      Deliberately NOT gold — it is not part of the official framework. */
   var AI_READINESS = {
@@ -369,7 +353,7 @@
           ck('Request an informational interview with someone in ' + esc(to.subfamily) + ' (' + esc(to.family) + ').')
         ]) +
         phase('02', 'Build the skills', 'Months 2–' + (months - 3), [
-          ck('Work the development table below top to bottom — one skill at a time, Vanderbilt courses first, then <b>Oracle Learning</b> enrollments.'),
+          ck('Work the development table below top to bottom — one skill at a time, starting from the <b>Oracle Learning</b> links in each row.'),
           ck('Complete <b>AI Workforce Readiness</b> first: it compounds every other skill you build.'),
           ck('Pick one certification from the table and set a completion date with your manager.'),
           ck('Practice in place: volunteer for one task in your current role that uses a destination skill.'),
@@ -422,7 +406,6 @@
 
       '<div class="plan__actions">' +
         '<button type="button" class="btn" id="print-plan">Print this plan</button>' +
-        '<a class="btn btn--ghost" href="https://me5231979.github.io/Course_Library/">Browse the Course Library</a>' +
       '</div>' +
       '</div>';
 
@@ -447,9 +430,6 @@
   function learnRow(t, i) {
     var s = t.skill;
     var q = encodeURIComponent(s.skill);
-    var courses = s === AI_READINESS ?
-      VU_COURSES.filter(function (c) { return c.name.indexOf('AI') === 0; }) :
-      (vuCourseFor(s.skill) ? [vuCourseFor(s.skill)] : []);
 
     var why = t.tag === 'universal' ? '<span class="lt-tag lt-tag--univ">Universal</span> assumed development need for every role' :
       t.tag === 'bridge' ? '<span class="lt-tag lt-tag--bridge">Bridge</span> near your <b>' + esc(t.via) + '</b>' :
@@ -466,12 +446,8 @@
       (oc.length ? '<span class="lt-orc">' + oc.slice(0, 3).map(function (c) {
         return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">Oracle: ' + esc(c.n) + '</a>';
       }).join('') + '</span>' : '') +
-      courses.map(function (c) {
-        return '<a class="lt-vu" href="' + c.url + '">VU: ' + esc(c.name) + '</a>';
-      }).join(' ') +
       '<span class="lt-srcs">' +
       named.join('') +
-      srcA('LinkedIn Learning', 'https://www.linkedin.com/learning/search?keywords=' + q) +
       srcA('YouTube', 'https://www.youtube.com/results?search_query=' + q + '+course') +
       (res.pods.length ? '' : srcA('Podcasts', 'https://podcasts.apple.com/us/search?term=' + q)) +
       (res.certs.length ? '' : srcA('Certifications', 'https://www.google.com/search?q=%22' + q + '%22+certification')) +
@@ -503,14 +479,6 @@
 
   function oStep(title, text) {
     return '<li><b>' + title + '</b><span>' + text + '</span></li>';
-  }
-
-  function vuCourseFor(skillName) {
-    var lower = skillName.toLowerCase();
-    for (var i = 0; i < VU_COURSES.length; i++) {
-      if (VU_COURSES[i].skills.some(function (s) { return s.toLowerCase() === lower; })) return VU_COURSES[i];
-    }
-    return null;
   }
 
   /* ---------- Skill detail modal ---------- */
