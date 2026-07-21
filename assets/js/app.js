@@ -29,7 +29,11 @@
       media.remove();
       return;
     }
-    video.addEventListener('loadeddata', function () { media.hidden = false; });
+    video.addEventListener('loadeddata', function () {
+      media.hidden = false;
+      var grid = document.querySelector('.hero__grid');
+      if (grid) grid.remove();
+    });
     video.load();
   })();
 
