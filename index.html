@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill Matrix | Vanderbilt Career Pathways</title>
+<meta name="description" content="Vanderbilt's skills-based career pathways explorer: pick your current role, pick a destination, and see the skills that carry over, the skills to grow, and a learning plan to get there.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Skill Matrix | Vanderbilt Career Pathways">
+<meta property="og:description" content="Your skills already travel. See where they can take you across 18 job families and 92 roles.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="assets/img/favicon-96.png">
+<link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/styles.css?v=1">
+</head>
+<body>
+<a class="skip-link" href="#explore">Skip to the explorer</a>
+
+<!-- ===================== NAV ===================== -->
+<header class="nav" id="nav">
+  <a class="nav__brand" href="#top" aria-label="Vanderbilt University, home">
+    <img class="nav__lockup" src="assets/img/vu-lockup-white.png" alt="Vanderbilt University" width="250" height="65">
+    <img class="nav__vicon" src="assets/img/vu-v-icon-nav.png" alt="Vanderbilt University" width="34" height="25">
+  </a>
+  <nav class="nav__links" aria-label="Sections">
+    <a href="#how">How it works</a>
+    <a href="#explore">Explorer</a>
+    <a href="#plan">Your plan</a>
+    <a class="btn" href="#explore">Map a path</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero on-dark">
+    <div class="hero__grid" aria-hidden="true"></div>
+    <div class="wrap">
+      <img src="assets/img/vu-v-icon.png" alt="Vanderbilt V" width="72" height="66" class="hero__mark" data-reveal>
+      <p class="eyebrow" data-reveal>Vanderbilt &middot; Skills-Based Job Architecture</p>
+      <h1 class="h-hero" data-reveal>Your skills already <em class="gold-text">travel</em>.</h1>
+      <p class="lead" data-reveal>Every Vanderbilt role is now described by the skills it takes to do it. That means the path from the job you have to the job you want is no longer a mystery &mdash; it's a map. Pick two roles and see exactly what carries over, what bridges, and what to grow.</p>
+      <div class="hero__cta" data-reveal>
+        <a class="btn" href="#explore">Map your path</a>
+        <a class="btn btn--ghost" href="#how">How it works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAT BAR ============ -->
+  <section class="statbar" aria-label="Framework at a glance">
+    <div class="wrap">
+      <p class="stat" data-reveal><b>18</b><span>Job families</span></p>
+      <p class="stat" data-reveal><b>92</b><span>Roles mapped</span></p>
+      <p class="stat" data-reveal><b>954</b><span>Skill mappings</span></p>
+      <p class="stat" data-reveal><b>6</b><span>Core competencies</span></p>
+      <p class="stat" data-reveal><b>4,410</b><span>Skills in the library</span></p>
+    </div>
+  </section>
+
+  <!-- ============ MANIFESTO ============ -->
+  <section class="section on-cream manifesto">
+    <div class="wrap">
+      <p data-reveal>The distance between two careers is <em>smaller than it looks</em> &mdash; when you measure it in skills instead of titles.</p>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="section" id="how">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>How it works</p>
+      <h2 class="h2" data-reveal>Three steps to <em>a destination</em>.</h2>
+      <div class="grid3">
+        <div class="feature" data-reveal>
+          <p class="feature__num">01</p>
+          <h3>Start where you are</h3>
+          <p>Select your current role. You'll see the six core competencies every Vanderbilt staff member shares, the skills the framework maps to your role, and &mdash; in dashed grey &mdash; AI-inferred skills you likely also carry.</p>
+        </div>
+        <div class="feature" data-reveal>
+          <p class="feature__num">02</p>
+          <h3>Choose a destination</h3>
+          <p>Select any role you're curious about, in any family. The matrix compares both skill sets: gold means it carries over, oak means a bridge exists, black outline means it's new ground.</p>
+        </div>
+        <div class="feature" data-reveal>
+          <p class="feature__num">03</p>
+          <h3>Get the plan</h3>
+          <p>A three-phase transition plan with recommended learning for every growth skill &mdash; Vanderbilt courses first, then LinkedIn Learning, YouTube, podcasts, certifications, and white papers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPLORER ============ -->
+  <section class="section on-cream" id="explore">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>The explorer</p>
+      <h2 class="h2" data-reveal>Two roles. <em>One matrix.</em></h2>
+      <p class="lead" data-reveal>Skills in <strong>gold</strong> are official: the core competencies and matched skills. Dashed grey pills are AI-inferred &mdash; probable skills that are not part of the official framework. Click any skill for its definition and proficiency ladder.</p>
+
+      <div class="pickers">
+        <div class="picker" data-reveal>
+          <p class="picker__label">Your current role</p>
+          <label class="visually-hidden" for="from-select" hidden>Current role</label>
+          <select id="from-select"><option value="">Select your role&hellip;</option></select>
+          <p class="picker__family" id="from-family"></p>
+        </div>
+        <div class="pickers__arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="2" y1="12" x2="21" y2="12"/><polyline points="14 5 21 12 14 19"/></svg>
+        </div>
+        <div class="picker picker--dest" data-reveal>
+          <p class="picker__label">Destination role</p>
+          <label for="to-select" hidden>Destination role</label>
+          <select id="to-select"><option value="">Select a destination&hellip;</option></select>
+          <p class="picker__family" id="to-family"></p>
+        </div>
+      </div>
+
+      <div class="rolepanels">
+        <div class="rolepanel" id="from-panel" aria-live="polite">
+          <p class="rolepanel__empty">Choose your current role to see its skill profile.</p>
+        </div>
+        <div class="rolepanel" id="to-panel" aria-live="polite">
+          <p class="rolepanel__empty">Choose a destination role to see what it takes.</p>
+        </div>
+      </div>
+
+      <div class="compare" id="compare" hidden aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ============ PLAN ============ -->
+  <section class="section on-dark" id="plan">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>Your plan</p>
+      <h2 class="h2 plan__intro" data-reveal id="plan-title">A clear path, <em>phase by phase</em>.</h2>
+      <div id="plan-body">
+        <p class="plan__empty">Select both roles above and your transition plan will build itself here.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div>
+        <img class="footer__centered" src="assets/img/vu-centered-white.png" alt="Vanderbilt University" width="180" height="188">
+        <p class="brandline">Intelligence that grows your people.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#explore">Pathways explorer</a></li>
+          <li><a href="#plan">Transition plan</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Keep learning</h4>
+        <ul>
+          <li><a href="https://me5231979.github.io/Course_Library/">Course Library</a></li>
+          <li><a href="https://www.vanderbilt.edu/">Vanderbilt University</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <p>&copy; 2026 Vanderbilt University &middot; Futures Learning Hub</p>
+      <p>Built on the Skills-Based Job Architecture</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ SKILL DETAIL MODAL ============ -->
+<dialog class="modal" id="skill-modal" aria-labelledby="modal-title">
+  <div class="modal__inner">
+    <button class="modal__close" id="modal-close" aria-label="Close">&times;</button>
+    <p class="modal__type" id="modal-type"></p>
+    <h3 id="modal-title"></h3>
+    <p class="modal__cat" id="modal-cat"></p>
+    <p class="modal__def" id="modal-def"></p>
+    <div class="modal__ai" id="modal-ai" hidden>AI-inferred skill &mdash; probable for this role based on its official skill profile, but not part of the official framework.</div>
+    <div class="modal__prof" id="modal-prof" hidden>
+      <h4>Expected proficiency by career level</h4>
+      <div id="modal-prof-body"></div>
+    </div>
+  </div>
+</dialog>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>
