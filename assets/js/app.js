@@ -320,7 +320,7 @@
 
     var html = '<p class="rolepanel__fam">' + esc(role.family) + '</p>' +
       '<h3>' + esc(role.subfamily) + '</h3>' +
-      skillGroup('Core competencies', 'every Vanderbilt role', DATA.core.map(function (c) {
+      skillGroup('Core competencies', '4 universal · 3 leadership', DATA.core.map(function (c) {
         return pillBtn(c.name, 'pill--core', { kind: 'core' });
       }));
 
@@ -419,7 +419,7 @@
         '<div><p class="readiness__num">' + a.pct + '<small>%</small></p>' +
         '<span class="readiness__label">Transfer readiness</span></div>' +
         '<div class="readiness__barwrap"><div class="readiness__bar"><div class="readiness__fill"></div></div>' +
-        '<p class="readiness__note">All six core competencies carry with you' +
+        '<p class="readiness__note">All seven core competencies travel with you' +
         (a.matches.length ? ', plus ' + a.matches.length + ' matched skill' + plural(a.matches.length) : '') +
         (a.bridges.length ? (a.matches.length ? ' and ' : ', plus ') + a.bridges.length + ' bridge skill' + plural(a.bridges.length) : '') +
         ' toward <strong>' + esc(to.subfamily) + '</strong>. ' +
@@ -522,7 +522,7 @@
           metaCell('Plan horizon', months + ' months') +
           metaCell('Created', esc(today) + ' &middot; Manager review: <span class="fillin fillin--sm"></span>') +
         '</div>' +
-        '<p class="plandoc__summary">You carry all six core competencies' +
+        '<p class="plandoc__summary">You carry all seven core competencies' +
         (a.matches.length ? ' plus ' + a.matches.length + ' matched skill' + plural(a.matches.length) +
           (matchedNames ? ' (' + matchedNames + ')' : '') : ' into this pathway') +
         '. This plan closes ' + (a.bridges.length + a.growth.length + 1) + ' development areas — ' +

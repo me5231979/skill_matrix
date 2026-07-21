@@ -3,7 +3,8 @@
 A single-page app built on Vanderbilt's **Skills-Based Job Architecture** (SBJA). Pick your
 current role and a destination role, and the matrix shows:
 
-- **Core competencies** (gold) — the six competencies every Vanderbilt staff member shares
+- **Core competencies** (gold) — Vanderbilt's seven competencies: four shared by all staff,
+  three applying at management and executive levels
 - **Skills that carry** (gold) — exact matches between the two roles
 - **Bridge skills** (oak) — destination skills with a near neighbor in your current role
   (same skill sub-category or category)
@@ -28,7 +29,7 @@ Selections are stored in the URL hash, so a path like
 | Source sheet | Used for |
 |---|---|
 | Job Family Skills | 18 job families, 92 roles (job sub-families), 954 skill mappings with proficiency levels |
-| Core Skills | The six core competencies |
+| Core Skills | The seven core competencies |
 | Skills Library (Post-feedback) | 4,410-skill library used to infer per-role probable skills |
 
 Probable skills are precomputed: for each role, unmapped library skills are ranked by how
