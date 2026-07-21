@@ -45,6 +45,49 @@
     prof: null
   };
 
+  /* Curated, named resources per skill category: prominent podcasts and industry
+     certifications. Links go to Apple Podcasts search (show name) and a web search
+     (certification name) so they stay current without hard-coding URLs. */
+  var RESOURCES = {
+    'Business Planning and Risk Management': { pods: ['HBR IdeaCast', 'The McKinsey Podcast'], certs: ['PMI Risk Management Professional (PMI-RMP)', 'Lean Six Sigma Green Belt'] },
+    'Legal, Regulation and Compliance': { pods: ['Compliance Perspectives (SCCE)', 'Great Women in Compliance'], certs: ['Certified Compliance & Ethics Professional (CCEP)', 'OSHA 30-Hour General Industry'] },
+    'Technology Use, Monitoring and Control': { pods: ['Daily Tech News Show', 'TechStuff'], certs: ['CompTIA A+', 'Google IT Support Professional Certificate', 'ITIL 4 Foundation'] },
+    'Education': { pods: ['Cult of Pedagogy', 'EdSurge Podcast'], certs: ['ATD Associate Professional in Talent Development (APTD)', 'ATD Certified Professional in Talent Development (CPTD)'] },
+    'Technology Design and Development': { pods: ['Software Engineering Daily', 'Syntax'], certs: ['AWS Certified Cloud Practitioner', 'Microsoft Azure Fundamentals (AZ-900)'] },
+    'Administrative Services': { pods: ['The Leader Assistant Podcast'], certs: ['IAAP Certified Administrative Professional (CAP)', 'Microsoft Office Specialist (MOS)'] },
+    'Corporate Communications': { pods: ['Spin Sucks', 'Communicast'], certs: ['Accreditation in Public Relations (APR)', 'ACES Certificate in Editing (Poynter)'] },
+    'Financial Resources Management': { pods: ['Journal of Accountancy Podcast', 'Planet Money'], certs: ['Certified Management Accountant (CMA)', 'GFOA Certified Public Finance Officer (CPFO)'] },
+    'Business Strategy': { pods: ['Masters of Scale', 'HBR IdeaCast'], certs: ['Project Management Professional (PMP)', 'ASP Strategic Management Professional (SMP)'] },
+    'Communication Design and Development': { pods: ['Design Matters with Debbie Millman', 'The Futur'], certs: ['Adobe Certified Professional', 'Google UX Design Certificate'] },
+    'Healthcare': { pods: ['What the Health? (KFF Health News)', 'NEJM This Week'], certs: ['AHA Basic Life Support (BLS)', 'Certified Health Education Specialist (CHES)'] },
+    'Hospitality and Food Services': { pods: ['Restaurant Unstoppable', 'The Restaurant Guys'], certs: ['ServSafe Manager', 'Certified Meeting Professional (CMP)', 'ACF Certified Culinarian'] },
+    'Leadership and Social Influence': { pods: ['Coaching for Leaders', 'The Look & Sound of Leadership'], certs: ['ICF Associate Certified Coach (ACC)', 'SHRM Certified Professional (SHRM-CP)'] },
+    'Marketing of Products and Services': { pods: ['Marketing Over Coffee', 'Online Marketing Made Easy'], certs: ['Google Analytics Certification', 'AMA Professional Certified Marketer (PCM)'] },
+    'Customer/Client Management': { pods: ['The Modern Customer Podcast'], certs: ['HDI Customer Service Representative', 'Certified Customer Experience Professional (CCXP)'] },
+    'Supply Chain Management': { pods: ['Supply Chain Now'], certs: ['ASCM Certified in Planning and Inventory Management (CPIM)', 'ASCM Certified Supply Chain Professional (CSCP)'] },
+    'Human Resources Management': { pods: ['Honest HR (SHRM)', 'HR Happy Hour'], certs: ['SHRM Certified Professional (SHRM-CP)', 'Professional in Human Resources (PHR)'] },
+    'Repair and Maintenance': { pods: ['Rooted in Reliability'], certs: ['Certified Maintenance & Reliability Professional (CMRP)', 'EPA Section 608 Certification', 'OSHA 30-Hour'] },
+    'Quality Management': { pods: ['The Quality Hub (ASQ)'], certs: ['ASQ Certified Quality Improvement Associate (CQIA)', 'Lean Six Sigma Green Belt'] },
+    'Financial Services and Insurance': { pods: ['Planet Money'], certs: ['Certified Credit Union Financial Counselor (CCUFC)', 'Certified Financial Planner (CFP)'] },
+    'Transportation Operations': { pods: ['The Parking Podcast'], certs: ['IPMI Certified Administrator of Public Parking (CAPP)', 'Commercial Driver’s License (CDL)'] },
+    'Research and Development': { pods: ['Everything Hertz'], certs: ['Certified Research Administrator (CRA)', 'CITI Program Human Subjects Research'] },
+    'Architecture, Construction, and Urban Design': { pods: ['The Construction Leadership Podcast'], certs: ['LEED Green Associate', 'OSHA 30-Hour Construction'] },
+    'Sales of Products and Services': { pods: ['The Sales Evangelist'], certs: ['NASP Certified Professional Sales Person (CPSP)', 'HubSpot Sales Software Certification'] },
+    'Problem Solving': { pods: ['Hidden Brain', 'Choiceology'], certs: ['Lean Six Sigma Yellow Belt'] },
+    'Social and Behavioral Sciences': { pods: ['Hidden Brain', 'Speaking of Psychology (APA)'], certs: ['CITI Program Human Subjects Research'] },
+    'Product Design and Development': { pods: ['Product Thinking with Melissa Perri'], certs: ['Certified Scrum Product Owner (CSPO)'] },
+    'Real Estate': { pods: ['America’s Commercial Real Estate Show'], certs: ['CCIM Designation', 'IFMA Facility Management Professional (FMP)'] },
+    'Energy and Utilities': { pods: ['The Energy Gang'], certs: ['AEE Certified Energy Manager (CEM)', 'LEED Green Associate'] },
+    'Cognitive': { pods: ['Hidden Brain'], certs: ['Lean Six Sigma Yellow Belt'] },
+    'Agriculture': { pods: ['Future of Agriculture'], certs: ['ISA Certified Arborist', 'NALP Landscape Industry Certified'] },
+    'Mathematics and Mathematical Modeling': { pods: ['Data Skeptic'], certs: ['Google Data Analytics Certificate', 'Microsoft Power BI Data Analyst (PL-300)'] },
+    'AI-Enabled Work': { pods: ['Hard Fork (NYT)', 'The AI Daily Brief'], certs: ['Google AI Essentials', 'Microsoft Azure AI Fundamentals (AI-900)'] }
+  };
+
+  function resourcesFor(category) {
+    return RESOURCES[category] || { pods: [], certs: [] };
+  }
+
   var STREAMS = [
     { label: 'Service & Support', levels: ['S1', 'S2', 'S3', 'S4'] },
     { label: 'Individual Contributor', levels: ['IC1', 'IC2', 'IC3', 'IC4', 'IC5'] },
@@ -413,6 +456,12 @@
       '<span class="lt-tag lt-tag--grow">New</span>' + (t.ai ? ' AI: likely already forming' : ' new ground for this pathway');
 
     var oc = oracleCoursesFor(s.skill);
+    var res = resourcesFor(s.category);
+    var named = res.pods.slice(0, 2).map(function (p) {
+      return srcA('Podcast: ' + p, 'https://podcasts.apple.com/us/search?term=' + encodeURIComponent(p));
+    }).concat(res.certs.slice(0, 2).map(function (c) {
+      return srcA('Cert: ' + c, 'https://www.google.com/search?q=' + encodeURIComponent('"' + c + '"'));
+    }));
     var learn =
       (oc.length ? '<span class="lt-orc">' + oc.slice(0, 3).map(function (c) {
         return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">Oracle: ' + esc(c.n) + '</a>';
@@ -421,10 +470,11 @@
         return '<a class="lt-vu" href="' + c.url + '">VU: ' + esc(c.name) + '</a>';
       }).join(' ') +
       '<span class="lt-srcs">' +
+      named.join('') +
       srcA('LinkedIn Learning', 'https://www.linkedin.com/learning/search?keywords=' + q) +
       srcA('YouTube', 'https://www.youtube.com/results?search_query=' + q + '+course') +
-      srcA('Podcasts', 'https://podcasts.apple.com/us/search?term=' + q) +
-      srcA('Certifications', 'https://www.google.com/search?q=%22' + q + '%22+certification') +
+      (res.pods.length ? '' : srcA('Podcasts', 'https://podcasts.apple.com/us/search?term=' + q)) +
+      (res.certs.length ? '' : srcA('Certifications', 'https://www.google.com/search?q=%22' + q + '%22+certification')) +
       srcA('White papers', 'https://scholar.google.com/scholar?q=%22' + q + '%22') +
       '</span>';
 
