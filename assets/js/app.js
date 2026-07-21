@@ -18,6 +18,21 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
 
+  /* Ambient hero montage: show only when the file loads; skip on small screens
+     and for reduced-motion users (spec: degrade to the static treatment). */
+  (function () {
+    var media = document.getElementById('hero-media');
+    var video = document.getElementById('hero-video');
+    if (!media || !video) return;
+    if (!matchMedia('(min-width: 700px)').matches ||
+        matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      media.remove();
+      return;
+    }
+    video.addEventListener('loadeddata', function () { media.hidden = false; });
+    video.load();
+  })();
+
   /* Universal AI-readiness skill: needed for every role, assumed to need development everywhere.
      Deliberately NOT gold — it is not part of the official framework. */
   var AI_READINESS = {
