@@ -281,6 +281,10 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .lt-tag--bridge { border: 1px solid var(--vu-oak); color: var(--vu-gold-flat); }
 .lt-tag--grow { border: 1px solid rgba(255,255,255,.4); color: rgba(255,255,255,.75); }
 .lt-tag--univ { border: 1px dashed rgba(255,255,255,.55); color: #fff; }
+.lt-orc { display: block; margin-bottom: .35rem; }
+.lt-orc a { display: block; color: var(--vu-gold-flat); font-weight: 600; text-decoration: none;
+  margin-bottom: .2rem; border-bottom: none; }
+.lt-orc a:hover { text-decoration: underline; }
 .lt-vu { display: inline-block; color: var(--vu-gold-flat); font-weight: 600; text-decoration: none;
   border-bottom: 1px solid rgba(207,174,112,.5); margin: 0 .5rem .3rem 0; }
 .lt-vu:hover { border-bottom-color: var(--vu-gold-flat); }
@@ -304,6 +308,15 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .oracle__steps li > span { font-size: .85rem; color: rgba(255,255,255,.72); grid-column: 2; }
 .oracle__steps span b { display: inline; }
 
+/* Outcome disclaimer */
+.plandoc__note { margin-top: 2.75rem; border: 1px solid rgba(255,255,255,.18); border-left: 3px solid var(--vu-gold-flat);
+  border-radius: var(--radius); padding: 1.3rem 1.5rem; background: rgba(255,255,255,.03); max-width: 100ch; }
+.plandoc__note-label { font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; font-size: .7rem; color: var(--vu-gold-flat); margin-bottom: .5rem; }
+.plandoc__note p:not(.plandoc__note-label) { font-size: .9rem; color: rgba(255,255,255,.78); }
+.plandoc__note p + p { margin-top: .6rem; }
+.plandoc__note b { color: #fff; font-weight: 600; }
+
 .plan__actions { margin-top: 2.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
 
 /* ---------- 15. Modal ---------- */
@@ -319,6 +332,12 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .modal__def { font-size: .96rem; color: var(--ink-soft); }
 .modal__ai { margin-top: 1rem; font-size: .84rem; color: var(--gray-mid); border: 1px dashed rgba(28,28,28,.3);
   border-radius: 4px; padding: .7rem .9rem; }
+.modal__learn { margin-top: 1.2rem; }
+.modal__learn h4 { font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; font-size: .72rem; margin-bottom: .5rem; color: var(--vu-oak); }
+.modal__learn a { display: block; color: var(--vu-oak); font-weight: 600; font-size: .9rem;
+  text-decoration: none; margin-bottom: .3rem; }
+.modal__learn a:hover { text-decoration: underline; }
 .modal__prof { margin-top: 1.4rem; }
 .modal__prof h4 { font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
   letter-spacing: .08em; font-size: .72rem; margin-bottom: .6rem; }
@@ -388,8 +407,12 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   .lt-tag--bridge { border-color: #946E24; color: #946E24; }
   .lt-tag--grow { border-color: #666; color: #333; }
   .lt-tag--univ { border-color: #333; color: #000; }
+  .lt-orc a { color: #946E24; }
   .lt-vu { color: #946E24; border-bottom: none; }
   .lt-srcs a { color: #333; border-bottom: none; }
+  .plandoc__note { border-color: #bbb; border-left-color: #946E24; background: #fff; page-break-inside: avoid; }
+  .plandoc__note-label { color: #946E24; }
+  .plandoc__note p:not(.plandoc__note-label), .plandoc__note b { color: #000 !important; }
   .lt-srcs a::after { content: none; }
 
   .oracle { page-break-before: auto; }

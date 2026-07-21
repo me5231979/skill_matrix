@@ -54,14 +54,23 @@
   ];
 
   var DATA = null;
+  var ORACLE = { prefix: '', skills: {} };
 
-  fetch('assets/data/sbja.json')
-    .then(function (r) { return r.json(); })
-    .then(function (json) { DATA = json; init(); })
-    .catch(function () {
-      document.getElementById('from-panel').innerHTML =
-        '<p class="rolepanel__empty">The skills data could not be loaded. Refresh to try again.</p>';
-    });
+  Promise.all([
+    fetch('assets/data/sbja.json').then(function (r) { return r.json(); }),
+    fetch('assets/data/oracle_courses.json').then(function (r) { return r.json(); }).catch(function () { return null; })
+  ]).then(function (res) {
+    DATA = res[0];
+    if (res[1]) ORACLE = res[1];
+    init();
+  }).catch(function () {
+    document.getElementById('from-panel').innerHTML =
+      '<p class="rolepanel__empty">The skills data could not be loaded. Refresh to try again.</p>';
+  });
+
+  function oracleCoursesFor(skillName) {
+    return ORACLE.skills[skillName] || [];
+  }
 
   /* ---------- Setup ---------- */
   var fromSel = document.getElementById('from-select');
@@ -354,11 +363,18 @@
           oStep('Open Oracle Grow', 'Grow builds a personalized page from your role + skills. Review its suggested skills (Dynamic Skills AI) and accept what fits.') +
           oStep('Declare your destination', 'In Grow / Career Development, add <b>' + esc(to.subfamily) + '</b> as a career or role of interest. Grow then surfaces the gap between your profile and that role.') +
           oStep('Create development goals', 'One goal per row of the table above, tagged with a development intent linked to your role of interest — so progress is visible to you and your manager.') +
-          oStep('Enroll in Oracle Learning', 'Me &rarr; <b>Learning</b>: search each skill by name, enroll in courses and <b>learning journeys</b>, join a learning community, and follow the skill topics.') +
+          oStep('Enroll in Oracle Learning', 'The table above deep-links straight to matched courses in Oracle Learning — enroll from there. For anything not linked, open Me &rarr; <b>Learning</b>, search the skill by name, and consider <b>learning journeys</b> and learning communities.') +
           oStep('Work Opportunity Marketplace', 'Browse gigs and short assignments in ' + esc(to.family) + ' — real practice plus visibility with the destination team.') +
           oStep('Keep the loop with people', 'Monthly manager check-ins against this plan; engage your <b>Engagement Consultant / HCM partner</b> when you need cross-department doors opened. Consider a mentor via Connections.') +
           oStep('Close the loop', 'Completed learning updates your Talent Profile (some courses update competencies automatically — verify). Re-run this tool as your profile grows and watch readiness climb.') +
         '</ol>' +
+      '</div>' +
+
+      '<div class="plandoc__note">' +
+        '<p class="plandoc__note-label">A note on outcomes</p>' +
+        '<p>This plan is a development roadmap, not a promise of placement. Completing it — including every course, goal, and gig — builds real readiness for <b>' + esc(to.subfamily) +
+        '</b>, but it does not guarantee selection for, or transfer into, that role. Internal openings are filled through Vanderbilt’s standard recruitment process, and selection depends on position availability, business needs, qualifications, and the strength of the applicant pool at the time you apply.</p>' +
+        '<p>What this work does guarantee: the skills are yours. They strengthen your performance in your current role, enrich your Talent Profile, and make you a stronger candidate for this role and many others across the University — whenever the right opening appears.</p>' +
       '</div>' +
 
       '<div class="plan__actions">' +
@@ -396,9 +412,14 @@
       t.tag === 'bridge' ? '<span class="lt-tag lt-tag--bridge">Bridge</span> near your <b>' + esc(t.via) + '</b>' :
       '<span class="lt-tag lt-tag--grow">New</span>' + (t.ai ? ' AI: likely already forming' : ' new ground for this pathway');
 
-    var learn = courses.map(function (c) {
-      return '<a class="lt-vu" href="' + c.url + '">VU: ' + esc(c.name) + '</a>';
-    }).join(' ') +
+    var oc = oracleCoursesFor(s.skill);
+    var learn =
+      (oc.length ? '<span class="lt-orc">' + oc.slice(0, 3).map(function (c) {
+        return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">Oracle: ' + esc(c.n) + '</a>';
+      }).join('') + '</span>' : '') +
+      courses.map(function (c) {
+        return '<a class="lt-vu" href="' + c.url + '">VU: ' + esc(c.name) + '</a>';
+      }).join(' ') +
       '<span class="lt-srcs">' +
       srcA('LinkedIn Learning', 'https://www.linkedin.com/learning/search?keywords=' + q) +
       srcA('YouTube', 'https://www.youtube.com/results?search_query=' + q + '+course') +
@@ -408,8 +429,10 @@
       '</span>';
 
     var oracle = t.tag === 'universal' ?
-      'Search “AI” in Oracle Learning; add an AI-readiness development goal; accept Grow’s AI skill suggestions' :
-      'Search “' + esc(s.skill) + '” in Oracle Learning; create a development goal tagged to your role of interest; add to Talent Profile once built';
+      (oc.length ? 'Enroll via the Oracle links; ' : 'Search “AI” in Oracle Learning; ') +
+        'add an AI-readiness development goal; accept Grow’s AI skill suggestions' :
+      (oc.length ? 'Enroll via the Oracle links' : 'Search “' + esc(s.skill) + '” in Oracle Learning') +
+        '; create a development goal tagged to your role of interest; add to Talent Profile once built';
 
     return '<tr>' +
       '<td class="lt-done"><span class="ckbox" aria-hidden="true"></span></td>' +
@@ -481,6 +504,17 @@
     document.getElementById('modal-cat').textContent = cat;
     document.getElementById('modal-def').textContent = def || 'No definition recorded in the framework.';
     document.getElementById('modal-ai').hidden = !isAI;
+
+    var learnBox = document.getElementById('modal-learn');
+    var oc = oracleCoursesFor(name);
+    if (oc.length) {
+      learnBox.innerHTML = '<h4>Learn this in Oracle Learning</h4>' + oc.map(function (c) {
+        return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">' + esc(c.n) + '</a>';
+      }).join('');
+      learnBox.hidden = false;
+    } else {
+      learnBox.hidden = true;
+    }
 
     var profBox = document.getElementById('modal-prof');
     var profBody = document.getElementById('modal-prof-body');
