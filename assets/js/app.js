@@ -34,6 +34,17 @@
       skills: ['Continuously strives for excellence', 'Public Speaking', 'Storytelling', 'Strategic Communication', 'Stakeholder Communications'] }
   ];
 
+  /* Universal AI-readiness skill: needed for every role, assumed to need development everywhere.
+     Deliberately NOT gold — it is not part of the official framework. */
+  var AI_READINESS = {
+    skill: 'AI Workforce Readiness',
+    type: 'Universal',
+    category: 'AI-Enabled Work',
+    subcategory: 'Applies to all Vanderbilt roles',
+    definition: 'Capability to work effectively in AI-enabled work: understanding what AI can and cannot do, prompting and directing AI tools well, critically verifying AI output before acting on it, handling data responsibly by sensitivity tier, and redesigning everyday workflows to pair human judgment with AI assistance. Assumed to need development for every role at every level.',
+    prof: null
+  };
+
   var STREAMS = [
     { label: 'Service & Support', levels: ['S1', 'S2', 'S3', 'S4'] },
     { label: 'Individual Contributor', levels: ['IC1', 'IC2', 'IC3', 'IC4', 'IC5'] },
@@ -130,6 +141,10 @@
         return pillBtn(s.skill, 'pill--ai', { kind: 'ai', role: role.subfamily });
       }));
     }
+
+    html += skillGroup('AI-enabled work', 'universal — develop for every role', [
+      pillBtn(AI_READINESS.skill, 'pill--univ', { kind: 'univ' })
+    ]);
     panel.innerHTML = html;
   }
 
@@ -238,114 +253,183 @@
   }
 
   function listGrowth(a) {
-    if (!a.growth.length) return null;
-    return '<ul>' + a.growth.map(function (s) {
+    var rows = a.growth.map(function (s) {
       var hint = a.probable[s.skill] ? '<span class="aihint">AI: likely already forming</span>' : '';
       return '<li><button type="button" class="skill-link" data-skill="' + esc(s.skill) +
         '" data-kind="role" data-role="' + esc(toSel.value) + '">' + esc(s.skill) + '</button>' + hint + '</li>';
-    }).join('') + '</ul>';
+    });
+    rows.push('<li><button type="button" class="skill-link" data-skill="' + esc(AI_READINESS.skill) +
+      '" data-kind="univ">' + esc(AI_READINESS.skill) + '</button>' +
+      '<span class="aihint">Universal — every role</span></li>');
+    return '<ul>' + rows.join('') + '</ul>';
   }
 
-  /* ---------- Plan ---------- */
+  /* ---------- Learning & Development Plan (printable document) ---------- */
   function renderPlan(from, to) {
     var body = document.getElementById('plan-body');
     var title = document.getElementById('plan-title');
     if (!from || !to || from === to) {
       title.innerHTML = 'A clear path, <em>phase by phase</em>.';
-      body.innerHTML = '<p class="plan__empty">Select both roles above and your transition plan will build itself here.</p>';
+      body.innerHTML = '<p class="plan__empty">Select both roles above and your Learning &amp; Development Plan will build itself here.</p>';
       return;
     }
     var a = analyze(from, to);
     title.innerHTML = esc(from.subfamily) + ' <em class="gold-text">&rarr;</em> ' + esc(to.subfamily);
 
-    var learnTargets = a.bridges.map(function (b) {
-      return { skill: b.skill, tag: 'bridge', via: b.via };
-    }).concat(a.growth.map(function (s) {
-      return { skill: s, tag: 'grow', ai: a.probable[s.skill] };
-    }));
+    // Learning table rows: universal AI readiness first, then bridges (easier wins), then growth.
+    var learnTargets = [{ skill: AI_READINESS, tag: 'universal' }]
+      .concat(a.bridges.map(function (b) { return { skill: b.skill, tag: 'bridge', via: b.via }; }))
+      .concat(a.growth.map(function (s) { return { skill: s, tag: 'grow', ai: a.probable[s.skill] }; }));
 
+    var months = a.growth.length > 5 ? 12 : a.growth.length > 2 ? 9 : 6;
     var matchedNames = a.matches.slice(0, 4).map(function (s) { return '<b>' + esc(s.skill) + '</b>'; }).join(', ');
+    var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     body.innerHTML =
-      '<p class="lead">A ' + (a.growth.length > 5 ? 'twelve' : a.growth.length > 2 ? 'nine' : 'six') +
-      '-month arc from <strong>' + esc(from.family) + '</strong> to <strong>' + esc(to.family) +
-      '</strong>. Start with what you have, close the gaps in order, then prove it in the real role.</p>' +
+      '<div class="plandoc">' +
 
+      /* --- Document header --- */
+      '<div class="plandoc__head">' +
+        '<div class="plandoc__meta">' +
+          metaCell('Staff member', '<span class="fillin"></span>') +
+          metaCell('Current role', esc(from.subfamily) + ' <small>(' + esc(from.family) + ')</small>') +
+          metaCell('Destination role', esc(to.subfamily) + ' <small>(' + esc(to.family) + ')</small>') +
+          metaCell('Transfer readiness', a.pct + '%') +
+          metaCell('Plan horizon', months + ' months') +
+          metaCell('Created', esc(today) + ' &middot; Manager review: <span class="fillin fillin--sm"></span>') +
+        '</div>' +
+        '<p class="plandoc__summary">You carry all six core competencies' +
+        (a.matches.length ? ' plus ' + a.matches.length + ' matched skill' + plural(a.matches.length) +
+          (matchedNames ? ' (' + matchedNames + ')' : '') : ' into this pathway') +
+        '. This plan closes ' + (a.bridges.length + a.growth.length + 1) + ' development areas — ' +
+        a.bridges.length + ' bridge skill' + plural(a.bridges.length) + ', ' + a.growth.length +
+        ' new skill' + plural(a.growth.length) + ', and AI Workforce Readiness (universal, assumed for every role) — in three phases with checkpoints in Oracle.</p>' +
+      '</div>' +
+
+      /* --- Phase checklists --- */
       '<div class="phases">' +
-        phase('01', 'Leverage what carries', 'Weeks 1–4', [
-          'Write your skills story: the six core competencies plus ' +
-            (matchedNames ? matchedNames : 'your transferable ' + esc(from.subfamily) + ' experience') +
-            ' are already ' + esc(to.subfamily) + ' currency.',
-          'Request an informational interview with someone in <b>' + esc(to.subfamily) + '</b> (' + esc(to.family) + ').',
-          'Ask your manager to note your pathway goal in your development plan.',
-          a.bridges.length ? 'Reframe your bridge skills: ' + a.bridges.slice(0, 3).map(function (b) {
-            return '<b>' + esc(b.via) + '</b>'; }).join(', ') + ' — the vocabulary changes, the muscle doesn’t.' :
-            'Map your day-to-day wins to the destination role’s language.'
+        phase('01', 'Align & set up in Oracle', 'Weeks 1–4', [
+          ck('<b>Meet with your manager</b>: share this printed plan, agree on the destination and timeline, and add it to your development conversation notes.'),
+          ck('In Oracle, open <b>Me &rarr; Career and Performance &rarr; Talent Profile</b> and add your current skills — matched skills, bridge skills, and any probable skills you genuinely have — with honest proficiency levels.'),
+          ck('In <b>Oracle Grow</b>, add <b>' + esc(to.subfamily) + '</b> as a career/role of interest so recommendations start pointing at this destination.'),
+          ck('In Oracle Grow, review the AI-suggested skills for your profile and accept the ones that fit.'),
+          ck('Create one <b>development goal per skill</b> in the table below, tagged to your role of interest.'),
+          ck('Request an informational interview with someone in ' + esc(to.subfamily) + ' (' + esc(to.family) + ').')
         ]) +
-        phase('02', 'Close the gaps', a.growth.length > 5 ? 'Months 2–9' : 'Months 2–6', [
-          'Work the learning list below — one skill at a time, Vanderbilt courses first.',
-          a.growth.length ? 'Priority order: start with ' + a.growth.slice(0, 2).map(function (s) {
-            return '<b>' + esc(s.skill) + '</b>'; }).join(' and ') + '.' :
-            'No hard gaps — deepen your bridge skills to destination-level proficiency.',
-          'Pick one certification from the learning list and set a completion date.',
-          'Practice in place: volunteer for one task in your current role that uses a destination skill.'
+        phase('02', 'Build the skills', 'Months 2–' + (months - 3), [
+          ck('Work the development table below top to bottom — one skill at a time, Vanderbilt courses first, then <b>Oracle Learning</b> enrollments.'),
+          ck('Complete <b>AI Workforce Readiness</b> first: it compounds every other skill you build.'),
+          ck('Pick one certification from the table and set a completion date with your manager.'),
+          ck('Practice in place: volunteer for one task in your current role that uses a destination skill.'),
+          ck('<b>Monthly manager check-in</b>: review progress against this table; update goal status in Oracle so the record travels with you.'),
+          ck('If progress stalls or the pathway needs formal support, engage your <b>Engagement Consultant / HCM partner</b> to help broker cross-department options.')
         ]) +
-        phase('03', 'Prove it and land it', a.growth.length > 5 ? 'Months 9–12' : 'Months 6–9', [
-          'Ask for a stretch assignment or cross-department project with the ' + esc(to.family) + ' team.',
-          'Shadow a ' + esc(to.subfamily) + ' colleague for a day; debrief what surprised you.',
-          'Refresh your résumé in skills language — lead with matched and newly built skills.',
-          'Apply through Vanderbilt’s internal mobility process, with your portfolio of course completions.'
+        phase('03', 'Prove it & land it', 'Months ' + (months - 3) + '–' + months, [
+          ck('In Oracle <b>Opportunity Marketplace</b>, take one gig or short assignment with the ' + esc(to.family) + ' team.'),
+          ck('Shadow a ' + esc(to.subfamily) + ' colleague for a day; debrief what surprised you.'),
+          ck('Update your <b>Talent Profile</b> with every completed course and new skill so recruiters and Grow can see it.'),
+          ck('Refresh your résumé in skills language — lead with matched and newly built skills.'),
+          ck('<b>Final manager conversation</b>: confirm readiness; loop in your Engagement Consultant / HCM partner on internal openings.'),
+          ck('Apply through Vanderbilt’s internal mobility process with your portfolio of completions.')
         ]) +
       '</div>' +
 
+      /* --- Skill development table --- */
       '<div class="learnlist">' +
-        '<h3>Recommended learning, skill by skill</h3>' +
-        '<p>Vanderbilt Course Library first where a live course builds the skill, then curated searches on LinkedIn Learning, YouTube, podcasts, certifications, and white papers. Each link opens pre-filtered to the skill.</p>' +
-        (learnTargets.length ? learnTargets.map(learnCard).join('') :
-          '<p class="plan__empty">Nothing to learn — these roles share their full skill set.</p>') +
+        '<h3>Skill development table</h3>' +
+        '<p>Ordered by priority: AI Workforce Readiness first (universal), then bridge skills (fastest wins), then new skills. Every row gets a development goal in Oracle. Source links open pre-filtered to the skill.</p>' +
+        '<div class="tablewrap"><table class="learntable">' +
+          '<thead><tr><th class="lt-done">Done</th><th class="lt-pri">#</th><th>Skill</th><th>Why</th>' +
+          '<th>Learn with</th><th>In Oracle</th><th class="lt-date">Target date</th></tr></thead>' +
+          '<tbody>' + learnTargets.map(learnRow).join('') + '</tbody>' +
+        '</table></div>' +
+      '</div>' +
+
+      /* --- Oracle playbook --- */
+      '<div class="oracle">' +
+        '<h3>Your Oracle playbook</h3>' +
+        '<p>Everything above, as a single tour through Oracle. Do steps 1–5 in week one; the rest run through the plan.</p>' +
+        '<ol class="oracle__steps">' +
+          oStep('Tag your skills', 'Me &rarr; Career and Performance &rarr; <b>Talent Profile</b>: add current skills with proficiency (matched, bridge, and real probable skills). This feeds every recommendation Oracle makes.') +
+          oStep('Open Oracle Grow', 'Grow builds a personalized page from your role + skills. Review its suggested skills (Dynamic Skills AI) and accept what fits.') +
+          oStep('Declare your destination', 'In Grow / Career Development, add <b>' + esc(to.subfamily) + '</b> as a career or role of interest. Grow then surfaces the gap between your profile and that role.') +
+          oStep('Create development goals', 'One goal per row of the table above, tagged with a development intent linked to your role of interest — so progress is visible to you and your manager.') +
+          oStep('Enroll in Oracle Learning', 'Me &rarr; <b>Learning</b>: search each skill by name, enroll in courses and <b>learning journeys</b>, join a learning community, and follow the skill topics.') +
+          oStep('Work Opportunity Marketplace', 'Browse gigs and short assignments in ' + esc(to.family) + ' — real practice plus visibility with the destination team.') +
+          oStep('Keep the loop with people', 'Monthly manager check-ins against this plan; engage your <b>Engagement Consultant / HCM partner</b> when you need cross-department doors opened. Consider a mentor via Connections.') +
+          oStep('Close the loop', 'Completed learning updates your Talent Profile (some courses update competencies automatically — verify). Re-run this tool as your profile grows and watch readiness climb.') +
+        '</ol>' +
       '</div>' +
 
       '<div class="plan__actions">' +
-        '<button type="button" class="btn" id="print-plan">Print my plan</button>' +
+        '<button type="button" class="btn" id="print-plan">Print this plan</button>' +
         '<a class="btn btn--ghost" href="https://me5231979.github.io/Course_Library/">Browse the Course Library</a>' +
+      '</div>' +
       '</div>';
 
     var printBtn = document.getElementById('print-plan');
     if (printBtn) printBtn.addEventListener('click', function () { print(); });
   }
 
+  function metaCell(label, value) {
+    return '<div class="metacell"><span>' + label + '</span><b>' + value + '</b></div>';
+  }
+
+  function ck(text) {
+    return '<span class="ckbox" aria-hidden="true"></span><span class="cktext">' + text + '</span>';
+  }
+
   function phase(num, title, when, items) {
     return '<div class="phase"><p class="phase__num">' + num + '</p><h4>' + title + '</h4>' +
-      '<p class="phase__when">' + when + '</p><ul>' + items.map(function (i) {
+      '<p class="phase__when">' + when + '</p><ul class="cklist">' + items.map(function (i) {
         return '<li>' + i + '</li>'; }).join('') + '</ul></div>';
   }
 
-  function learnCard(t) {
+  function learnRow(t, i) {
     var s = t.skill;
     var q = encodeURIComponent(s.skill);
-    var course = vuCourseFor(s.skill);
-    var tag = t.tag === 'bridge' ?
-      '<span class="learn__tag learn__tag--bridge">Bridge — via ' + esc(t.via) + '</span>' :
-      '<span class="learn__tag learn__tag--grow">Grow</span>';
-    if (t.ai) tag += '<span class="learn__tag learn__tag--ai">AI: likely forming</span>';
+    var courses = s === AI_READINESS ?
+      VU_COURSES.filter(function (c) { return c.name.indexOf('AI') === 0; }) :
+      (vuCourseFor(s.skill) ? [vuCourseFor(s.skill)] : []);
 
-    return '<details class="learn"><summary><b>' + esc(s.skill) + '</b>' + tag + '</summary>' +
-      '<div class="learn__body">' +
-      (s.definition ? '<p class="learn__def">' + esc(s.definition) + '</p>' : '') +
-      (course ? '<p class="learn__vu">Vanderbilt course: <a href="' + course.url + '">' +
-        esc(course.name) + '</a> — live, interactive, and free to staff.</p>' : '') +
-      '<ul class="sources">' +
-        src('LinkedIn Learning', 'https://www.linkedin.com/learning/search?keywords=' + q) +
-        src('YouTube', 'https://www.youtube.com/results?search_query=' + q + '+course') +
-        src('Podcasts', 'https://podcasts.apple.com/us/search?term=' + q) +
-        src('Certifications', 'https://www.google.com/search?q=%22' + q + '%22+certification') +
-        src('White papers', 'https://scholar.google.com/scholar?q=%22' + q + '%22') +
-        src('Coursera', 'https://www.coursera.org/search?query=' + q) +
-      '</ul></div></details>';
+    var why = t.tag === 'universal' ? '<span class="lt-tag lt-tag--univ">Universal</span> assumed development need for every role' :
+      t.tag === 'bridge' ? '<span class="lt-tag lt-tag--bridge">Bridge</span> near your <b>' + esc(t.via) + '</b>' :
+      '<span class="lt-tag lt-tag--grow">New</span>' + (t.ai ? ' AI: likely already forming' : ' new ground for this pathway');
+
+    var learn = courses.map(function (c) {
+      return '<a class="lt-vu" href="' + c.url + '">VU: ' + esc(c.name) + '</a>';
+    }).join(' ') +
+      '<span class="lt-srcs">' +
+      srcA('LinkedIn Learning', 'https://www.linkedin.com/learning/search?keywords=' + q) +
+      srcA('YouTube', 'https://www.youtube.com/results?search_query=' + q + '+course') +
+      srcA('Podcasts', 'https://podcasts.apple.com/us/search?term=' + q) +
+      srcA('Certifications', 'https://www.google.com/search?q=%22' + q + '%22+certification') +
+      srcA('White papers', 'https://scholar.google.com/scholar?q=%22' + q + '%22') +
+      '</span>';
+
+    var oracle = t.tag === 'universal' ?
+      'Search “AI” in Oracle Learning; add an AI-readiness development goal; accept Grow’s AI skill suggestions' :
+      'Search “' + esc(s.skill) + '” in Oracle Learning; create a development goal tagged to your role of interest; add to Talent Profile once built';
+
+    return '<tr>' +
+      '<td class="lt-done"><span class="ckbox" aria-hidden="true"></span></td>' +
+      '<td class="lt-pri">' + (i + 1) + '</td>' +
+      '<td class="lt-skill"><button type="button" class="skill-link" data-skill="' + esc(s.skill) +
+        '" data-kind="' + (s === AI_READINESS ? 'univ' : 'role') + '" data-role="' + esc(toSel.value) + '">' +
+        esc(s.skill) + '</button></td>' +
+      '<td class="lt-why">' + why + '</td>' +
+      '<td class="lt-learn">' + learn + '</td>' +
+      '<td class="lt-oracle">' + oracle + '</td>' +
+      '<td class="lt-date"><span class="fillin fillin--sm"></span></td>' +
+      '</tr>';
   }
 
-  function src(label, url) {
-    return '<li><a href="' + url + '" target="_blank" rel="noopener">' + label + '</a></li>';
+  function srcA(label, url) {
+    return '<a href="' + url + '" target="_blank" rel="noopener">' + label + '</a>';
+  }
+
+  function oStep(title, text) {
+    return '<li><b>' + title + '</b><span>' + text + '</span></li>';
   }
 
   function vuCourseFor(skillName) {
@@ -369,7 +453,11 @@
 
   function openSkill(name, kind, roleKey) {
     var type = '', cat = '', def = '', prof = null, isAI = false;
-    if (kind === 'core') {
+    if (kind === 'univ') {
+      type = 'Universal skill · AI-enabled work';
+      cat = AI_READINESS.category + ' › ' + AI_READINESS.subcategory;
+      def = AI_READINESS.definition;
+    } else if (kind === 'core') {
       var c = DATA.core.filter(function (x) { return x.name === name; })[0];
       if (!c) return;
       type = 'Core competency'; cat = c.applies; def = c.definition;
