@@ -216,6 +216,14 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .skill-link { background: none; border: none; padding: 0; font: inherit; color: var(--vu-black);
   cursor: pointer; text-align: left; border-bottom: 1px solid rgba(148,110,36,.4); }
 .skill-link:hover, .skill-link:focus-visible { color: var(--vu-oak); border-bottom-color: var(--vu-oak); }
+.ownhint { margin-top: 1.5rem; font-size: .92rem; color: var(--ink-soft); max-width: 80ch; }
+.ownhint b { color: var(--vu-black); }
+.own { display: inline-flex; align-items: center; gap: .35rem; margin-left: .6rem; cursor: pointer;
+  font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  font-size: .6rem; color: var(--gray-mid); vertical-align: middle; white-space: nowrap; }
+.own:hover { color: var(--vu-oak); }
+.ownbox { accent-color: var(--vu-gold-flat); width: 14px; height: 14px; cursor: pointer; margin: 0; }
+.pills--matches .via { display: block; font-size: .74rem; color: var(--gray-mid); margin-top: .15rem; }
 
 /* ---------- 14. Plan ---------- */
 .plan__intro { margin-bottom: .5rem; }
@@ -263,7 +271,7 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .learnlist > h3, .oracle > h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.6rem; margin-bottom: .3rem; }
 .learnlist > p, .oracle > p { color: rgba(255,255,255,.65); font-size: .92rem; max-width: 80ch; }
 .tablewrap { overflow-x: auto; margin-top: 1.25rem; border: 1px solid rgba(255,255,255,.16); border-radius: var(--radius); }
-.learntable { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 880px; }
+.learntable { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 680px; }
 .learntable th { font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
   letter-spacing: .08em; font-size: .66rem; color: var(--vu-gold-flat); text-align: left;
   padding: .8rem .9rem; border-bottom: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.04); }
@@ -285,14 +293,34 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .lt-orc a { display: block; color: var(--vu-gold-flat); font-weight: 600; text-decoration: none;
   margin-bottom: .2rem; border-bottom: none; }
 .lt-orc a:hover { text-decoration: underline; }
-.lt-vu { display: inline-block; color: var(--vu-gold-flat); font-weight: 600; text-decoration: none;
-  border-bottom: 1px solid rgba(207,174,112,.5); margin: 0 .5rem .3rem 0; }
-.lt-vu:hover { border-bottom-color: var(--vu-gold-flat); }
-.lt-srcs { display: block; margin-top: .25rem; }
-.lt-srcs a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .74rem; margin-right: .65rem;
-  border-bottom: 1px dotted rgba(255,255,255,.35); }
-.lt-srcs a:hover { color: var(--vu-gold-flat); border-bottom-color: var(--vu-gold-flat); }
-.lt-oracle { font-size: .8rem; color: rgba(255,255,255,.7); }
+.lt-none { font-size: .8rem; color: rgba(255,255,255,.55); font-style: italic; }
+.dateinput { font-family: var(--font-sans); font-size: .82rem; color: #fff; background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.25); border-radius: 4px; padding: .35rem .5rem; width: 100%;
+  color-scheme: dark; }
+.dateinput:focus-visible { outline: 2px solid var(--vu-gold-flat); outline-offset: 1px; }
+
+/* Skill resources beyond Oracle */
+.skillres { margin-top: 2.75rem; }
+.skillres > h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.6rem; margin-bottom: .3rem; }
+.skillres > p { color: rgba(255,255,255,.65); font-size: .92rem; max-width: 85ch; }
+.skillres > p b { color: #fff; }
+.skillres__grid { display: grid; gap: 1rem; margin-top: 1.25rem; grid-template-columns: 1fr; }
+@media (min-width: 860px) { .skillres__grid { grid-template-columns: 1fr 1fr; } }
+.skillres__card { border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius);
+  background: rgba(255,255,255,.03); padding: 1.1rem 1.2rem; }
+.skillres__card h4 { font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; font-size: .74rem; color: var(--vu-gold-flat); margin-bottom: .25rem; }
+.skillres__for { font-size: .76rem; color: rgba(255,255,255,.5); margin-bottom: .7rem; }
+.skillres__card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.skillres__card li { display: flex; align-items: baseline; gap: .55rem; font-size: .86rem; }
+.skillres__card li a { color: rgba(255,255,255,.85); text-decoration: none;
+  border-bottom: 1px dotted rgba(255,255,255,.3); }
+.skillres__card li a:hover { color: var(--vu-gold-flat); border-bottom-color: var(--vu-gold-flat); }
+.restype { flex-shrink: 0; font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; font-size: .56rem; padding: .12rem .45rem; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.35); color: rgba(255,255,255,.7); min-width: 58px; text-align: center; }
+.restype--free { border-color: var(--vu-gold-flat); color: var(--vu-gold-flat); }
+.oracle__help { color: var(--vu-gold-flat); font-weight: 600; }
 
 /* Oracle playbook */
 .oracle { margin-top: 2.75rem; }
@@ -403,17 +431,28 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   .learntable tr { page-break-inside: avoid; }
   .learntable .lt-pri { color: #946E24; }
   .lt-skill .skill-link { color: #000; border-bottom: none; }
-  .lt-why b, .lt-oracle { color: #000; }
+  .lt-why b { color: #000; }
   .lt-tag--bridge { border-color: #946E24; color: #946E24; }
   .lt-tag--grow { border-color: #666; color: #333; }
   .lt-tag--univ { border-color: #333; color: #000; }
   .lt-orc a { color: #946E24; }
-  .lt-vu { color: #946E24; border-bottom: none; }
-  .lt-srcs a { color: #333; border-bottom: none; }
+  .lt-none { color: #444; }
+  .dateinput { color: #000; background: #fff; border: none; border-bottom: 1px solid #666; border-radius: 0;
+    color-scheme: light; padding: 0; }
   .plandoc__note { border-color: #bbb; border-left-color: #946E24; background: #fff; page-break-inside: avoid; }
   .plandoc__note-label { color: #946E24; }
   .plandoc__note p:not(.plandoc__note-label), .plandoc__note b { color: #000 !important; }
-  .lt-srcs a::after { content: none; }
+  .skillres > h3 { color: #000; page-break-after: avoid; }
+  .skillres > p { color: #333; }
+  .skillres > p b { color: #000; }
+  .skillres__grid { grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .skillres__card { border-color: #bbb; background: #fff; page-break-inside: avoid; }
+  .skillres__card h4 { color: #946E24; }
+  .skillres__for { color: #555; }
+  .skillres__card li a { color: #000; border-bottom: none; }
+  .restype { border-color: #999; color: #333; }
+  .restype--free { border-color: #946E24; color: #946E24; }
+  .oracle__help { color: #946E24; }
 
   .oracle { page-break-before: auto; }
   .oracle__steps { grid-template-columns: 1fr 1fr; gap: .6rem; }
