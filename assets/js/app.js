@@ -241,6 +241,16 @@
       ['Podcast', 'Hard Fork (NYT)', 'https://www.nytimes.com/column/hard-fork']]
   };
 
+  /* Oracle deep links (Vanderbilt tenancy) */
+  var ORA = {
+    grow: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/human-resources/career-grow/launch',
+    talent: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/profiles/person-profile/skills-qualification-start?persona=ORA_HRT_EMPLOYEE',
+    skills: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/profiles/skills/skillscenter?navigateBack=true'
+  };
+  function oa(label, url) {
+    return '<a class="olink" href="' + url + '" target="_blank" rel="noopener">' + label + '</a>';
+  }
+
   var STREAMS = [
     { label: 'Service & Support', levels: ['S1', 'S2', 'S3', 'S4'] },
     { label: 'Individual Contributor', levels: ['IC1', 'IC2', 'IC3', 'IC4', 'IC5'] },
@@ -437,7 +447,7 @@
           'No brand-new skills required. Deepen and certify what you have.') +
         '</p></div></div>' +
 
-      '<p class="ownhint">Already have some of the destination skills from an earlier job, a degree, or life outside work? <b>Tick “I have this”</b>. Readiness and the plan update instantly, and adding those skills to your Talent Profile becomes your first Oracle step.</p>' +
+      '<p class="ownhint">Already have some of the destination skills from an earlier job, a degree, or life outside work? <b>Tick “I have this”</b>. Readiness and the plan update instantly, and adding those skills to your ' + oa('Talent Profile', ORA.talent) + ' becomes your first Oracle step.</p>' +
 
       '<div class="buckets">' +
         bucket('bucket--match', 'Skills that carry', 'You already have these', listMatches(a, from)) +
@@ -544,9 +554,9 @@
       '<div class="phases">' +
         phase('01', 'Align & set up in Oracle', 'Weeks 1–4', [
           ck('<b>Meet with your manager</b>: share this printed plan, agree on the destination and timeline, and add it to your development conversation notes.'),
-          ck('In Oracle, open <b>Me &rarr; Career and Performance &rarr; Talent Profile</b>. Add your current skills with honest proficiency: matched, bridge, skills marked “I have this,” and probable skills you genuinely have.'),
-          ck('In <b>Oracle Grow</b>, add <b>' + esc(to.subfamily) + '</b> as a career/role of interest so recommendations start pointing at this destination.'),
-          ck('In Oracle Grow, review the AI-suggested skills for your profile and accept the ones that fit.'),
+          ck('Open your ' + oa('Talent Profile', ORA.talent) + '. Add your current skills with honest proficiency: matched, bridge, skills marked “I have this,” and probable skills you genuinely have.'),
+          ck('In ' + oa('Oracle Grow', ORA.grow) + ', add <b>' + esc(to.subfamily) + '</b> as a career/role of interest so recommendations start pointing at this destination.'),
+          ck('In the ' + oa('Skills Center', ORA.skills) + ', review the AI-suggested skills for your profile and accept the ones that fit.'),
           ck('Create one <b>development goal per skill</b> in the table below, tagged to your role of interest.'),
           ck('Request an informational interview with someone in ' + esc(to.subfamily) + ' (' + esc(to.family) + ').')
         ]) +
@@ -554,7 +564,7 @@
           ck('Work the development table top to bottom, one skill at a time, starting from the <b>Oracle Learning</b> links.'),
           ck('Complete <b>AI Workforce Readiness</b> first: it compounds every other skill you build.'),
           ck('Pick one certification from the <b>skill resources</b> below and set a completion date with your manager.'),
-          ck('Learning outside Oracle (podcasts, videos, certifications)? <b>Flag it in Oracle Grow</b>: add it to that skill’s development goal so it counts in your talent record.'),
+          ck('Learning outside Oracle (podcasts, videos, certifications)? <b>Flag it in ' + oa('Oracle Grow', ORA.grow) + '</b>: add it to that skill’s development goal so it counts in your talent record.'),
           ck('Practice in place: volunteer for one task in your current role that uses a destination skill.'),
           ck('<b>Monthly manager check-in</b>: review progress against this table; update goal status in Oracle so the record travels with you.'),
           ck('If progress stalls or the pathway needs formal support, engage your <b>Engagement Consultant / HCM partner</b> to help broker cross-department options.')
@@ -562,7 +572,7 @@
         phase('03', 'Prove it & land it', 'Months ' + (months === 6 ? 4 : months - 3) + '–' + months, [
           ck('In Oracle <b>Opportunity Marketplace</b>, take one gig or short assignment with the ' + esc(to.family) + ' team.'),
           ck('Shadow a ' + esc(to.subfamily) + ' colleague for a day; debrief what surprised you.'),
-          ck('Update your <b>Talent Profile</b> with every completed course and new skill so recruiters and Grow can see it.'),
+          ck('Update your ' + oa('Talent Profile', ORA.talent) + ' with every completed course and new skill so recruiters and Grow can see it.'),
           ck('Refresh your résumé in skills language. Lead with matched and newly built skills.'),
           ck('<b>Final manager conversation</b>: confirm readiness; loop in your Engagement Consultant / HCM partner on internal openings.'),
           ck('Apply through Vanderbilt’s internal mobility process with your portfolio of completions.')
@@ -572,7 +582,7 @@
       /* --- Skill development table --- */
       '<div class="learnlist">' +
         '<h3>Skill development table</h3>' +
-        '<p>Ordered by priority: AI Workforce Readiness first (universal), then bridge skills (fastest wins), then new skills. For every row: enroll from its Oracle Learning links, create a development goal in <b>Oracle Grow</b> tagged to your role of interest, and add the skill to your Talent Profile once built.</p>' +
+        '<p>Ordered by priority: AI Workforce Readiness first (universal), then bridge skills (fastest wins), then new skills. For every row: enroll from its Oracle Learning links, create a development goal in ' + oa('Oracle Grow', ORA.grow) + ' tagged to your role of interest, and add the skill to your ' + oa('Talent Profile', ORA.talent) + ' once built.</p>' +
         '<div class="tablewrap"><table class="learntable">' +
           '<thead><tr><th class="lt-done">Done</th><th class="lt-pri">#</th><th>Skill</th><th>Why</th>' +
           '<th>Oracle Learning</th><th class="lt-date">Target date</th></tr></thead>' +
@@ -588,14 +598,14 @@
         '<h3>Your Oracle playbook</h3>' +
         '<p>Everything above, as a single tour through Oracle. Do steps 1–5 in week one; the rest run through the plan. New to Grow, Oracle Learning, or the Talent Marketplace? Start with Vanderbilt’s <a class="oracle__help" href="https://www.vanderbilt.edu/pcb/talent-marketplace/" target="_blank" rel="noopener">Talent Marketplace resource page</a>.</p>' +
         '<ol class="oracle__steps">' +
-          oStep('Tag your skills', 'Me &rarr; Career and Performance &rarr; <b>Talent Profile</b>: add current skills with proficiency (matched, bridge, and real probable skills). This feeds every recommendation Oracle makes.') +
-          oStep('Open Oracle Grow', 'Grow builds a personalized page from your role + skills. Review its suggested skills (Dynamic Skills AI) and accept what fits.') +
-          oStep('Declare your destination', 'In Grow / Career Development, add <b>' + esc(to.subfamily) + '</b> as a career or role of interest. Grow then surfaces the gap between your profile and that role.') +
+          oStep('Tag your skills', 'Open your ' + oa('Talent Profile', ORA.talent) + ' and add current skills with proficiency (matched, bridge, and real probable skills). This feeds every recommendation Oracle makes. See your full skill picture in the ' + oa('Skills Center', ORA.skills) + '.') +
+          oStep('Open Oracle Grow', 'Open ' + oa('Oracle Grow', ORA.grow) + ': it builds a personalized page from your role + skills. Review its suggested skills (Dynamic Skills AI) and accept what fits.') +
+          oStep('Declare your destination', 'In ' + oa('Oracle Grow', ORA.grow) + ', add <b>' + esc(to.subfamily) + '</b> as a career or role of interest. Grow then surfaces the gap between your profile and that role.') +
           oStep('Create development goals', 'One goal per row of the table, tagged to your role of interest, so progress is visible to you and your manager.') +
           oStep('Enroll in Oracle Learning', 'The table deep-links to matched courses. Enroll from there. For anything not linked, open Me &rarr; <b>Learning</b>, search the skill, and consider <b>learning journeys</b> and communities.') +
           oStep('Work Opportunity Marketplace', 'Browse gigs and short assignments in ' + esc(to.family) + ' for real practice and visibility with the destination team.') +
           oStep('Keep the loop with people', 'Monthly manager check-ins against this plan; engage your <b>Engagement Consultant / HCM partner</b> when you need cross-department doors opened. Consider a mentor via Connections.') +
-          oStep('Close the loop', 'Completed learning updates your Talent Profile (verify: some courses update it automatically). Re-run this tool as your profile grows and watch readiness climb.') +
+          oStep('Close the loop', 'Completed learning updates your ' + oa('Talent Profile', ORA.talent) + ' (verify: some courses update it automatically). Re-run this tool as your profile grows and watch readiness climb.') +
         '</ol>' +
       '</div>' +
 
@@ -641,7 +651,7 @@
       '<span class="lt-orc">' + oc.slice(0, 2).map(function (c) {
         return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">' + esc(c.n) + '</a>';
       }).join('') + '</span>' :
-      '<span class="lt-none">Not in the Oracle catalog. Use the skill resources below and log the work in Oracle Grow.</span>';
+      '<span class="lt-none">Not in the Oracle catalog. Use the skill resources below and log the work in ' + oa('Oracle Grow', ORA.grow) + '.</span>';
 
     var dk = dateKey(s.skill);
     var dv = DATES[dk] || '';
@@ -677,7 +687,7 @@
     });
     if (!cards.length) return '';
     return '<div class="skillres"><h3>Skill resources beyond Oracle</h3>' +
-      '<p>Named podcasts, channels, certifications, and free professional resources for the skill areas in this plan. Direct links, no searching. These live <b>outside Oracle</b>: when you use one, flag it in <b>Oracle Grow</b> by updating that skill’s development goal so the work shows in your talent record.</p>' +
+      '<p>Named podcasts, channels, certifications, and free professional resources for the skill areas in this plan. Direct links, no searching. These live <b>outside Oracle</b>: when you use one, flag it in ' + oa('Oracle Grow', ORA.grow) + ' by updating that skill’s development goal so the work shows in your talent record.</p>' +
       '<div class="skillres__grid">' + cards.join('') + '</div></div>';
   }
 

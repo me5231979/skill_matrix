@@ -341,6 +341,11 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   border: 1px solid rgba(255,255,255,.35); color: rgba(255,255,255,.7); min-width: 58px; text-align: center; }
 .restype--free { border-color: var(--vu-gold-flat); color: var(--vu-gold-flat); }
 .oracle__help { color: var(--vu-gold-flat); font-weight: 600; }
+.olink { color: var(--vu-gold-flat); font-weight: 600; text-decoration: none;
+  border-bottom: 1px dotted currentColor; }
+.olink:hover { color: var(--vu-highlight); }
+.compare .olink, .ownhint .olink { color: var(--vu-oak); }
+.compare .olink:hover, .ownhint .olink:hover { color: var(--vu-black); }
 
 /* Oracle playbook */
 .oracle { margin-top: 2.75rem; }
@@ -473,6 +478,7 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   .restype { border-color: #999; color: #333; }
   .restype--free { border-color: #946E24; color: #946E24; }
   .oracle__help { color: #946E24; }
+  .olink { color: #946E24; border-bottom: none; }
 
   .oracle { page-break-before: auto; }
   .oracle__steps { grid-template-columns: 1fr 1fr; gap: .6rem; }
