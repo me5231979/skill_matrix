@@ -154,6 +154,14 @@ a { color: inherit; }
   padding: 1rem 1.1rem; }
 .legend__item .pill { cursor: default; }
 .legend__item p { font-size: .82rem; color: var(--ink-soft); margin-top: .55rem; }
+.legendprof { display: grid; gap: 1rem; margin-top: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 700px) { .legendprof { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1080px) { .legendprof { grid-template-columns: repeat(5, 1fr); } }
+.legendprof__item { background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: .85rem 1rem; }
+.legendprof__item .pmeter { margin-left: 0; }
+.legendprof__item b { display: block; font-weight: 600; font-size: .85rem; margin-top: .35rem; }
+.legendprof__item p { font-size: .76rem; color: var(--ink-soft); margin-top: .2rem; }
 .legend__hint { margin-top: 1rem; font-size: .88rem; color: var(--gray-mid); }
 
 .pickers { display: grid; gap: 1.5rem; margin-top: 2.75rem; grid-template-columns: 1fr; align-items: start; }
