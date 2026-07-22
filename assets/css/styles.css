@@ -131,7 +131,7 @@ a { color: inherit; }
 .growth { position: relative; min-height: 56vh; display: grid; place-items: center;
   background: url('../img/growth.jpg') center / cover no-repeat #1C1C1C; padding: clamp(4rem, 9vw, 7rem) var(--pad-x); }
 .growth::before { content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center, rgba(20,19,17,.35) 0%, rgba(20,19,17,.78) 100%); }
+  background: linear-gradient(180deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.42) 45%, rgba(0,0,0,.82) 100%); }
 .growth__text { position: relative; font-family: var(--font-serif); color: #fff; text-align: center;
   font-size: clamp(1.8rem, 4.2vw, 3.2rem); line-height: 1.25; max-width: 22ch; text-wrap: balance; }
 .growth__text em { font-style: italic; }
@@ -187,8 +187,8 @@ a { color: inherit; }
 .pills { display: flex; flex-wrap: wrap; gap: .45rem; padding: 0; margin: 0; list-style: none; }
 
 /* Pills: gold fill = core / matched. Oak outline = framework skill. Dashed grey = AI-inferred. */
-.pill { display: inline-block; font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
-  letter-spacing: .05em; font-size: .66rem; line-height: 1.35; padding: .3rem .65rem; border-radius: 999px;
+.pill { display: inline-block; font-family: var(--font-sans); font-weight: 600;
+  font-size: .78rem; line-height: 1.35; padding: .3rem .7rem; border-radius: 999px;
   border: 1px solid rgba(148,110,36,.5); color: var(--vu-oak); background: transparent; cursor: pointer;
   transition: all .2s var(--ease); text-align: left; }
 button.pill:hover, button.pill:focus-visible { border-color: var(--vu-oak); background: rgba(207,174,112,.14); }
@@ -199,6 +199,15 @@ button.pill--ai:hover, button.pill--ai:focus-visible { border-color: var(--gray-
 .pill--behav { border-color: rgba(28,28,28,.45); color: var(--vu-black); }
 .pill--univ { border-style: dashed; border-color: rgba(28,28,28,.6); color: var(--vu-black); background: rgba(28,28,28,.04); }
 button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--vu-black); background: rgba(28,28,28,.09); }
+
+/* Proficiency dot meter: peak expected level, Awareness(1) to Expert(5) */
+.pmeter { display: inline-flex; gap: 2px; margin-left: .45rem; vertical-align: middle; }
+.pmeter i { width: 5px; height: 5px; border-radius: 50%; background: rgba(28,28,28,.14); }
+.pmeter i.on { background: var(--vu-gold-flat); }
+.learntable .pmeter { margin-left: .5rem; }
+.learntable .pmeter i { background: rgba(255,255,255,.18); }
+.learntable .pmeter i.on { background: var(--vu-gold-flat); }
+.lt-prof { display: block; font-size: .72rem; color: rgba(255,255,255,.55); margin-top: .25rem; }
 
 /* ---------- 13. Comparison ---------- */
 .compare { margin-top: 3rem; }
@@ -456,6 +465,9 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   .learntable tr { page-break-inside: avoid; }
   .learntable .lt-pri { color: #946E24; }
   .lt-skill .skill-link { color: #000; border-bottom: none; }
+  .pmeter i { background: #ddd; }
+  .pmeter i.on { background: #946E24; }
+  .lt-prof { color: #444; }
   .lt-why b { color: #000; }
   .lt-tag--bridge { border-color: #946E24; color: #946E24; }
   .lt-tag--grow { border-color: #666; color: #333; }

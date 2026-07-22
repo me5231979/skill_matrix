@@ -44,7 +44,7 @@
     type: 'Universal',
     category: 'AI-Enabled Work',
     subcategory: 'Applies to all Vanderbilt roles',
-    definition: 'Capability to work effectively in AI-enabled work: understanding what AI can and cannot do, prompting and directing AI tools well, critically verifying AI output before acting on it, handling data responsibly by sensitivity tier, and redesigning everyday workflows to pair human judgment with AI assistance. Assumed to need development for every role at every level.',
+    definition: 'Capability to work effectively in AI-enabled work: understanding what AI can and cannot do, prompting and directing AI tools well, critically verifying AI output before acting on it, handling data responsibly by sensitivity tier and redesigning everyday workflows to pair human judgment with AI assistance. Assumed to need development for every role at every level.',
     prof: null
   };
 
@@ -241,6 +241,32 @@
       ['Podcast', 'Hard Fork (NYT)', 'https://www.nytimes.com/column/hard-fork']]
   };
 
+  /* Proficiency scale: Awareness(1) .. Expert(5) */
+  var PROF_ORDER = { Awareness: 1, Developing: 2, Intermediate: 3, Advanced: 4, Expert: 5 };
+  var PROF_NAMES = ['Awareness', 'Developing', 'Intermediate', 'Advanced', 'Expert'];
+  function profPeak(prof) {
+    var m = 0;
+    if (prof) Object.keys(prof).forEach(function (k) { m = Math.max(m, PROF_ORDER[prof[k]] || 0); });
+    return m;
+  }
+  function profRange(prof) {
+    var lo = 6, hi = 0;
+    if (prof) Object.keys(prof).forEach(function (k) {
+      var v = PROF_ORDER[prof[k]] || 0;
+      if (v) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    });
+    if (!hi) return null;
+    return lo === hi ? PROF_NAMES[hi - 1] : PROF_NAMES[lo - 1] + ' \u2192 ' + PROF_NAMES[hi - 1];
+  }
+  function profMeter(prof) {
+    var peak = profPeak(prof);
+    if (!peak) return '';
+    var dots = '';
+    for (var i = 1; i <= 5; i++) dots += '<i class="' + (i <= peak ? 'on' : '') + '"></i>';
+    return '<span class="pmeter" aria-label="Top expected proficiency: ' + PROF_NAMES[peak - 1] +
+      '" title="Top expected proficiency: ' + PROF_NAMES[peak - 1] + '">' + dots + '</span>';
+  }
+
   /* Oracle deep links (Vanderbilt tenancy) */
   var ORA = {
     grow: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/human-resources/career-grow/launch',
@@ -348,7 +374,8 @@
     Object.keys(groups).forEach(function (type) {
       if (!groups[type].length) return;
       html += skillGroup(type + ' skills', 'official framework', groups[type].map(function (s) {
-        return pillBtn(s.skill, s.type === 'Behavioral' ? 'pill--behav' : '', { kind: 'role', role: role.subfamily });
+        return pillBtn(s.skill, s.type === 'Behavioral' ? 'pill--behav' : '', { kind: 'role', role: role.subfamily },
+          profMeter(s.prof));
       }));
     });
 
@@ -370,10 +397,10 @@
       pills.map(function (p) { return '<li>' + p + '</li>'; }).join('') + '</ul></div>';
   }
 
-  function pillBtn(name, cls, data) {
+  function pillBtn(name, cls, data, extra) {
     return '<button type="button" class="pill ' + cls + '" data-skill="' + esc(name) +
       '" data-kind="' + data.kind + '"' + (data.role ? ' data-role="' + esc(data.role) + '"' : '') + '>' +
-      esc(name) + '</button>';
+      esc(name) + (extra || '') + '</button>';
   }
 
   /* ---------- "I already have this" (self-claimed destination skills) ---------- */
@@ -448,7 +475,7 @@
           'No brand-new skills required. Deepen and certify what you have.') +
         '</p></div></div>' +
 
-      '<p class="ownhint">Already have some of the destination skills from an earlier job, a degree, or life outside work? <b>Tick “I have this”</b>. Readiness and the plan update instantly, and adding those skills to your ' + oa('Talent Profile', ORA.talent) + ' becomes your first Oracle step.</p>' +
+      '<p class="ownhint">Already have some of the destination skills from an earlier job, a degree or life outside work? <b>Tick “I have this”</b>. Readiness and the plan update instantly, and adding those skills to your ' + oa('Talent Profile', ORA.talent) + ' becomes your first Oracle step.</p>' +
 
       '<div class="buckets">' +
         bucket('bucket--match', 'Skills that carry', 'You already have these', listMatches(a, from)) +
@@ -548,14 +575,14 @@
           (matchedNames ? ' (' + matchedNames + ')' : '') : ' into this pathway') +
         '. This plan closes ' + (a.bridges.length + a.growth.length + 1) + ' development areas in three phases with Oracle checkpoints: ' +
         a.bridges.length + ' bridge skill' + plural(a.bridges.length) + ', ' + a.growth.length +
-        ' new skill' + plural(a.growth.length) + ', and AI Workforce Readiness (universal).</p>' +
+        ' new skill' + plural(a.growth.length) + ' and AI Workforce Readiness (universal).</p>' +
       '</div>' +
 
       /* --- Phase checklists --- */
       '<div class="phases">' +
         phase('01', 'Align & set up in Oracle', 'Weeks 1–4', [
           ck('<b>Meet with your manager</b>: share this printed plan, agree on the destination and timeline, and add it to your development conversation notes.'),
-          ck('Open your ' + oa('Talent Profile', ORA.talent) + '. Add your current skills with honest proficiency: matched, bridge, skills marked “I have this,” and probable skills you genuinely have.'),
+          ck('Open your ' + oa('Talent Profile', ORA.talent) + '. Add your current skills with honest proficiency: matched, bridge, skills marked “I have this” and probable skills you genuinely have.'),
           ck('In ' + oa('Oracle Grow', ORA.grow) + ', add <b>' + esc(to.subfamily) + '</b> as a career/role of interest so recommendations start pointing at this destination.'),
           ck('In the ' + oa('Skills Center', ORA.skills) + ', review the AI-suggested skills for your profile and accept the ones that fit.'),
           ck('Create one <b>development goal per skill</b> in the table below, tagged to your role of interest.'),
@@ -614,9 +641,9 @@
 
       '<div class="plandoc__note">' +
         '<p class="plandoc__note-label">A note on outcomes</p>' +
-        '<p>This plan is a development roadmap, not a promise of placement. Completing it, every course, goal, and gig, builds real readiness for <b>' + esc(to.subfamily) +
-        '</b>, but it does not guarantee selection for, or transfer into, that role. Internal openings are filled through Vanderbilt’s standard recruitment process, and selection depends on position availability, business needs, qualifications, and the strength of the applicant pool at the time you apply.</p>' +
-        '<p>What this work does guarantee: the skills are yours. They strengthen your performance in your current role, enrich your Talent Profile, and make you a stronger candidate for this role and many others across the University, whenever the right opening appears.</p>' +
+        '<p>This plan is a development roadmap, not a promise of placement. Completing it, every course, goal and gig, builds real readiness for <b>' + esc(to.subfamily) +
+        '</b>, but it does not guarantee selection for, or transfer into, that role. Internal openings are filled through Vanderbilt’s standard recruitment process, and selection depends on position availability, business needs, qualifications and the strength of the applicant pool at the time you apply.</p>' +
+        '<p>What this work does guarantee: the skills are yours. They strengthen your performance in your current role, enrich your Talent Profile and make you a stronger candidate for this role and many others across the University, whenever the right opening appears.</p>' +
       '</div>' +
 
       '<div class="plan__actions">' +
@@ -664,7 +691,8 @@
       '<td class="lt-pri">' + (i + 1) + '</td>' +
       '<td class="lt-skill"><button type="button" class="skill-link" data-skill="' + esc(s.skill) +
         '" data-kind="' + (s === AI_READINESS ? 'univ' : 'role') + '" data-role="' + esc(toSel.value) + '">' +
-        esc(s.skill) + '</button></td>' +
+        esc(s.skill) + '</button>' + profMeter(s.prof) +
+        (profRange(s.prof) ? '<span class="lt-prof">Target: ' + profRange(s.prof) + '</span>' : '') + '</td>' +
       '<td class="lt-why">' + why + '</td>' +
       '<td class="lt-learn">' + learn + '</td>' +
       '<td class="lt-date"><input type="date" class="dateinput" data-datekey="' + esc(dk) + '"' +
@@ -690,7 +718,7 @@
     });
     if (!cards.length) return '';
     return '<div class="skillres"><h3>Skill resources beyond Oracle</h3>' +
-      '<p>Named podcasts, channels, certifications, and free professional resources for the skill areas in this plan. Direct links, no searching. These live <b>outside Oracle</b>: when you use one, flag it in ' + oa('Oracle Grow', ORA.grow) + ' by updating that skill’s development goal so the work shows in your talent record.</p>' +
+      '<p>Named podcasts, channels, certifications and free professional resources for the skill areas in this plan. Direct links, no searching. These live <b>outside Oracle</b>: when you use one, flag it in ' + oa('Oracle Grow', ORA.grow) + ' by updating that skill’s development goal so the work shows in your talent record.</p>' +
       '<div class="skillres__grid">' + cards.join('') + '</div></div>';
   }
 
