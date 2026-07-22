@@ -245,7 +245,8 @@
   var ORA = {
     grow: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/human-resources/career-grow/launch',
     talent: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/profiles/person-profile/skills-qualification-start?persona=ORA_HRT_EMPLOYEE',
-    skills: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/profiles/skills/skillscenter?navigateBack=true'
+    skills: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/profiles/skills/skillscenter?navigateBack=true',
+    market: 'https://ecsr.fa.us2.oraclecloud.com/fscmUI/redwood/internalmobility/opportunitymarketplace/search'
   };
   function oa(label, url) {
     return '<a class="olink" href="' + url + '" target="_blank" rel="noopener">' + label + '</a>';
@@ -570,7 +571,7 @@
           ck('If progress stalls or the pathway needs formal support, engage your <b>Engagement Consultant / HCM partner</b> to help broker cross-department options.')
         ]) +
         phase('03', 'Prove it & land it', 'Months ' + (months === 6 ? 4 : months - 3) + '–' + months, [
-          ck('In Oracle <b>Opportunity Marketplace</b>, take one gig or short assignment with the ' + esc(to.family) + ' team.'),
+          ck('In the ' + oa('Opportunity Marketplace', ORA.market) + ', take one gig or short assignment with the ' + esc(to.family) + ' team.'),
           ck('Shadow a ' + esc(to.subfamily) + ' colleague for a day; debrief what surprised you.'),
           ck('Update your ' + oa('Talent Profile', ORA.talent) + ' with every completed course and new skill so recruiters and Grow can see it.'),
           ck('Refresh your résumé in skills language. Lead with matched and newly built skills.'),
@@ -603,7 +604,7 @@
           oStep('Declare your destination', 'In ' + oa('Oracle Grow', ORA.grow) + ', add <b>' + esc(to.subfamily) + '</b> as a career or role of interest. Grow then surfaces the gap between your profile and that role.') +
           oStep('Create development goals', 'One goal per row of the table, tagged to your role of interest, so progress is visible to you and your manager.') +
           oStep('Enroll in Oracle Learning', 'The table deep-links to matched courses. Enroll from there. For anything not linked, open Me &rarr; <b>Learning</b>, search the skill, and consider <b>learning journeys</b> and communities.') +
-          oStep('Work Opportunity Marketplace', 'Browse gigs and short assignments in ' + esc(to.family) + ' for real practice and visibility with the destination team.') +
+          oStep('Work Opportunity Marketplace', 'Browse the ' + oa('Opportunity Marketplace', ORA.market) + ' for gigs and short assignments in ' + esc(to.family) + ' for real practice and visibility with the destination team.') +
           oStep('Keep the loop with people', 'Monthly manager check-ins against this plan; engage your <b>Engagement Consultant / HCM partner</b> when you need cross-department doors opened. Consider a mentor via Connections.') +
           oStep('Close the loop', 'Completed learning updates your ' + oa('Talent Profile', ORA.talent) + ' (verify: some courses update it automatically). Re-run this tool as your profile grows and watch readiness climb.') +
         '</ol>' +
