@@ -146,23 +146,25 @@ a { color: inherit; }
 .on-dark .feature p { color: rgba(255,255,255,.72); }
 
 /* ---------- 12. Explorer ---------- */
-/* Skill legend */
-.legend { display: grid; gap: 1rem; margin-top: 1.75rem; grid-template-columns: 1fr; }
-@media (min-width: 700px) { .legend { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1080px) { .legend { grid-template-columns: repeat(4, 1fr); } }
-.legend__item { background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 1rem 1.1rem; }
-.legend__item .pill { cursor: default; }
-.legend__item p { font-size: .82rem; color: var(--ink-soft); margin-top: .55rem; }
-.legendprof { display: grid; gap: 1rem; margin-top: 1rem; grid-template-columns: 1fr; }
-@media (min-width: 700px) { .legendprof { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1080px) { .legendprof { grid-template-columns: repeat(5, 1fr); } }
-.legendprof__item { background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
-  padding: .85rem 1rem; }
-.legendprof__item .pmeter { margin-left: 0; }
-.legendprof__item b { display: block; font-weight: 600; font-size: .85rem; margin-top: .35rem; }
-.legendprof__item p { font-size: .76rem; color: var(--ink-soft); margin-top: .2rem; }
-.legend__hint { margin-top: 1rem; font-size: .88rem; color: var(--gray-mid); }
+/* Skill key: one slim strip, definitions behind a disclosure */
+.key { margin-top: 1.6rem; }
+.key__strip { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem; }
+.key__strip .pill { cursor: default; }
+.key__scale { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem;
+  color: var(--gray-mid); margin-left: .4rem; }
+.key__scale .pmeter { margin-left: 0; }
+.key__arrow { color: var(--vu-gold-flat); }
+.key__more { margin-top: .7rem; }
+.key__more summary { cursor: pointer; display: inline-block; font-size: .85rem; font-weight: 500;
+  color: var(--vu-oak); border-bottom: 1px dotted rgba(148,110,36,.5); list-style: none; }
+.key__more summary::-webkit-details-marker { display: none; }
+.key__more summary:hover { color: var(--vu-black); }
+.key__grid { display: grid; gap: .55rem 2rem; margin-top: .9rem; grid-template-columns: 1fr; }
+@media (min-width: 860px) { .key__grid { grid-template-columns: 1fr 1fr; } }
+.key__grid p { font-size: .84rem; color: var(--ink-soft); }
+.key__grid .pill, .key__grid .pmeter { margin-right: .4rem; }
+.key__grid b { color: var(--vu-black); font-weight: 600; }
+.key__hint { grid-column: 1 / -1; color: var(--gray-mid); font-size: .82rem; }
 
 .pickers { display: grid; gap: 1.5rem; margin-top: 2.75rem; grid-template-columns: 1fr; align-items: start; }
 @media (min-width: 900px) { .pickers { grid-template-columns: 1fr auto 1fr; } }
@@ -388,6 +390,21 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .plandoc__note b { color: #fff; font-weight: 600; }
 
 .plan__actions { margin-top: 2.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+
+/* Freshness stamp + resume example */
+.fresh { display: block; margin-top: .5rem; font-size: .78rem; color: rgba(255,255,255,.45); }
+.eg-resume { background: none; border: none; padding: 0; font: inherit; cursor: pointer; }
+.resume-eg { margin-top: .5rem; }
+.resume-eg__label { font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; font-size: .7rem; color: var(--vu-oak); margin: 1rem 0 .35rem; }
+.resume-eg__before { font-size: .92rem; color: var(--gray-mid); font-style: italic; }
+.resume-eg ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.resume-eg li { font-size: .9rem; color: var(--ink-soft); padding-left: 1rem; position: relative; }
+.resume-eg li::before { content: ''; position: absolute; left: 0; top: .5em; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--vu-gold-flat); }
+.resume-eg li b { color: var(--vu-black); }
+.resume-eg__note { margin-top: 1rem; font-size: .85rem; color: var(--gray-mid); border-top: 1px solid var(--line);
+  padding-top: .8rem; }
 
 /* ---------- 15. Modal ---------- */
 .modal { border: none; border-radius: var(--radius); padding: 0; max-width: 620px; width: calc(100% - 2.5rem);

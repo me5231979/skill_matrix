@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=1">
+<link rel="stylesheet" href="assets/css/styles.css?v=3">
 </head>
 <body>
 <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -84,6 +84,7 @@
     <div class="wrap">
       <p class="eyebrow" data-reveal>How it works</p>
       <h2 class="h2" data-reveal>Three steps to <em>a destination</em>.</h2>
+      <p class="lead" data-reveal><strong>This is the map. Oracle is the vehicle.</strong> Explore destinations and build your plan here. Then execute it in Oracle: your Talent Profile, development goals, courses and gigs all live there.</p>
       <div class="grid3">
         <div class="feature" data-reveal>
           <p class="feature__num">01</p>
@@ -109,52 +110,33 @@
     <div class="wrap">
       <p class="eyebrow" data-reveal>The explorer</p>
       <h2 class="h2" data-reveal>Two roles. <em>One matrix.</em></h2>
-      <div class="legend" data-reveal role="img" aria-label="Skill color legend">
-        <div class="legend__item">
+      <p class="lead" data-reveal>Roles here are Vanderbilt job sub-families. Each covers a group of related job titles, so readiness reads at the career-area level, not a single posting.</p>
+      <div class="key" data-reveal>
+        <div class="key__strip" role="img" aria-label="Skill color and proficiency key">
           <span class="pill pill--core">Core &amp; matched</span>
-          <p>Gold is official. Core competencies and skills both roles share.</p>
-        </div>
-        <div class="legend__item">
           <span class="pill">Role skill</span>
-          <p>Oak outline. A skill the framework maps to the role.</p>
-        </div>
-        <div class="legend__item">
           <span class="pill pill--ai">Probable skill</span>
-          <p>Dashed grey is AI-inferred. Not part of the framework.</p>
-        </div>
-        <div class="legend__item">
           <span class="pill pill--univ">AI Workforce Readiness</span>
-          <p>Universal. A development need in every role.</p>
+          <span class="key__scale"><span class="pmeter"><i class="on"></i><i></i><i></i><i></i><i></i></span> Awareness
+            <span class="key__arrow">&rarr;</span>
+            <span class="pmeter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span> Expert</span>
         </div>
+        <details class="key__more">
+          <summary>What these mean</summary>
+          <div class="key__grid">
+            <p><span class="pill pill--core">Core &amp; matched</span> Gold is official: core competencies and skills both roles share.</p>
+            <p><span class="pill">Role skill</span> Oak outline: a skill the framework maps to the role.</p>
+            <p><span class="pill pill--ai">Probable skill</span> Dashed grey is AI-inferred, not part of the framework.</p>
+            <p><span class="pill pill--univ">AI Workforce Readiness</span> Universal: a development need in every role.</p>
+            <p><span class="pmeter"><i class="on"></i><i></i><i></i><i></i><i></i></span> <b>Awareness</b> Knows the basics and the language. Applies the skill with guidance.</p>
+            <p><span class="pmeter"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Developing</b> Applies the skill in routine situations with occasional support.</p>
+            <p><span class="pmeter"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Intermediate</b> Works independently. The skill is part of everyday performance.</p>
+            <p><span class="pmeter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> <b>Advanced</b> Handles complex situations and guides others in the skill.</p>
+            <p><span class="pmeter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Expert</b> A recognized authority. Sets direction and develops others.</p>
+            <p class="key__hint">Dots on a skill show its top expected proficiency in that role. Click any skill for its definition and full ladder by career level.</p>
+          </div>
+        </details>
       </div>
-      <div class="legendprof" data-reveal role="img" aria-label="Proficiency level key">
-        <div class="legendprof__item">
-          <span class="pmeter"><i class="on"></i><i></i><i></i><i></i><i></i></span>
-          <b>Awareness</b>
-          <p>Knows the basics and the language. Applies the skill with guidance.</p>
-        </div>
-        <div class="legendprof__item">
-          <span class="pmeter"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>
-          <b>Developing</b>
-          <p>Applies the skill in routine situations with occasional support.</p>
-        </div>
-        <div class="legendprof__item">
-          <span class="pmeter"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
-          <b>Intermediate</b>
-          <p>Works independently. The skill is part of everyday performance.</p>
-        </div>
-        <div class="legendprof__item">
-          <span class="pmeter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
-          <b>Advanced</b>
-          <p>Handles complex situations and guides others in the skill.</p>
-        </div>
-        <div class="legendprof__item">
-          <span class="pmeter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
-          <b>Expert</b>
-          <p>A recognized authority. Sets direction and develops others.</p>
-        </div>
-      </div>
-      <p class="legend__hint" data-reveal>Dots on a skill show its top expected proficiency in that role. Click any skill for its definition and full ladder by career level.</p>
 
       <div class="pickers">
         <div class="picker" data-reveal>
@@ -245,6 +227,28 @@
     <div class="modal__prof" id="modal-prof" hidden>
       <h4>Expected proficiency by career level</h4>
       <div id="modal-prof-body"></div>
+    </div>
+  </div>
+</dialog>
+
+<!-- ============ RESUME EXAMPLE MODAL ============ -->
+<dialog class="modal" id="resume-modal" aria-labelledby="resume-title">
+  <div class="modal__inner">
+    <button class="modal__close" id="resume-close" aria-label="Close">&times;</button>
+    <p class="modal__type">What good looks like</p>
+    <h3 id="resume-title">A r&eacute;sum&eacute; in skills language</h3>
+    <p class="modal__cat">A fictitious example: Dining Services &rarr; IT support pathway</p>
+    <div class="resume-eg">
+      <p class="resume-eg__label">Before</p>
+      <p class="resume-eg__before">&ldquo;Worked in the dining hall for 8 years. Duties included cooking, cleaning and inventory.&rdquo;</p>
+      <p class="resume-eg__label">After: lead with skills, prove them with results</p>
+      <ul>
+        <li><b>Inventory Management Systems:</b> ran daily counts and orders in a digital inventory system for a 3,000-meal operation, cutting waste 12%</li>
+        <li><b>Customer Support:</b> resolved 30+ guest questions and issues per shift, keeping satisfaction scores above 90%</li>
+        <li><b>Process Improvement:</b> redesigned the prep-line workflow, saving 45 staff minutes per day</li>
+        <li><b>Technology in daily work:</b> first on the team to adopt the new point-of-sale and scheduling systems, then trained 12 coworkers</li>
+      </ul>
+      <p class="resume-eg__note">Same job. Same person. The second version names the transferable skills a hiring manager in the destination role is scanning for, with evidence attached.</p>
     </div>
   </div>
 </dialog>

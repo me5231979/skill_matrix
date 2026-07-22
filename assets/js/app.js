@@ -575,13 +575,13 @@
           (matchedNames ? ' (' + matchedNames + ')' : '') : ' into this pathway') +
         '. This plan closes ' + (a.bridges.length + a.growth.length + 1) + ' development areas in three phases with Oracle checkpoints: ' +
         a.bridges.length + ' bridge skill' + plural(a.bridges.length) + ', ' + a.growth.length +
-        ' new skill' + plural(a.growth.length) + ' and AI Workforce Readiness (universal).</p>' +
+        ' new skill' + plural(a.growth.length) + ' and AI Workforce Readiness (universal). <b>This plan is yours to drive.</b> Managers, Engagement Consultants and this tool guide the way; you own the work. It builds real readiness, and selection still runs through Vanderbilt\u2019s normal hiring process.</p>' +
       '</div>' +
 
       /* --- Phase checklists --- */
       '<div class="phases">' +
         phase('01', 'Align & set up in Oracle', 'Weeks 1–4', [
-          ck('<b>Meet with your manager</b>: share this printed plan, agree on the destination and timeline, and add it to your development conversation notes.'),
+          ck('<b>Meet with your manager</b>: share this printed plan, agree on the destination and timeline and add it to your development conversation notes. Be open about your goal. Developing talent across Vanderbilt is part of every manager\u2019s job.'),
           ck('Open your ' + oa('Talent Profile', ORA.talent) + '. Add your current skills with honest proficiency: matched, bridge, skills marked “I have this” and probable skills you genuinely have.'),
           ck('In ' + oa('Oracle Grow', ORA.grow) + ', add <b>' + esc(to.subfamily) + '</b> as a career/role of interest so recommendations start pointing at this destination.'),
           ck('In the ' + oa('Skills Center', ORA.skills) + ', review the AI-suggested skills for your profile and accept the ones that fit.'),
@@ -603,7 +603,7 @@
           ck('Shadow your phase 1 contact for a day; debrief what surprised you.'),
           ck('Watch the ' + oa('Opportunity Marketplace', ORA.market) + ' for open requisitions in ' + esc(to.subfamily) + '.'),
           ck('Update your ' + oa('Talent Profile', ORA.talent) + ' with every completed course and new skill so recruiters and Grow can see it.'),
-          ck('Refresh your résumé in skills language. Lead with matched and newly built skills.'),
+          ck('Refresh your résumé in skills language. Lead with matched and newly built skills. <button type="button" class="olink eg-resume">See an example</button>'),
           ck('<b>Final manager conversation</b>: confirm readiness; loop in your Engagement Consultant / HCM partner on internal openings.'),
           ck('Apply through Vanderbilt’s internal mobility process with your portfolio of completions.')
         ]) +
@@ -718,7 +718,7 @@
     });
     if (!cards.length) return '';
     return '<div class="skillres"><h3>Skill resources beyond Oracle</h3>' +
-      '<p>Named podcasts, channels, certifications and free professional resources for the skill areas in this plan. Direct links, no searching. These live <b>outside Oracle</b>: when you use one, flag it in ' + oa('Oracle Grow', ORA.grow) + ' by updating that skill’s development goal so the work shows in your talent record.</p>' +
+      '<p>Named podcasts, channels, certifications and free professional resources for the skill areas in this plan. Direct links, no searching. These live <b>outside Oracle</b>: when you use one, flag it in ' + oa('Oracle Grow', ORA.grow) + ' by updating that skill’s development goal so the work shows in your talent record. <span class="fresh">Resources last reviewed July 2026 \u00b7 Oracle catalog: July 2026 export.</span></p>' +
       '<div class="skillres__grid">' + cards.join('') + '</div></div>';
   }
 
@@ -743,10 +743,17 @@
   modal.addEventListener('click', function (e) { if (e.target === modal) modal.close(); });
 
   document.addEventListener('click', function (e) {
+    if (e.target.closest('.eg-resume')) {
+      document.getElementById('resume-modal').showModal();
+      return;
+    }
     var btn = e.target.closest('[data-skill]');
     if (!btn || !DATA) return;
     openSkill(btn.dataset.skill, btn.dataset.kind, btn.dataset.role);
   });
+  var resumeModal = document.getElementById('resume-modal');
+  document.getElementById('resume-close').addEventListener('click', function () { resumeModal.close(); });
+  resumeModal.addEventListener('click', function (e) { if (e.target === resumeModal) resumeModal.close(); });
 
   function openSkill(name, kind, roleKey) {
     var type = '', cat = '', def = '', prof = null, isAI = false;
