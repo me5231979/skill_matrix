@@ -68,19 +68,20 @@
       ['YouTube', 'NetworkChuck', 'https://www.youtube.com/@NetworkChuck'],
       ['Cert', 'CompTIA A+', 'https://www.comptia.org/certifications/a'],
       ['Cert', 'Google IT Support Professional Certificate', 'https://grow.google/certificates/it-support/'],
-      ['Free', 'Microsoft Learn (free training)', 'https://learn.microsoft.com/en-us/training/']],
+      ['Free', 'Cisco Networking Academy (free)', 'https://www.netacad.com']],
     'Education': [
       ['Podcast', 'Cult of Pedagogy', 'https://www.cultofpedagogy.com/pod/'],
       ['Podcast', 'Teaching in Higher Ed', 'https://teachinginhighered.com/podcast/'],
       ['YouTube', 'Edutopia', 'https://www.youtube.com/@edutopia'],
       ['Cert', 'ATD Talent Development Certifications (APTD/CPTD)', 'https://www.td.org/certification'],
+      ['Program', 'Vanderbilt Peabody College', 'https://peabody.vanderbilt.edu'],
       ['Free', 'OER Commons (free open education resources)', 'https://oercommons.org']],
     'Technology Design and Development': [
       ['Podcast', 'Software Engineering Daily', 'https://softwareengineeringdaily.com'],
       ['Podcast', 'Syntax', 'https://syntax.fm'],
       ['YouTube', 'freeCodeCamp', 'https://www.youtube.com/@freecodecamp'],
-      ['Cert', 'AWS Certified Cloud Practitioner', 'https://aws.amazon.com/certification/certified-cloud-practitioner/'],
-      ['Cert', 'Microsoft Azure Fundamentals (AZ-900)', 'https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/'],
+      ['Cert', 'CompTIA Cloud+ (vendor-neutral)', 'https://www.comptia.org/certifications/cloud'],
+      ['Course', 'Harvard CS50 (free)', 'https://cs50.harvard.edu/'],
       ['Free', 'The Odin Project (free)', 'https://www.theodinproject.com']],
     'Administrative Services': [
       ['Podcast', 'The Leader Assistant', 'https://leaderassistant.com/podcast'],
@@ -104,6 +105,8 @@
       ['Podcast', 'Masters of Scale', 'https://mastersofscale.com'],
       ['Podcast', 'HBR IdeaCast', 'https://hbr.org/podcasts/ideacast'],
       ['Cert', 'Project Management Professional (PMP)', 'https://www.pmi.org/certifications/project-management-pmp'],
+      ['Program', 'Harvard Business School Online', 'https://online.hbs.edu'],
+      ['Program', 'Stanford Online', 'https://online.stanford.edu'],
       ['Free', 'MIT OpenCourseWare: Sloan (free)', 'https://ocw.mit.edu']],
     'Communication Design and Development': [
       ['Podcast', 'Design Matters with Debbie Millman', 'https://www.designmattersmedia.com'],
@@ -129,6 +132,7 @@
       ['YouTube', 'Simon Sinek', 'https://www.youtube.com/@simonsinek'],
       ['Cert', 'ICF Coaching Credentials (ACC)', 'https://coachingfederation.org'],
       ['Cert', 'SHRM Certified Professional (SHRM-CP)', 'https://www.shrm.org/credentials'],
+      ['Program', 'Harvard Business School Online', 'https://online.hbs.edu'],
       ['Free', 'Center for Creative Leadership articles (free)', 'https://www.ccl.org/articles/']],
     'Marketing of Products and Services': [
       ['Podcast', 'Marketing Over Coffee', 'https://www.marketingovercoffee.com'],
@@ -203,7 +207,7 @@
       ['Cert', 'Certified Scrum Product Owner (CSPO)', 'https://www.scrumalliance.org'],
       ['Free', 'Scrum.org Open Assessments (free)', 'https://www.scrum.org']],
     'Real Estate': [
-      ['Podcast', 'BiggerPockets Podcasts', 'https://www.biggerpockets.com/podcasts'],
+      ['Podcast', 'America’s Commercial Real Estate Show', 'https://www.creshow.com'],
       ['Cert', 'CCIM Designation', 'https://www.ccim.com'],
       ['Cert', 'IFMA Facility Management Professional (FMP)', 'https://www.ifma.org'],
       ['Free', 'IFMA resources', 'https://www.ifma.org']],
@@ -227,12 +231,14 @@
       ['Cert', 'Google Data Analytics Certificate', 'https://grow.google/certificates/data-analytics/'],
       ['Free', 'Kaggle Learn (free)', 'https://www.kaggle.com/learn']],
     'AI-Enabled Work': [
-      ['Podcast', 'Hard Fork (NYT)', 'https://www.nytimes.com/column/hard-fork'],
-      ['Podcast', 'Practical AI', 'https://changelog.com/practicalai'],
-      ['YouTube', '3Blue1Brown (neural networks)', 'https://www.youtube.com/@3blue1brown'],
+      ['Free', 'One Useful Thing, Ethan Mollick (free)', 'https://www.oneusefulthing.org'],
+      ['Book', 'Co-Intelligence, Ethan Mollick', 'https://www.oneusefulthing.org/about'],
+      ['Course', 'Vanderbilt: Prompt Engineering (Coursera)', 'https://www.coursera.org/learn/prompt-engineering'],
+      ['Course', 'Harvard CS50 AI (free)', 'https://cs50.harvard.edu/ai/'],
+      ['Course', 'Stanford Online: AI courses', 'https://online.stanford.edu'],
+      ['Free', 'Elements of AI, Univ. of Helsinki (free)', 'https://www.elementsofai.com'],
       ['Cert', 'Google AI Essentials', 'https://grow.google/ai-essentials/'],
-      ['Cert', 'Microsoft Azure AI Fundamentals (AI-900)', 'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/'],
-      ['Free', 'Elements of AI (free course)', 'https://www.elementsofai.com']]
+      ['Podcast', 'Hard Fork (NYT)', 'https://www.nytimes.com/column/hard-fork']]
   };
 
   var STREAMS = [
