@@ -37,6 +37,22 @@
     video.load();
   })();
 
+  /* Entry acknowledgment: outcomes note as a gate, once per browser. */
+  (function () {
+    var KEY = 'sm_ack_v1';
+    var seen = false;
+    try { seen = !!localStorage.getItem(KEY); } catch (e) { seen = false; }
+    if (seen) return;
+    var d = document.getElementById('ack-modal');
+    if (!d || !d.showModal) return;
+    d.addEventListener('cancel', function (e) { e.preventDefault(); });
+    document.getElementById('ack-btn').addEventListener('click', function () {
+      try { localStorage.setItem(KEY, new Date().toISOString()); } catch (e) {}
+      d.close();
+    });
+    d.showModal();
+  })();
+
   /* Universal AI-readiness skill: needed for every role, assumed to need development everywhere.
      Deliberately NOT gold — it is not part of the official framework. */
   var AI_READINESS = {

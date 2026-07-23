@@ -439,6 +439,11 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   font-size: 1.5rem; line-height: 1; cursor: pointer; color: var(--gray-mid); padding: .3rem; }
 .modal__close:hover { color: var(--vu-black); }
 
+/* Entry acknowledgment gate */
+.ackmodal { border-top: 3px solid var(--vu-gold-flat); }
+.ackmodal::backdrop { background: rgba(14,14,14,.82); backdrop-filter: blur(4px); }
+.ackmodal__actions { margin-top: 1.6rem; }
+
 /* ---------- 16. Footer ---------- */
 .footer { background: #141414; color: #fff; padding: 4rem 0 2.5rem; }
 .footer__grid { display: grid; gap: 2.5rem; grid-template-columns: 1fr; }
