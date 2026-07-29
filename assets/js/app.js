@@ -445,8 +445,34 @@
     });
   });
 
+  /* How-it-works copy follows the active experience. */
+  var HOW_COPY = {
+    roles: [
+      ['Start where you are', 'Pick your current role. See the seven core competencies, the skills mapped to your role and AI-inferred skills in dashed grey.'],
+      ['Choose a destination', 'Pick any role in any family \u2014 or move one level up in your own. Gold carries over. Oak bridges from what you know. Black outline is new ground.'],
+      ['Get the plan', 'A printable plan: phase checklists, a skill table with Oracle Learning links and curated resources and a step-by-step Oracle playbook.']
+    ],
+    skills: [
+      ['Pick your skills', 'Choose up to 10 skills from the library \u2014 search or browse \u2014 up to 3 core competencies you really do well, and up to 5 in your own words.'],
+      ['Meet your matches', 'We match your skills against every Vanderbilt role and surface your five best fits, showing what you already bring to each.'],
+      ['Get the plan', 'Choose a match and get the same printable plan: phase checklists, Oracle Learning links, curated resources and the Oracle playbook.']
+    ]
+  };
+  function applyHowCopy(path) {
+    HOW_COPY[path].forEach(function (c, i) {
+      var el = document.querySelector('[data-how="' + (i + 1) + '"]');
+      if (!el) return;
+      el.querySelector('h3').textContent = c[0];
+      el.querySelector('p').textContent = c[1];
+    });
+    document.querySelectorAll('.pathswitch__btn').forEach(function (x) {
+      x.classList.toggle('on', x.dataset.path === path);
+    });
+  }
+
   /* Either/or paths: one workflow per visit unless the user starts over. */
   function enterRolesPath() {
+    applyHowCopy('roles');
     document.getElementById('skillsfirst').hidden = true;
     document.getElementById('explore').hidden = false;
     document.getElementById('plan').hidden = false;
@@ -456,6 +482,7 @@
     if (fromSel.value === '__skills__') { fromSel.value = ''; toSel.value = ''; if (DATA) update(); }
   }
   function enterSkillsPath() {
+    applyHowCopy('skills');
     document.getElementById('skillsfirst').hidden = false;
     document.getElementById('explore').hidden = true;
     document.getElementById('plan').hidden = true;
