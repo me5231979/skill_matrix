@@ -606,3 +606,10 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .btn--ghost2:hover { border-color: var(--vu-gold-flat); color: var(--vu-gold-flat); background: transparent; box-shadow: none; }
 .skillsmode .key { display: none; }
 .pickers[hidden], .section[hidden] { display: none !important; }
+
+/* skills-first browse dropdowns */
+.sf__browse { display: flex; gap: .6rem; align-items: center; margin-top: .7rem; flex-wrap: wrap; }
+.sf__or { font-family: var(--font-condensed); font-weight: 700; font-size: .72rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gray-mid); }
+.sf__browse select { flex: 1 1 220px; padding: .7rem .9rem; border: 1px solid var(--sand); border-radius: 4px;
+  font: 500 .92rem var(--font-sans); background: #fff; max-width: 100%; min-width: 0; }

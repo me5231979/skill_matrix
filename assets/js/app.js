@@ -1179,6 +1179,49 @@
     document.getElementById('sf-typed-add').addEventListener('click', addTyped);
     typedInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addTyped(); } });
 
+    /* Browse the library by dropdown as well as by typing. */
+    var catSel = document.getElementById('sf-cat');
+    var skillSel = document.getElementById('sf-skillsel');
+    function fillSkillSel(cat) {
+      skillSel.innerHTML = '<option value="">Pick a skill to add\u2026</option>';
+      var rows = LIB.filter(function (r) { return !cat || r[1] === cat; });
+      if (cat) {
+        rows.forEach(function (r) {
+          var o = document.createElement('option');
+          o.value = r[0]; o.textContent = r[0];
+          skillSel.appendChild(o);
+        });
+      } else {
+        var byCat = {};
+        rows.forEach(function (r) { (byCat[r[1] || 'Other'] = byCat[r[1] || 'Other'] || []).push(r[0]); });
+        Object.keys(byCat).sort().forEach(function (c) {
+          var og = document.createElement('optgroup');
+          og.label = c;
+          byCat[c].forEach(function (n) {
+            var o = document.createElement('option');
+            o.value = n; o.textContent = n;
+            og.appendChild(o);
+          });
+          skillSel.appendChild(og);
+        });
+      }
+    }
+    var cats = {};
+    LIB.forEach(function (r) { if (r[1]) cats[r[1]] = true; });
+    Object.keys(cats).sort().forEach(function (c) {
+      var o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      catSel.appendChild(o);
+    });
+    fillSkillSel('');
+    catSel.addEventListener('change', function () { fillSkillSel(catSel.value); });
+    skillSel.addEventListener('change', function () {
+      var v = skillSel.value;
+      if (v && SF.picked.indexOf(v) < 0 && SF.picked.length < 10) SF.picked.push(v);
+      skillSel.value = '';
+      renderSF();
+    });
+
     document.getElementById('sf-match').addEventListener('click', runMatch);
     renderSF();
   }
