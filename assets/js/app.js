@@ -37,20 +37,41 @@
     video.load();
   })();
 
-  /* Entry acknowledgment: outcomes note as a gate, once per browser. */
+  /* Entry acknowledgment: outcomes note as a gate, on every entry.
+     Acknowledging opens the path chooser. */
+  var pathModal = document.getElementById('path-modal');
+  function openPathChooser() { if (pathModal && pathModal.showModal) pathModal.showModal(); }
   (function () {
-    var KEY = 'sm_ack_v1';
-    var seen = false;
-    try { seen = !!localStorage.getItem(KEY); } catch (e) { seen = false; }
-    if (seen) return;
     var d = document.getElementById('ack-modal');
     if (!d || !d.showModal) return;
     d.addEventListener('cancel', function (e) { e.preventDefault(); });
     document.getElementById('ack-btn').addEventListener('click', function () {
-      try { localStorage.setItem(KEY, new Date().toISOString()); } catch (e) {}
       d.close();
+      openPathChooser();
     });
     d.showModal();
+  })();
+
+  /* Path chooser: two ways in. */
+  (function () {
+    if (!pathModal) return;
+    document.getElementById('path-close').addEventListener('click', function () { pathModal.close(); });
+    pathModal.addEventListener('click', function (e) { if (e.target === pathModal) pathModal.close(); });
+    document.getElementById('path-roles').addEventListener('click', function () {
+      pathModal.close();
+      document.getElementById('skillsfirst').hidden = true;
+      document.getElementById('explore').scrollIntoView({ behavior: 'smooth' });
+    });
+    document.getElementById('path-skills').addEventListener('click', function () {
+      pathModal.close();
+      var sf = document.getElementById('skillsfirst');
+      sf.hidden = false;
+      sf.scrollIntoView({ behavior: 'smooth' });
+    });
+    ['hero-path', 'nav-path'].forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b) b.addEventListener('click', openPathChooser);
+    });
   })();
 
   /* Universal AI-readiness skill: needed for every role, assumed to need development everywhere.
@@ -304,14 +325,18 @@
 
   var DATA = null;
   var ORACLE = { prefix: '', skills: {} };
+  var LIB = [];   /* [[name, category, subcategory, type, definition], ...] */
 
   Promise.all([
     fetch('assets/data/sbja.json').then(function (r) { return r.json(); }),
-    fetch('assets/data/oracle_courses.json').then(function (r) { return r.json(); }).catch(function () { return null; })
+    fetch('assets/data/oracle_courses.json').then(function (r) { return r.json(); }).catch(function () { return null; }),
+    fetch('assets/data/library.json').then(function (r) { return r.json(); }).catch(function () { return []; })
   ]).then(function (res) {
     DATA = res[0];
     if (res[1]) ORACLE = res[1];
+    LIB = res[2] || [];
     init();
+    initSkillsFirst();
   }).catch(function () {
     document.getElementById('from-panel').innerHTML =
       '<p class="rolepanel__empty">The skills data could not be loaded. Refresh to try again.</p>';
@@ -344,8 +369,18 @@
       });
     });
 
-    fromSel.addEventListener('change', update);
-    toSel.addEventListener('change', update);
+    // Linear progression: same role, next level up.
+    var upGroup = document.createElement('optgroup');
+    upGroup.label = 'Move up';
+    var upOpt = document.createElement('option');
+    upOpt.value = '__up__';
+    upOpt.textContent = '\u2B06 My current role, one level up';
+    upGroup.appendChild(upOpt);
+    toSel.insertBefore(upGroup, toSel.children[1]);
+
+    fromSel.addEventListener('change', function () { syncLevelPicker(); update(); });
+    toSel.addEventListener('change', function () { syncLevelPicker(); update(); });
+    document.getElementById('level-select').addEventListener('change', update);
 
     // Restore a shared link: #from=Dining%20Services&to=Network%20Support
     var params = new URLSearchParams(location.hash.replace(/^#/, ''));
@@ -354,9 +389,66 @@
     if (fromSel.value || toSel.value) update();
   }
 
+  var LEVEL_ORDER = ['S1','S2','S3','S4','IC1','IC2','IC3','IC4','IC5','PM1','PM2','PM3','PM4','PM5','M1','M2','M3','M4','M5','E1','E2','E3'];
+  function streamOf(level) {
+    for (var i = 0; i < STREAMS.length; i++) if (STREAMS[i].levels.indexOf(level) >= 0) return STREAMS[i];
+    return null;
+  }
+  function roleLevels(role) {
+    var present = {};
+    role.skills.forEach(function (s) {
+      if (s.prof) Object.keys(s.prof).forEach(function (k) { present[k] = true; });
+    });
+    return LEVEL_ORDER.filter(function (l) { return present[l]; });
+  }
+  function nextLevelUp(role, level) {
+    var stream = streamOf(level);
+    if (!stream) return null;
+    var levels = roleLevels(role);
+    var idx = stream.levels.indexOf(level);
+    for (var i = idx + 1; i < stream.levels.length; i++) {
+      if (levels.indexOf(stream.levels[i]) >= 0) return stream.levels[i];
+    }
+    return null;
+  }
+  function syncLevelPicker() {
+    var wrap = document.getElementById('level-wrap');
+    var sel = document.getElementById('level-select');
+    var isUp = toSel.value === '__up__';
+    wrap.hidden = !isUp;
+    if (!isUp) return;
+    var from = getFrom();
+    var keep = sel.value;
+    sel.innerHTML = '<option value="">Select your level\u2026</option>';
+    if (!from || from === SKILLS_ROLE) return;
+    roleLevels(from).forEach(function (l) {
+      var o = document.createElement('option');
+      var st = streamOf(l);
+      o.value = l; o.textContent = l + ' \u00b7 ' + (st ? st.label : '');
+      sel.appendChild(o);
+    });
+    if (keep) sel.value = keep;
+  }
+
+  /* Skills-first synthetic origin role, built from the user's selections. */
+  var SKILLS_ROLE = null;
+  function getFrom() {
+    if (fromSel.value === '__skills__') return SKILLS_ROLE;
+    return DATA.roles[fromSel.value] || null;
+  }
+
   function update() {
-    var from = DATA.roles[fromSel.value] || null;
+    var from = getFrom();
     var to = DATA.roles[toSel.value] || null;
+
+    if (toSel.value === '__up__') {
+      document.getElementById('from-family').textContent = from && from.family ? 'Job family: ' + from.family : '';
+      document.getElementById('to-family').textContent = 'Same role \u00b7 one level up';
+      renderRolePanel(document.getElementById('from-panel'), from, 'Choose your current role to see its skill profile.');
+      var lvl = document.getElementById('level-select').value;
+      renderLevelUp(from, lvl);
+      return;
+    }
 
     document.getElementById('from-family').textContent = from ? 'Job family: ' + from.family : '';
     document.getElementById('to-family').textContent = to ? 'Job family: ' + to.family : '';
@@ -552,6 +644,151 @@
     return '<ul>' + rows.join('') + '</ul>';
   }
 
+  /* ---------- Level-up: same role, next level ---------- */
+  function levelAnalyze(role, cur, nxt) {
+    var steady = [], deepen = [], fresh = [];
+    role.skills.forEach(function (s) {
+      var a1 = s.prof && s.prof[cur] ? (PROF_ORDER[s.prof[cur]] || 0) : 0;
+      var b1 = s.prof && s.prof[nxt] ? (PROF_ORDER[s.prof[nxt]] || 0) : 0;
+      if (!b1) { if (a1) steady.push(s); return; }
+      if (!a1) fresh.push({ skill: s, to: s.prof[nxt] });
+      else if (b1 > a1) deepen.push({ skill: s, from: s.prof[cur], to: s.prof[nxt] });
+      else steady.push(s);
+    });
+    var total = steady.length + deepen.length + fresh.length;
+    var pct = Math.round(20 + 80 * (steady.length / Math.max(total, 1)));
+    return { steady: steady, deepen: deepen, fresh: fresh, pct: Math.min(pct, 98) };
+  }
+
+  function renderLevelUp(role, lvl) {
+    var box = document.getElementById('compare');
+    var body = document.getElementById('plan-body');
+    var title = document.getElementById('plan-title');
+    document.getElementById('to-panel').innerHTML =
+      '<p class="rolepanel__empty">' + (role ? 'Pick your current level on the left picker to see the step up.' :
+      'Choose your current role first, then your level.') + '</p>';
+    if (!role || !lvl) {
+      box.hidden = true; box.innerHTML = '';
+      title.innerHTML = 'A clear path, <em>phase by phase</em>.';
+      body.innerHTML = '<p class="plan__empty">Choose your role and current level and your step-up plan will build itself here.</p>';
+      return;
+    }
+    var nxt = nextLevelUp(role, lvl);
+    if (!nxt) {
+      box.hidden = false;
+      box.innerHTML = '<p class="bucket__none">You\u2019re at the top of this track for ' + esc(role.subfamily) +
+        '. Explore a destination role instead \u2014 or talk with your manager about the next stream.</p>';
+      title.innerHTML = 'A clear path, <em>phase by phase</em>.';
+      body.innerHTML = '<p class="plan__empty">No higher level is mapped for this role in this track.</p>';
+      return;
+    }
+    var la = levelAnalyze(role, lvl, nxt);
+    document.getElementById('to-panel').innerHTML =
+      '<p class="rolepanel__fam">' + esc(role.family) + '</p><h3>' + esc(role.subfamily) +
+      ' \u00b7 ' + esc(nxt) + '</h3><p class="rolepanel__empty">The same role, one level up: ' +
+      la.deepen.length + ' skill' + plural(la.deepen.length) + ' to deepen and ' +
+      la.fresh.length + ' new expectation' + plural(la.fresh.length) + ' at ' + esc(nxt) + '.</p>';
+
+    box.hidden = false;
+    box.innerHTML =
+      '<div class="readiness" data-pct="' + la.pct + '">' +
+        '<div><p class="readiness__num">' + la.pct + '<small>%</small></p>' +
+        '<span class="readiness__label">Step-up readiness</span></div>' +
+        '<div class="readiness__barwrap"><div class="readiness__bar"><div class="readiness__fill"></div></div>' +
+        '<p class="readiness__note">From <b>' + esc(lvl) + '</b> to <b>' + esc(nxt) + '</b> in ' +
+        esc(role.subfamily) + ': ' + la.steady.length + ' skill' + plural(la.steady.length) +
+        ' hold steady, ' + la.deepen.length + ' deepen' + (la.fresh.length ? ' and ' +
+        la.fresh.length + ' new expectation' + plural(la.fresh.length) + ' appear' : '') + '.</p></div></div>' +
+      '<div class="buckets">' +
+        bucket('bucket--match', 'Holds steady', 'Same expected proficiency at ' + esc(nxt),
+          la.steady.length ? '<ul class="pills pills--matches">' + la.steady.map(function (s) {
+            return '<li>' + pillBtn(s.skill, 'pill--core', { kind: 'role', role: role.subfamily }) + '</li>';
+          }).join('') + '</ul>' : null) +
+        bucket('bucket--bridge', 'Deepen', 'The bar rises at ' + esc(nxt), la.deepen.length ?
+          '<ul>' + la.deepen.map(function (d) {
+            return '<li><button type="button" class="skill-link" data-skill="' + esc(d.skill.skill) +
+              '" data-kind="role" data-role="' + esc(role.subfamily) + '">' + esc(d.skill.skill) +
+              '</button><span class="via">' + esc(d.from) + ' \u2192 <b>' + esc(d.to) + '</b></span></li>';
+          }).join('') + '</ul>' : null) +
+        bucket('bucket--grow', 'New at ' + esc(nxt), 'Expectations that first appear at this level', la.fresh.length ?
+          '<ul>' + la.fresh.map(function (d) {
+            return '<li><button type="button" class="skill-link" data-skill="' + esc(d.skill.skill) +
+              '" data-kind="role" data-role="' + esc(role.subfamily) + '">' + esc(d.skill.skill) +
+              '</button><span class="via">expected: <b>' + esc(d.to) + '</b></span></li>';
+          }).join('') + '</ul>' : null) +
+      '</div>';
+    requestAnimationFrame(function () {
+      var fill = box.querySelector('.readiness__fill');
+      if (fill) fill.style.width = la.pct + '%';
+    });
+
+    /* Step-up plan */
+    title.innerHTML = esc(role.subfamily) + ': ' + esc(lvl) + ' <em class="gold-text">&rarr;</em> ' + esc(nxt);
+    var targets = [{ skill: AI_READINESS, tag: 'universal' }]
+      .concat(la.deepen.map(function (d) { return { skill: d.skill, tag: 'deepen', via: d.from + ' \u2192 ' + d.to }; }))
+      .concat(la.fresh.map(function (d) { return { skill: d.skill, tag: 'newlevel', via: d.to }; }));
+    var months = targets.length > 6 ? 9 : 6;
+    var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    LEVEL_CTX = { role: role.subfamily, lvl: lvl, nxt: nxt };
+
+    body.innerHTML =
+      '<div class="plandoc">' +
+      '<div class="plandoc__head">' +
+        '<div class="plandoc__meta">' +
+          metaCell('Staff member', '<span class="fillin"></span>') +
+          metaCell('Role', esc(role.subfamily) + ' <small>(' + esc(role.family) + ')</small>') +
+          metaCell('Step up', esc(lvl) + ' &rarr; ' + esc(nxt)) +
+          metaCell('Step-up readiness', la.pct + '%') +
+          metaCell('Plan horizon', months + ' months') +
+          metaCell('Created', esc(today) + ' &middot; Manager review: <span class="fillin fillin--sm"></span>') +
+        '</div>' +
+        '<p class="plandoc__summary">This is linear progression: the same role, held to a higher bar. ' +
+        la.steady.length + ' of your skills already meet the ' + esc(nxt) + ' expectation. This plan deepens ' +
+        la.deepen.length + ' skill' + plural(la.deepen.length) +
+        (la.fresh.length ? ', builds ' + la.fresh.length + ' new expectation' + plural(la.fresh.length) : '') +
+        ' and completes AI Workforce Readiness. <b>Level moves are earned in place</b>: they run through your manager, your performance record and Vanderbilt\u2019s compensation and promotion processes.</p>' +
+      '</div>' +
+      '<div class="phases">' +
+        phase('01', 'Align with your manager', 'Weeks 1\u20134', [
+          ck('<b>Meet with your manager</b>: share this plan, confirm what ' + esc(nxt) + ' looks like in your team and agree the timeline.'),
+          ck('Open your ' + oa('Talent Profile', ORA.talent) + ' and record your current skills at honest proficiency.'),
+          ck('Create one development goal per row of the table below in ' + oa('Oracle Grow', ORA.grow) + '.'),
+          ck('Ask which ' + esc(nxt) + '-level responsibilities you can begin taking on now.')
+        ]) +
+        phase('02', 'Deepen the skills', 'Months 2\u2013' + (months - 2), [
+          ck('Work the table top to bottom \u2014 each row lists the proficiency jump it needs.'),
+          ck('Complete <b>AI Workforce Readiness</b> first: it compounds everything else.'),
+          ck('Volunteer for stretch work that exercises each deepening skill at the ' + esc(nxt) + ' bar.'),
+          ck('<b>Monthly manager check-in</b>: review the table; update goal status in Oracle.')
+        ]) +
+        phase('03', 'Perform at the next level', 'Months ' + (months - 2) + '\u2013' + months, [
+          ck('Deliver at the ' + esc(nxt) + ' bar visibly: lead a piece of work that proves the deepened skills.'),
+          ck('Update your ' + oa('Talent Profile', ORA.talent) + ' with every completed course and skill.'),
+          ck('<b>Review conversation</b>: walk your manager through the evidence, skill by skill.'),
+          ck('Engage your <b>Engagement Consultant / HCM partner</b> on the formal step: level changes follow Vanderbilt\u2019s promotion and compensation processes.')
+        ]) +
+      '</div>' +
+      '<div class="learnlist">' +
+        '<h3>Skill development table</h3>' +
+        '<p>Ordered by priority: AI Workforce Readiness first, then the skills whose bar rises at ' + esc(nxt) + '.</p>' +
+        '<div class="tablewrap"><table class="learntable">' +
+          '<thead><tr><th class="lt-done">Done</th><th class="lt-pri">#</th><th>Skill</th><th>Why</th>' +
+          '<th>Oracle Learning</th><th class="lt-date">Target date</th></tr></thead>' +
+          '<tbody>' + targets.map(function (t, i) { return learnRowFor(t, i, role.subfamily); }).join('') + '</tbody>' +
+        '</table></div>' +
+      '</div>' +
+      skillResources(targets) +
+      '<div class="plandoc__note">' +
+        '<p class="plandoc__note-label">A note on outcomes</p>' +
+        '<p>This plan is a development roadmap, not a promise of promotion. Level changes depend on demonstrated performance, business need and Vanderbilt\u2019s standard review processes. What the work guarantees: the deepened skills are yours, in this role and every role after it.</p>' +
+      '</div>' +
+      '<div class="plan__actions"><button type="button" class="btn" id="print-plan">Print this plan</button></div>' +
+      '</div>';
+    var printBtn = document.getElementById('print-plan');
+    if (printBtn) printBtn.addEventListener('click', function () { print(); });
+  }
+  var LEVEL_CTX = null;
+
   /* ---------- Learning & Development Plan (printable document) ---------- */
   function renderPlan(from, to) {
     var body = document.getElementById('plan-body');
@@ -623,6 +860,14 @@
           ck('<b>Final manager conversation</b>: confirm readiness; loop in your Engagement Consultant / HCM partner on internal openings.'),
           ck('Apply through Vanderbilt’s internal mobility process with your portfolio of completions.')
         ]) +
+        (fromSel.value === '__skills__' && SF_LEADER ?
+          phase('04', 'Develop as a people leader', 'Alongside every phase', [
+            ck('Your core strengths point to leadership, and you don\u2019t manage people today. Treat people leadership as a skill to build deliberately, not a title to wait for.'),
+            ck('Tell your manager leadership is part of your goal; ask for chances to lead work: a project, a process, an onboarding buddy role.'),
+            ck('Build the three leadership competencies in your ' + oa('Talent Profile', ORA.talent) + ': leading and inspiring teams, University strategy, effective and ethical decisions.'),
+            ck('In ' + oa('Oracle Learning', ORA.grow) + ', search for people-leadership fundamentals (feedback, delegation, difficult conversations) and enroll in one course now.'),
+            ck('When manager openings appear in the ' + oa('Opportunity Marketplace', ORA.market) + ', you\u2019ll have evidence, not just interest.')
+          ]) : '') +
       '</div>' +
 
       /* --- Skill development table --- */
@@ -685,11 +930,14 @@
         return '<li>' + i + '</li>'; }).join('') + '</ul></div>';
   }
 
-  function learnRow(t, i) {
+  function learnRow(t, i) { return learnRowFor(t, i, toSel.value); }
+  function learnRowFor(t, i, roleKey) {
     var s = t.skill;
 
     var why = t.tag === 'universal' ? '<span class="lt-tag lt-tag--univ">Universal</span> assumed development need for every role' :
       t.tag === 'bridge' ? '<span class="lt-tag lt-tag--bridge">Bridge</span> near your <b>' + esc(t.via) + '</b>' :
+      t.tag === 'deepen' ? '<span class="lt-tag lt-tag--bridge">Deepen</span> proficiency rises: <b>' + esc(t.via) + '</b>' :
+      t.tag === 'newlevel' ? '<span class="lt-tag lt-tag--grow">New at this level</span> expected: <b>' + esc(t.via) + '</b>' :
       '<span class="lt-tag lt-tag--grow">New</span>' + (t.ai ? ' AI: likely already forming' : ' new ground for this pathway');
 
     var oc = oracleCoursesFor(s.skill);
@@ -706,7 +954,7 @@
       '<td class="lt-done"><span class="ckbox" aria-hidden="true"></span></td>' +
       '<td class="lt-pri">' + (i + 1) + '</td>' +
       '<td class="lt-skill"><button type="button" class="skill-link" data-skill="' + esc(s.skill) +
-        '" data-kind="' + (s === AI_READINESS ? 'univ' : 'role') + '" data-role="' + esc(toSel.value) + '">' +
+        '" data-kind="' + (s === AI_READINESS ? 'univ' : 'role') + '" data-role="' + esc(roleKey) + '">' +
         esc(s.skill) + '</button>' + profMeter(s.prof) +
         (profRange(s.prof) ? '<span class="lt-prof">Target: ' + profRange(s.prof) + '</span>' : '') + '</td>' +
       '<td class="lt-why">' + why + '</td>' +
@@ -783,6 +1031,7 @@
       type = 'Core competency'; cat = c.applies; def = c.definition;
     } else {
       var role = DATA.roles[roleKey];
+      if (!role && SKILLS_ROLE && roleKey === SKILLS_ROLE.subfamily) role = SKILLS_ROLE;
       if (!role) return;
       var s = role.skills.filter(function (x) { return x.skill === name; })[0];
       if (!s && role.probable) {
@@ -830,6 +1079,205 @@
     }
     modal.showModal();
   }
+
+  /* ---------- Skills-first: pick skills, match roles ---------- */
+  var SF = { picked: [], core: [], typed: [] };
+  var LEAD_CORE = ['Leads and inspires teams', 'Develops and implements University strategy',
+                   'Makes effective and ethical decisions for the University'];
+
+  function libToSkill(row) {
+    return { skill: row[0], category: row[1], subcategory: row[2], type: row[3] || 'Technical',
+             definition: row[4] || '', prof: null };
+  }
+  function normTxt(t) { return String(t).toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+  function initSkillsFirst() {
+    var search = document.getElementById('sf-search');
+    var suggest = document.getElementById('sf-suggest');
+    if (!search) return;
+
+    /* core competency pills */
+    var coreUl = document.getElementById('sf-core');
+    coreUl.innerHTML = DATA.core.map(function (c) {
+      return '<li><button type="button" class="pill pill--core sf-corepill" data-core="' + esc(c.name) + '">' +
+        esc(c.name) + '</button></li>';
+    }).join('');
+    coreUl.addEventListener('click', function (e) {
+      var b = e.target.closest('.sf-corepill');
+      if (!b) return;
+      var name = b.dataset.core;
+      var i = SF.core.indexOf(name);
+      if (i >= 0) SF.core.splice(i, 1);
+      else if (SF.core.length < 3) SF.core.push(name);
+      renderSF();
+    });
+
+    search.addEventListener('input', function () {
+      var q = normTxt(search.value);
+      if (q.length < 2) { suggest.hidden = true; return; }
+      var hits = [];
+      for (var i = 0; i < LIB.length && hits.length < 12; i++) {
+        if (normTxt(LIB[i][0]).indexOf(q) >= 0 && SF.picked.indexOf(LIB[i][0]) < 0) hits.push(LIB[i]);
+      }
+      suggest.innerHTML = hits.length ? hits.map(function (r) {
+        return '<button type="button" data-add="' + esc(r[0]) + '"><b>' + esc(r[0]) + '</b><span>' +
+          esc(r[1]) + (r[2] ? ' \u203a ' + esc(r[2]) : '') + '</span></button>';
+      }).join('') : '<p>No matching skill. Add it in your own words below.</p>';
+      suggest.hidden = false;
+    });
+    document.addEventListener('click', function (e) {
+      var addBtn = e.target.closest('[data-add]');
+      if (addBtn) {
+        if (SF.picked.length < 10) SF.picked.push(addBtn.dataset.add);
+        search.value = ''; suggest.hidden = true;
+        renderSF();
+        return;
+      }
+      if (!e.target.closest('.sf__search')) suggest.hidden = true;
+      var rm = e.target.closest('[data-remove]');
+      if (rm) {
+        var kind = rm.dataset.removeKind, val = rm.dataset.remove;
+        if (kind === 'picked') SF.picked = SF.picked.filter(function (x) { return x !== val; });
+        if (kind === 'typed') SF.typed = SF.typed.filter(function (x) { return x.text !== val; });
+        renderSF();
+      }
+    });
+
+    var typedInput = document.getElementById('sf-typed-input');
+    function addTyped() {
+      var v = typedInput.value.trim();
+      if (!v || SF.typed.length >= 5) return;
+      var qn = normTxt(v), best = null, bestScore = 0;
+      for (var i = 0; i < LIB.length; i++) {
+        var n = normTxt(LIB[i][0]);
+        if (n === qn) { best = LIB[i]; bestScore = 1; break; }
+        if (n.indexOf(qn) >= 0 || qn.indexOf(n) >= 0) {
+          var sc = Math.min(n.length, qn.length) / Math.max(n.length, qn.length);
+          if (sc > bestScore) { bestScore = sc; best = LIB[i]; }
+        }
+      }
+      SF.typed.push({ text: v, match: bestScore >= 0.45 && best ? best[0] : null });
+      typedInput.value = '';
+      renderSF();
+    }
+    document.getElementById('sf-typed-add').addEventListener('click', addTyped);
+    typedInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addTyped(); } });
+
+    document.getElementById('sf-match').addEventListener('click', runMatch);
+    renderSF();
+  }
+
+  function renderSF() {
+    document.getElementById('sf-picked-count').textContent = SF.picked.length + ' of 10';
+    document.getElementById('sf-core-count').textContent = SF.core.length + ' of 3';
+    document.getElementById('sf-typed-count').textContent = SF.typed.length + ' of 5';
+    document.getElementById('sf-picked').innerHTML = SF.picked.map(function (n) {
+      return '<li><span class="pill">' + esc(n) +
+        '<button type="button" class="sf-x" data-remove="' + esc(n) + '" data-remove-kind="picked" aria-label="Remove">&times;</button></span></li>';
+    }).join('');
+    document.querySelectorAll('.sf-corepill').forEach(function (b) {
+      b.classList.toggle('on', SF.core.indexOf(b.dataset.core) >= 0);
+    });
+    document.getElementById('sf-typed').innerHTML = SF.typed.map(function (t) {
+      return '<li><span class="pill pill--ai">' + esc(t.text) +
+        (t.match ? '<em class="sf-matchnote">\u2192 ' + esc(t.match) + '</em>' : '<em class="sf-matchnote">your words</em>') +
+        '<button type="button" class="sf-x" data-remove="' + esc(t.text) + '" data-remove-kind="typed" aria-label="Remove">&times;</button></span></li>';
+    }).join('');
+  }
+
+  function sfSkillNames() {
+    var names = SF.picked.slice();
+    SF.typed.forEach(function (t) { if (t.match && names.indexOf(t.match) < 0) names.push(t.match); });
+    return names;
+  }
+
+  function runMatch() {
+    var out = document.getElementById('sf-results');
+    var names = sfSkillNames();
+    if (!names.length) {
+      out.hidden = false;
+      out.innerHTML = '<p class="bucket__none">Pick at least one skill from the library (or add one of your own that matches) and try again.</p>';
+      return;
+    }
+    var libByName = {};
+    LIB.forEach(function (r) { libByName[r[0]] = r; });
+    var mine = names.map(function (n) { return libByName[n] ? libToSkill(libByName[n]) : { skill: n, category: '', subcategory: '' }; });
+
+    var scored = Object.keys(DATA.roles).map(function (key) {
+      var role = DATA.roles[key];
+      var byName = {}, bySub = {}, byCat = {};
+      role.skills.forEach(function (s) {
+        byName[s.skill] = true;
+        if (s.subcategory) bySub[s.subcategory] = true;
+        if (s.category) byCat[s.category] = true;
+      });
+      var score = 0, exact = [];
+      mine.forEach(function (s) {
+        if (byName[s.skill]) { score += 3; exact.push(s.skill); }
+        else if (s.subcategory && bySub[s.subcategory]) score += 1.5;
+        else if (s.category && byCat[s.category]) score += 0.75;
+      });
+      return { key: key, role: role, score: score, exact: exact };
+    }).filter(function (r) { return r.score > 0; });
+    scored.sort(function (x, y) { return y.score - x.score; });
+    var top = scored.slice(0, 5);
+    var maxScore = 3 * names.length;
+
+    var leadPicked = SF.core.filter(function (c) { return LEAD_CORE.indexOf(c) >= 0; });
+    var leaderSignal = leadPicked.length > 0 && !document.getElementById('sf-manager').checked;
+
+    out.hidden = false;
+    out.innerHTML = '<h3>Your best-fit roles</h3>' +
+      (leadPicked.length ? '<p class="sf__leadnote">You named <b>' + leadPicked.map(esc).join('</b>, <b>') +
+        '</b> among your core strengths' + (leaderSignal ?
+        ' \u2014 and you don\u2019t manage people today. That\u2019s a leadership signal: whichever role you choose, your plan will include developing as a people leader.' :
+        ' \u2014 strengths we would want to see in a manager.') + '</p>' : '') +
+      '<div class="sf__cards">' + (top.length ? top.map(function (r) {
+        var pct = Math.min(97, Math.round(100 * r.score / maxScore));
+        return '<div class="sf__card">' +
+          '<p class="sf__cardfam">' + esc(r.role.family) + '</p>' +
+          '<h4>' + esc(r.key) + '</h4>' +
+          '<div class="sf__cardbar"><i style="width:' + pct + '%"></i></div>' +
+          '<p class="sf__cardpct"><b>' + pct + '%</b> skills fit</p>' +
+          (r.exact.length ? '<p class="sf__cardhits">You bring: ' + r.exact.slice(0, 4).map(esc).join(' \u00b7 ') +
+            (r.exact.length > 4 ? ' +' + (r.exact.length - 4) + ' more' : '') + '</p>' :
+            '<p class="sf__cardhits">Related skills in your set point here.</p>') +
+          '<button type="button" class="btn btn--dark sf-choose" data-rolekey="' + esc(r.key) + '">Build my plan for this role</button>' +
+          '</div>';
+      }).join('') : '<p class="bucket__none">No strong matches yet \u2014 add a few more skills.</p>') + '</div>';
+
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  var SF_LEADER = false;
+
+  document.addEventListener('click', function (e) {
+    var chooseBtn = e.target.closest('.sf-choose');
+    if (!chooseBtn) return;
+    var key = chooseBtn.dataset.rolekey;
+    var libByName = {};
+    LIB.forEach(function (r) { libByName[r[0]] = r; });
+    SKILLS_ROLE = {
+      family: 'Skills-first profile',
+      subfamily: 'My skills',
+      skills: sfSkillNames().map(function (n) {
+        return libByName[n] ? libToSkill(libByName[n]) : { skill: n, category: '', subcategory: '', type: 'Technical', definition: '', prof: null };
+      }),
+      probable: []
+    };
+    var leadPicked = SF.core.filter(function (c) { return LEAD_CORE.indexOf(c) >= 0; });
+    SF_LEADER = leadPicked.length > 0 && !document.getElementById('sf-manager').checked;
+
+    if (!fromSel.querySelector('option[value="__skills__"]')) {
+      var o = document.createElement('option');
+      o.value = '__skills__'; o.textContent = 'My skills (skills-first profile)';
+      fromSel.insertBefore(o, fromSel.children[1]);
+    }
+    fromSel.value = '__skills__';
+    toSel.value = key;
+    syncLevelPicker();
+    update();
+    document.getElementById('explore').scrollIntoView({ behavior: 'smooth' });
+  });
 
   /* ---------- Utils ---------- */
   function esc(s) {

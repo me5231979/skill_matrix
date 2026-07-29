@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=3">
+<link rel="stylesheet" href="assets/css/styles.css?v=5">
 </head>
 <body>
 <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -35,7 +35,7 @@
     <a href="#how">How it works</a>
     <a href="#explore">Explorer</a>
     <a href="#plan">Your plan</a>
-    <a class="btn" href="#explore">Map a path</a>
+    <button type="button" class="btn" id="nav-path">Map a path</button>
   </nav>
 </header>
 
@@ -56,7 +56,7 @@
       <h1 class="h-hero" data-reveal>Know <em class="gold-text">exactly</em> where you can go.</h1>
       <p class="lead" data-reveal>Every Vanderbilt role is built on skills. Now your path forward is too. Pick two roles. See what you already bring, what closes the gap and what to grow next. The Summit is closer than you think.</p>
       <div class="hero__cta" data-reveal>
-        <a class="btn" href="#explore">Map your path</a>
+        <button type="button" class="btn" id="hero-path">Choose your path</button>
         <a class="btn btn--ghost" href="#how">How it works</a>
       </div>
     </div>
@@ -101,6 +101,50 @@
           <h3>Get the plan</h3>
           <p>A printable plan: phase checklists, a skill table with Oracle Learning links and curated resources and a step-by-step Oracle playbook.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SKILLS-FIRST ============ -->
+  <section class="section" id="skillsfirst" hidden>
+    <div class="wrap">
+      <p class="eyebrow">Skills-first</p>
+      <h2 class="h2">Start with <em>what you do well.</em></h2>
+      <p class="lead">Pick the skills you enjoy and are good at &mdash; up to 10 from Vanderbilt&rsquo;s skills library, up to 3 core competencies you really excel at, and up to 5 of your own words. We&rsquo;ll match you to the roles that fit best.</p>
+
+      <div class="sf">
+        <div class="sf__block">
+          <p class="sf__label">1 &middot; Skills from the library <span class="sf__count" id="sf-picked-count">0 of 10</span></p>
+          <div class="sf__search">
+            <input type="text" id="sf-search" placeholder="Type to search 4,410 skills&hellip;" autocomplete="off" aria-label="Search skills">
+            <div class="sf__suggest" id="sf-suggest" hidden></div>
+          </div>
+          <ul class="pills sf__picked" id="sf-picked"></ul>
+        </div>
+
+        <div class="sf__block">
+          <p class="sf__label">2 &middot; Core competencies you really, really do well <span class="sf__count" id="sf-core-count">0 of 3</span></p>
+          <ul class="pills sf__core" id="sf-core"></ul>
+        </div>
+
+        <div class="sf__block">
+          <p class="sf__label">3 &middot; In your own words <span class="sf__count" id="sf-typed-count">0 of 5</span></p>
+          <div class="sf__typedrow">
+            <input type="text" id="sf-typed-input" placeholder="A skill in your own words, then Add&hellip;" aria-label="Add a skill in your own words">
+            <button type="button" class="btn btn--dark" id="sf-typed-add">Add</button>
+          </div>
+          <ul class="pills sf__typed" id="sf-typed"></ul>
+        </div>
+
+        <div class="sf__block sf__managerrow">
+          <label class="own own--lg"><input type="checkbox" id="sf-manager"><span>I currently manage people</span></label>
+        </div>
+
+        <div class="sf__actions">
+          <button type="button" class="btn" id="sf-match">Find my best-fit roles</button>
+        </div>
+
+        <div class="sf__results" id="sf-results" hidden aria-live="polite"></div>
       </div>
     </div>
   </section>
@@ -153,6 +197,10 @@
           <label for="to-select" hidden>Destination role</label>
           <select id="to-select"><option value="">Select a destination&hellip;</option></select>
           <p class="picker__family" id="to-family"></p>
+          <div class="levelpick" id="level-wrap" hidden>
+            <label for="level-select">Your current level in this role</label>
+            <select id="level-select"><option value="">Select your level&hellip;</option></select>
+          </div>
         </div>
       </div>
 
@@ -244,6 +292,27 @@
   </div>
 </dialog>
 
+<!-- ============ PATH CHOOSER ============ -->
+<dialog class="modal pathmodal" id="path-modal" aria-labelledby="path-title">
+  <div class="modal__inner">
+    <button class="modal__close" id="path-close" aria-label="Close">&times;</button>
+    <p class="modal__type">Choose your path</p>
+    <h3 id="path-title">How do you want to start?</h3>
+    <div class="pathcards">
+      <button type="button" class="pathcard" id="path-roles">
+        <span class="pathcard__num">01</span>
+        <b>I know my role &mdash; and where I want to go</b>
+        <span>Pick your current role and a destination: another department, or the next level up in the role you hold today.</span>
+      </button>
+      <button type="button" class="pathcard" id="path-skills">
+        <span class="pathcard__num">02</span>
+        <b>I know what I like &mdash; and the skills I have</b>
+        <span>Pick up to 10 skills, 3 core strengths and 5 of your own words. We&rsquo;ll match you to the roles that fit best.</span>
+      </button>
+    </div>
+  </div>
+</dialog>
+
 <!-- ============ RESUME EXAMPLE MODAL ============ -->
 <dialog class="modal" id="resume-modal" aria-labelledby="resume-title">
   <div class="modal__inner">
@@ -266,6 +335,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=5"></script>
 </body>
 </html>
