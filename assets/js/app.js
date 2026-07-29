@@ -429,6 +429,22 @@
     if (keep) sel.value = keep;
   }
 
+  /* Experience switcher: flip the whole workflow from either section. */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.pathswitch__btn');
+    if (!b) return;
+    if (b.dataset.path === 'roles') {
+      enterRolesPath();
+      document.getElementById('explore').scrollIntoView({ behavior: 'smooth' });
+    } else {
+      enterSkillsPath();
+      document.getElementById('skillsfirst').scrollIntoView({ behavior: 'smooth' });
+    }
+    document.querySelectorAll('.pathswitch__btn').forEach(function (x) {
+      x.classList.toggle('on', x.dataset.path === b.dataset.path);
+    });
+  });
+
   /* Either/or paths: one workflow per visit unless the user starts over. */
   function enterRolesPath() {
     document.getElementById('skillsfirst').hidden = true;
@@ -1221,19 +1237,6 @@
       skillSel.value = '';
       renderSF();
     });
-
-    /* Method toggle: search vs browse */
-    var mSearch = document.getElementById('sf-m-search');
-    var mBrowse = document.getElementById('sf-m-browse');
-    function setMethod(browse) {
-      mSearch.classList.toggle('on', !browse); mSearch.setAttribute('aria-selected', !browse);
-      mBrowse.classList.toggle('on', browse); mBrowse.setAttribute('aria-selected', browse);
-      document.getElementById('sf-search-wrap').hidden = browse;
-      document.getElementById('sf-browse-wrap').hidden = !browse;
-      if (!browse) search.focus();
-    }
-    mSearch.addEventListener('click', function () { setMethod(false); });
-    mBrowse.addEventListener('click', function () { setMethod(true); });
 
     document.getElementById('sf-match').addEventListener('click', runMatch);
     renderSF();

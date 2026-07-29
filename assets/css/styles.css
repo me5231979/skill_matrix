@@ -622,3 +622,13 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .sf__method + .sf__method { border-left: 1px solid var(--sand); }
 .sf__method.on { background: var(--vu-black); color: #fff; }
 .sf__browse[hidden], .sf__search[hidden] { display: none !important; }
+
+/* ---------- Experience switcher ---------- */
+.pathswitch { display: inline-flex; align-items: center; gap: .6rem; margin-bottom: 1.4rem;
+  border: 1px solid var(--sand); border-radius: 999px; padding: .3rem .4rem .3rem 1rem; background: #fff; }
+.on-cream .pathswitch { background: #fff; }
+.pathswitch__label { font-family: var(--font-condensed); font-weight: 700; font-size: .72rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--gray-mid); }
+.pathswitch__btn { border: 0; background: transparent; cursor: pointer; padding: .5rem 1.1rem;
+  border-radius: 999px; font: 600 .85rem var(--font-sans); color: var(--ink-soft); }
+.pathswitch__btn.on { background: var(--vu-black); color: var(--vu-gold-flat); }

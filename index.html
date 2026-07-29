@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=8">
+<link rel="stylesheet" href="assets/css/styles.css?v=9">
 </head>
 <body>
 <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -108,6 +108,11 @@
   <!-- ============ SKILLS-FIRST ============ -->
   <section class="section" id="skillsfirst" hidden>
     <div class="wrap">
+      <div class="pathswitch" role="group" aria-label="Search by role or by skills">
+        <span class="pathswitch__label">Searching by</span>
+        <button type="button" class="pathswitch__btn ps-role" data-path="roles">My role</button>
+        <button type="button" class="pathswitch__btn ps-skills on" data-path="skills">My skills</button>
+      </div>
       <p class="eyebrow">Skills-first</p>
       <h2 class="h2">Start with <em>what you do well.</em></h2>
       <p class="lead">Pick the skills you enjoy and are good at &mdash; up to 10 from Vanderbilt&rsquo;s skills library, up to 3 core competencies you really excel at, and up to 5 of your own words. We&rsquo;ll match you to the roles that fit best.</p>
@@ -115,15 +120,12 @@
       <div class="sf">
         <div class="sf__block">
           <p class="sf__label">1 &middot; Skills from the library <span class="sf__count" id="sf-picked-count">0 of 10</span></p>
-          <div class="sf__methods" role="tablist" aria-label="How to find skills">
-            <button type="button" class="sf__method on" id="sf-m-search" role="tab" aria-selected="true">&#128269; Type to search</button>
-            <button type="button" class="sf__method" id="sf-m-browse" role="tab" aria-selected="false">&#9662; Browse by category</button>
-          </div>
-          <div class="sf__search" id="sf-search-wrap">
+          <div class="sf__search">
             <input type="text" id="sf-search" placeholder="Type to search 4,410 skills&hellip;" autocomplete="off" aria-label="Search skills">
             <div class="sf__suggest" id="sf-suggest" hidden></div>
           </div>
-          <div class="sf__browse" id="sf-browse-wrap" hidden>
+          <div class="sf__browse">
+            <span class="sf__or">or browse</span>
             <select id="sf-cat" aria-label="Browse by skill category"><option value="">All categories&hellip;</option></select>
             <select id="sf-skillsel" aria-label="Pick a skill"><option value="">Pick a skill to add&hellip;</option></select>
           </div>
@@ -160,6 +162,11 @@
   <!-- ============ EXPLORER ============ -->
   <section class="section on-cream" id="explore">
     <div class="wrap">
+      <div class="pathswitch" role="group" aria-label="Search by role or by skills">
+        <span class="pathswitch__label">Searching by</span>
+        <button type="button" class="pathswitch__btn ps-role on" data-path="roles">My role</button>
+        <button type="button" class="pathswitch__btn ps-skills" data-path="skills">My skills</button>
+      </div>
       <p class="eyebrow" data-reveal>The explorer</p>
       <h2 class="h2" data-reveal>Two roles. <em>One matrix.</em></h2>
       <p class="lead" data-reveal>Roles here are Vanderbilt job sub-families. Each covers a group of related job titles, so readiness reads at the career-area level, not a single posting.</p>
@@ -350,6 +357,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js?v=8"></script>
+<script src="assets/js/app.js?v=9"></script>
 </body>
 </html>
