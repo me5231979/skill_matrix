@@ -613,3 +613,12 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   text-transform: uppercase; color: var(--gray-mid); }
 .sf__browse select { flex: 1 1 220px; padding: .7rem .9rem; border: 1px solid var(--sand); border-radius: 4px;
   font: 500 .92rem var(--font-sans); background: #fff; max-width: 100%; min-width: 0; }
+
+/* skills-first method toggle */
+.sf__methods { display: inline-flex; border: 1px solid var(--sand); border-radius: 999px; overflow: hidden;
+  margin-bottom: .8rem; background: #fff; }
+.sf__method { border: 0; background: transparent; cursor: pointer; padding: .55rem 1.2rem;
+  font: 600 .85rem var(--font-sans); color: var(--ink-soft); }
+.sf__method + .sf__method { border-left: 1px solid var(--sand); }
+.sf__method.on { background: var(--vu-black); color: #fff; }
+.sf__browse[hidden], .sf__search[hidden] { display: none !important; }

@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=7">
+<link rel="stylesheet" href="assets/css/styles.css?v=8">
 </head>
 <body>
 <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -88,13 +88,13 @@
       <div class="grid3">
         <div class="feature" data-reveal>
           <p class="feature__num">01</p>
-          <h3>Start where you are</h3>
-          <p>Pick your current role. See the seven core competencies, the skills mapped to your role and AI-inferred skills in dashed grey.</p>
+          <h3>Choose your path</h3>
+          <p>Know your role? Start there. Know your skills? Start with what you do well: pick up to 10 skills, 3 core strengths and 5 in your own words. One path at a time.</p>
         </div>
         <div class="feature" data-reveal>
           <p class="feature__num">02</p>
-          <h3>Choose a destination</h3>
-          <p>Pick any role in any family. Gold carries over. Oak bridges from what you know. Black outline is new ground.</p>
+          <h3>Find your destination</h3>
+          <p>On the role path, pick any role in any family &mdash; or one level up in your own. On the skills path, we match you to your five best-fit roles. Gold carries over. Oak bridges. Black outline is new ground.</p>
         </div>
         <div class="feature" data-reveal>
           <p class="feature__num">03</p>
@@ -115,12 +115,15 @@
       <div class="sf">
         <div class="sf__block">
           <p class="sf__label">1 &middot; Skills from the library <span class="sf__count" id="sf-picked-count">0 of 10</span></p>
-          <div class="sf__search">
+          <div class="sf__methods" role="tablist" aria-label="How to find skills">
+            <button type="button" class="sf__method on" id="sf-m-search" role="tab" aria-selected="true">&#128269; Type to search</button>
+            <button type="button" class="sf__method" id="sf-m-browse" role="tab" aria-selected="false">&#9662; Browse by category</button>
+          </div>
+          <div class="sf__search" id="sf-search-wrap">
             <input type="text" id="sf-search" placeholder="Type to search 4,410 skills&hellip;" autocomplete="off" aria-label="Search skills">
             <div class="sf__suggest" id="sf-suggest" hidden></div>
           </div>
-          <div class="sf__browse">
-            <span class="sf__or">or browse</span>
+          <div class="sf__browse" id="sf-browse-wrap" hidden>
             <select id="sf-cat" aria-label="Browse by skill category"><option value="">All categories&hellip;</option></select>
             <select id="sf-skillsel" aria-label="Pick a skill"><option value="">Pick a skill to add&hellip;</option></select>
           </div>
@@ -347,6 +350,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js?v=7"></script>
+<script src="assets/js/app.js?v=8"></script>
 </body>
 </html>

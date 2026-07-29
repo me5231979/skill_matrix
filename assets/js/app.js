@@ -1222,6 +1222,19 @@
       renderSF();
     });
 
+    /* Method toggle: search vs browse */
+    var mSearch = document.getElementById('sf-m-search');
+    var mBrowse = document.getElementById('sf-m-browse');
+    function setMethod(browse) {
+      mSearch.classList.toggle('on', !browse); mSearch.setAttribute('aria-selected', !browse);
+      mBrowse.classList.toggle('on', browse); mBrowse.setAttribute('aria-selected', browse);
+      document.getElementById('sf-search-wrap').hidden = browse;
+      document.getElementById('sf-browse-wrap').hidden = !browse;
+      if (!browse) search.focus();
+    }
+    mSearch.addEventListener('click', function () { setMethod(false); });
+    mBrowse.addEventListener('click', function () { setMethod(true); });
+
     document.getElementById('sf-match').addEventListener('click', runMatch);
     renderSF();
   }
