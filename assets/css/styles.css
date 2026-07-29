@@ -594,3 +594,15 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .sf__cardbar i { display: block; height: 100%; background: var(--vu-gold-grad); border-radius: 3px; }
 .sf__cardpct { font-size: .82rem; color: var(--ink-soft); margin: .45rem 0 .55rem; }
 .sf__cardhits { font-size: .8rem; color: var(--gray-mid); margin-bottom: 1rem; min-height: 2.4em; }
+
+/* ---------- Either/or path mode ---------- */
+.modebanner { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;
+  background: var(--vu-black); color: #fff; border-radius: var(--radius); padding: 1rem 1.3rem; margin-top: 2rem; }
+.modebanner p { font-size: .92rem; color: rgba(255,255,255,.85); }
+.modebanner b { color: var(--vu-gold-flat); }
+.modebanner__actions { display: flex; gap: .6rem; }
+.modebanner .btn { padding: .55rem 1.1rem; font-size: .85rem; }
+.btn--ghost2 { background: transparent; color: #fff; border-color: rgba(255,255,255,.4); }
+.btn--ghost2:hover { border-color: var(--vu-gold-flat); color: var(--vu-gold-flat); background: transparent; box-shadow: none; }
+.skillsmode .key { display: none; }
+.pickers[hidden], .section[hidden] { display: none !important; }

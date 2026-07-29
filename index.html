@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=5">
+<link rel="stylesheet" href="assets/css/styles.css?v=6">
 </head>
 <body>
 <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -182,7 +182,14 @@
         </details>
       </div>
 
-      <div class="pickers">
+      <div class="modebanner" id="mode-banner" hidden>
+        <p id="mode-banner-text"></p>
+        <div class="modebanner__actions">
+          <button type="button" class="btn btn--dark" id="mode-change">Change role</button>
+          <button type="button" class="btn btn--ghost2" id="mode-restart">Start over</button>
+        </div>
+      </div>
+      <div class="pickers" id="pickers">
         <div class="picker" data-reveal>
           <p class="picker__label">Your current role</p>
           <label class="visually-hidden" for="from-select" hidden>Current role</label>
@@ -335,6 +342,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js?v=5"></script>
+<script src="assets/js/app.js?v=6"></script>
 </body>
 </html>

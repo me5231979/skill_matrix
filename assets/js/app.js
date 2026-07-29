@@ -59,14 +59,13 @@
     pathModal.addEventListener('click', function (e) { if (e.target === pathModal) pathModal.close(); });
     document.getElementById('path-roles').addEventListener('click', function () {
       pathModal.close();
-      document.getElementById('skillsfirst').hidden = true;
+      enterRolesPath();
       document.getElementById('explore').scrollIntoView({ behavior: 'smooth' });
     });
     document.getElementById('path-skills').addEventListener('click', function () {
       pathModal.close();
-      var sf = document.getElementById('skillsfirst');
-      sf.hidden = false;
-      sf.scrollIntoView({ behavior: 'smooth' });
+      enterSkillsPath();
+      document.getElementById('skillsfirst').scrollIntoView({ behavior: 'smooth' });
     });
     ['hero-path', 'nav-path'].forEach(function (id) {
       var b = document.getElementById(id);
@@ -428,6 +427,23 @@
       sel.appendChild(o);
     });
     if (keep) sel.value = keep;
+  }
+
+  /* Either/or paths: one workflow per visit unless the user starts over. */
+  function enterRolesPath() {
+    document.getElementById('skillsfirst').hidden = true;
+    document.getElementById('explore').hidden = false;
+    document.getElementById('plan').hidden = false;
+    document.getElementById('pickers').hidden = false;
+    document.getElementById('mode-banner').hidden = true;
+    document.getElementById('explore').classList.remove('skillsmode');
+    if (fromSel.value === '__skills__') { fromSel.value = ''; toSel.value = ''; if (DATA) update(); }
+  }
+  function enterSkillsPath() {
+    document.getElementById('skillsfirst').hidden = false;
+    document.getElementById('explore').hidden = true;
+    document.getElementById('plan').hidden = true;
+    if (fromSel.value || toSel.value) { fromSel.value = ''; toSel.value = ''; if (DATA) update(); }
   }
 
   /* Skills-first synthetic origin role, built from the user's selections. */
@@ -1274,9 +1290,28 @@
     }
     fromSel.value = '__skills__';
     toSel.value = key;
+    var explore = document.getElementById('explore');
+    explore.hidden = false;
+    document.getElementById('plan').hidden = false;
+    explore.classList.add('skillsmode');
+    document.getElementById('pickers').hidden = true;
+    var banner = document.getElementById('mode-banner');
+    banner.hidden = false;
+    document.getElementById('mode-banner-text').innerHTML =
+      'Skills-first path: <b>My skills</b> \u2192 <b>' + esc(key) + '</b>. One path at a time \u2014 change your matched role above, or start over to switch paths.';
     syncLevelPicker();
     update();
-    document.getElementById('explore').scrollIntoView({ behavior: 'smooth' });
+    explore.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#mode-change')) {
+      document.getElementById('sf-results').scrollIntoView({ behavior: 'smooth' });
+    }
+    if (e.target.closest('#mode-restart')) {
+      enterRolesPath();
+      openPathChooser();
+    }
   });
 
   /* ---------- Utils ---------- */
