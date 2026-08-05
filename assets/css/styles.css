@@ -662,4 +662,34 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--vu-oak);
   border: 1px dashed var(--vu-oak); border-radius: 3px; padding: .12rem .4rem; }
 .tt__cardnote { font-size: .84rem; color: var(--ink-soft); margin: .4rem 0 .9rem; }
+
+/* Assess-and-plan: develop a single member */
+.tt-devbtn { margin-left: .55rem; font: 700 .62rem var(--font-condensed); letter-spacing: .1em;
+  text-transform: uppercase; color: var(--vu-black); background: var(--vu-gold-flat);
+  border: 0; border-radius: 3px; padding: .22rem .5rem; cursor: pointer; }
+.tt-devbtn:hover { background: var(--vu-oak); color: #fff; }
+.tt__hint { margin-top: .9rem; font-size: .85rem; color: var(--ink-soft); }
+.tt__hint[hidden] { display: none !important; }
+.tt-devback { background: none; border: 0; padding: 0; margin-bottom: 1.1rem; cursor: pointer;
+  font: 600 .85rem var(--font-sans); color: var(--vu-oak); }
+.tt-devback:hover { text-decoration: underline; }
+.tt__dirrow { margin: .4rem 0 1.4rem; }
+.ttdir { flex: 1 1 200px; text-align: left; background: #fff; border: 1px solid var(--sand);
+  border-radius: 6px; padding: .8rem .95rem; cursor: pointer; }
+.ttdir b { display: block; font: 600 .92rem var(--font-sans); }
+.ttdir span { display: block; margin-top: .2rem; font-size: .78rem; color: var(--ink-soft); }
+.ttdir:hover { border-color: var(--vu-gold-flat); }
+.ttdir.on { border-color: var(--vu-black); background: var(--vu-black); }
+.ttdir.on b { color: var(--vu-gold-flat); }
+.ttdir.on span { color: #cfc9bd; }
+.tt__targetrow { align-items: center; margin-bottom: 1.2rem; }
+.tt__targetlbl { font: 600 .85rem var(--font-sans); color: var(--ink-soft); flex: none; }
+.tt__ratetable select { padding: .4rem .5rem; border: 1px solid var(--sand); border-radius: 4px;
+  font: 500 .82rem var(--font-sans); background: #fff; }
+.tt-gapchip { display: inline-block; min-width: 2.2rem; font: 700 .78rem var(--font-sans);
+  color: #fff; background: var(--vu-oak); border-radius: 999px; padding: .18rem .5rem; }
+.tt-okchip { font: 600 .74rem var(--font-sans); color: var(--ink-soft); }
+.tt__devplan { margin-top: 2.6rem; border-top: 3px solid var(--vu-gold-flat); padding-top: 1.6rem; }
+.tt__strengthh { font-family: var(--font-serif); font-weight: 400; font-size: 1.15rem; margin-top: 1.8rem; }
+.tt__strengths .pill { border-color: var(--vu-gold-flat); }
 #teamtool[hidden] { display: none !important; }
