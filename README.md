@@ -11,6 +11,11 @@ current role and a destination role, and the matrix shows:
 - **Skills to grow** (black outline) — new ground, covered by the learning plan
 - **Probable skills** (dashed grey) — AI-inferred skills likely held in each role but not
   part of the official framework
+- **Three ways in** — role-to-role (including one level up in the same role), skills-first
+  (pick up to 10 library skills, 3 core strengths, 5 in your own words; get five best-fit
+  roles), and a manager view: an anonymous team roster (role + level, no names) with four
+  lenses — skill coverage with single-holder risk, level-up readiness, coverage of a
+  target role, and a custom skill push — generating printable plans per member
 - **A printable Learning & Development Plan** with recommended learning per growth skill:
   Oracle Learning deep links first (matched from the active course catalog), then named
   podcasts and industry certifications curated per skill category, YouTube, and white

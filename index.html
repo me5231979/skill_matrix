@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=10">
+<link rel="stylesheet" href="assets/css/styles.css?v=11">
 </head>
 <body>
 <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -105,6 +105,44 @@
     </div>
   </section>
 
+  <!-- ============ TEAM TOOL ============ -->
+  <section class="section on-cream" id="teamtool" hidden>
+    <div class="wrap">
+      <div class="pathswitch" role="group" aria-label="Search by role, skills or team">
+        <span class="pathswitch__label">Searching by</span>
+        <button type="button" class="pathswitch__btn ps-role" data-path="roles">My role</button>
+        <button type="button" class="pathswitch__btn ps-skills" data-path="skills">My skills</button>
+        <button type="button" class="pathswitch__btn ps-team on" data-path="team">My team</button>
+      </div>
+      <p class="eyebrow">The manager view</p>
+      <h2 class="h2">See your team&rsquo;s skills. <em>Fill the gaps.</em></h2>
+      <p class="lead">Map your team by role and level &mdash; no names, nothing that identifies a person. See where coverage runs thin, where one person carries a skill alone, and what it takes to cover a critical role. Then hand each member a real development plan.</p>
+      <p class="tt__notice"><b>Development, not evaluation.</b> This roster lives only in your browser &mdash; nothing is uploaded or shared. Use it to prepare growth conversations, not to assess performance.</p>
+
+      <div class="tt__build">
+        <p class="sf__label">Build your roster <span class="sf__count" id="tt-count">0 members</span></p>
+        <div class="tt__addrow">
+          <select id="tt-role" aria-label="Member role"><option value="">Role&hellip;</option></select>
+          <select id="tt-level" aria-label="Member level"><option value="">Level&hellip;</option></select>
+          <button type="button" class="btn btn--dark" id="tt-add">Add member</button>
+        </div>
+        <ul class="tt__roster" id="tt-roster"></ul>
+      </div>
+
+      <div class="tt__lens" id="tt-lens" hidden>
+        <p class="sf__label">Look at the team through</p>
+        <div class="lensrow">
+          <button type="button" class="ttlens on" data-ttlens="coverage">Skill coverage</button>
+          <button type="button" class="ttlens" data-ttlens="stepup">Level-up readiness</button>
+          <button type="button" class="ttlens" data-ttlens="target">Cover a role</button>
+          <button type="button" class="ttlens" data-ttlens="custom">A skill push</button>
+        </div>
+      </div>
+
+      <div class="tt__view" id="tt-view" aria-live="polite"></div>
+    </div>
+  </section>
+
   <!-- ============ SKILLS-FIRST ============ -->
   <section class="section" id="skillsfirst" hidden>
     <div class="wrap">
@@ -112,6 +150,7 @@
         <span class="pathswitch__label">Searching by</span>
         <button type="button" class="pathswitch__btn ps-role" data-path="roles">My role</button>
         <button type="button" class="pathswitch__btn ps-skills on" data-path="skills">My skills</button>
+        <button type="button" class="pathswitch__btn ps-team" data-path="team">My team</button>
       </div>
       <p class="eyebrow">Skills-first</p>
       <h2 class="h2">Start with <em>what you do well.</em></h2>
@@ -166,6 +205,7 @@
         <span class="pathswitch__label">Searching by</span>
         <button type="button" class="pathswitch__btn ps-role on" data-path="roles">My role</button>
         <button type="button" class="pathswitch__btn ps-skills" data-path="skills">My skills</button>
+        <button type="button" class="pathswitch__btn ps-team" data-path="team">My team</button>
       </div>
       <p class="eyebrow" data-reveal>The explorer</p>
       <h2 class="h2" data-reveal>Two roles. <em>One matrix.</em></h2>
@@ -331,6 +371,11 @@
         <b>I know what I like &mdash; and the skills I have</b>
         <span>Pick up to 10 skills, 3 core strengths and 5 of your own words. We&rsquo;ll match you to the roles that fit best.</span>
       </button>
+      <button type="button" class="pathcard" id="path-team">
+        <span class="pathcard__num">03</span>
+        <b>I lead a team &mdash; grow their skills</b>
+        <span>Map your team by role and level (no names), see where coverage is thin, and build a development plan for every member.</span>
+      </button>
     </div>
   </div>
 </dialog>
@@ -357,6 +402,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js?v=10"></script>
+<script src="assets/js/app.js?v=11"></script>
 </body>
 </html>

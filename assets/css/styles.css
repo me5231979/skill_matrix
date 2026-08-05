@@ -632,3 +632,34 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .pathswitch__btn { border: 0; background: transparent; cursor: pointer; padding: .5rem 1.1rem;
   border-radius: 999px; font: 600 .85rem var(--font-sans); color: var(--ink-soft); }
 .pathswitch__btn.on { background: var(--vu-black); color: var(--vu-gold-flat); }
+
+/* ---------- Manager team tool ---------- */
+.tt__notice { margin-top: 1.2rem; background: #fff; border-left: 3px solid var(--vu-gold-flat);
+  padding: .85rem 1.1rem; font-size: .9rem; color: var(--ink-soft); max-width: 70ch; }
+.tt__build { margin-top: 2.2rem; }
+.tt__addrow { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .4rem; }
+.tt__addrow select { flex: 1 1 240px; padding: .75rem .9rem; border: 1px solid var(--sand); border-radius: 4px;
+  font: 500 .92rem var(--font-sans); background: #fff; min-width: 0; }
+.tt__addrow .btn { flex: none; }
+.tt__roster { list-style: none; padding: 0; margin: .9rem 0 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+.tt__lens { margin-top: 2rem; }
+.lensrow { display: flex; flex-wrap: wrap; gap: .55rem; }
+.ttlens { font: 600 .85rem var(--font-sans); padding: .5rem 1.05rem; border-radius: 999px; cursor: pointer;
+  background: #fff; color: var(--ink-soft); border: 1px solid var(--sand); }
+.ttlens:hover { border-color: var(--vu-gold-flat); color: var(--vu-oak); }
+.ttlens.on { background: var(--vu-black); border-color: var(--vu-black); color: var(--vu-gold-flat); }
+.tt__view { margin-top: 2rem; }
+.tt__h { font-family: var(--font-serif); font-weight: 400; font-size: 1.6rem; }
+.tt__sub { color: var(--ink-soft); font-size: .93rem; margin: .5rem 0 1.2rem; max-width: 80ch; }
+.tt-flagtext { color: var(--vu-oak); }
+.tt__tablewrap { background: #fff; }
+.tt__table td, .tt__table th { text-align: center; }
+.tt__table td.tt-skill, .tt__table th:first-child { text-align: left; }
+.tt__table .tt-yes { color: var(--vu-oak); font-weight: 600; }
+.tt__table .tt-no { background: #faf8f4; }
+.tt__table tr.tt-single td.tt-skill { border-left: 3px solid var(--vu-gold-flat); }
+.tt-flag { display: inline-block; margin-left: .5rem; font-family: var(--font-condensed); font-weight: 700;
+  font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--vu-oak);
+  border: 1px dashed var(--vu-oak); border-radius: 3px; padding: .12rem .4rem; }
+.tt__cardnote { font-size: .84rem; color: var(--ink-soft); margin: .4rem 0 .9rem; }
+#teamtool[hidden] { display: none !important; }
