@@ -1,7 +1,7 @@
-# Skill Matrix — Vanderbilt Career Pathways Explorer
+# Talent Compass — Vanderbilt Career Pathways Explorer
 
 A single-page app built on Vanderbilt's **Skills-Based Job Architecture** (SBJA). Pick your
-current role and a destination role, and the matrix shows:
+current role and a destination role, and the compass shows:
 
 - **Core competencies** (gold) — Vanderbilt's seven competencies: four shared by all staff,
   three applying at management and executive levels

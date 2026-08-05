@@ -1,5 +1,5 @@
 /* =====================================================================
-   VANDERBILT SKILL MATRIX — CAREER PATHWAYS EXPLORER
+   VANDERBILT TALENT COMPASS — CAREER PATHWAYS EXPLORER
    Data: assets/data/sbja.json (extracted from the SBJA workbook).
    ===================================================================== */
 (function () {
