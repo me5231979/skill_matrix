@@ -342,6 +342,7 @@
     init();
     initSkillsFirst();
     initTeam();
+    initDevelop();
   }).catch(function () {
     document.getElementById('from-panel').innerHTML =
       '<p class="rolepanel__empty">The skills data could not be loaded. Refresh to try again.</p>';
@@ -467,9 +468,9 @@
       ['Get the plan', 'Choose a match and get the same printable plan: phase checklists, Oracle Learning links, curated resources and the Oracle playbook.']
     ],
     team: [
-      ['Build your roster', 'Add each team member by role and level \u2014 no names, nothing identifying. The roster stays in your browser only.'],
-      ['See the gaps', 'Four lenses: overall coverage, single-holder risk, readiness to cover a critical role, or a skill push you define.'],
-      ['Develop each member', 'Generate a printable plan for any member \u2014 a step up in their current role, or a pathway to a role in or beyond your unit.']
+      ['Pick the person\u2019s role', 'Select the sub-family and role level \u2014 no names, ever. Every skill mapped to that role populates automatically.'],
+      ['Rate and choose the direction', 'Skill by skill, set where they are and where they need to be \u2014 for the current role, the next level in the sub-family, or a transfer. Add your own development areas beyond the framework.'],
+      ['Get the plan \u2014 then the team', 'Gaps become a printable development plan with Oracle Learning links. Build a roster to see whole-team coverage, risk and readiness.']
     ]
   };
   function applyHowCopy(path) {
@@ -1505,8 +1506,8 @@
       view.innerHTML = '<p class="rolepanel__empty">Add your team above \u2014 role and level per member \u2014 and the coverage view builds itself here.</p>';
       return;
     }
-    if (TEAM.lens === 'develop') view.innerHTML = ttDevelop();
-    else if (TEAM.lens === 'coverage') view.innerHTML = ttCoverage();
+    if (TEAM.lens === 'develop') TEAM.lens = 'coverage';
+    if (TEAM.lens === 'coverage') view.innerHTML = ttCoverage();
     else if (TEAM.lens === 'stepup') view.innerHTML = ttStepup();
     else if (TEAM.lens === 'target') view.innerHTML = ttTarget();
     else view.innerHTML = ttCustom();
@@ -1515,42 +1516,40 @@
     var rm = e.target.closest('[data-ttremove]');
     if (rm) {
       TEAM.members.splice(+rm.dataset.ttremove, 1);
-      TEAM.dev = null;
-      if (TEAM.lens === 'develop') TEAM.lens = 'coverage';
       saveTeam(); renderTeam();
       return;
     }
     var devBtn = e.target.closest('[data-ttdev]');
     if (devBtn) {
-      var mi = +devBtn.dataset.ttdev, mm = TEAM.members[mi];
+      var mm = TEAM.members[+devBtn.dataset.ttdev];
       if (!mm) return;
-      TEAM.dev = { i: mi, dir: 'current', role: mm.role, level: mm.level, ratings: {}, built: false };
-      TEAM.lens = 'develop';
-      saveTeam(); renderTeam();
-      document.getElementById('tt-view').scrollIntoView({ behavior: 'smooth' });
+      DEV = { role: mm.role, level: mm.level, dir: 'current', tgtRole: mm.role, tgtLevel: mm.level, ratings: {}, extras: [], built: false };
+      saveDev(); syncDevPickers(); renderDevelop();
+      document.getElementById('tt-develop').scrollIntoView({ behavior: 'smooth' });
       return;
     }
     var dirBtn = e.target.closest('[data-ttdir]');
-    if (dirBtn && TEAM.dev) {
-      var dm = TEAM.members[TEAM.dev.i];
-      TEAM.dev.dir = dirBtn.dataset.ttdir;
-      TEAM.dev.ratings = {}; TEAM.dev.built = false;
-      if (TEAM.dev.dir === 'current') { TEAM.dev.role = dm.role; TEAM.dev.level = dm.level; }
-      else if (TEAM.dev.dir === 'up') {
-        TEAM.dev.role = dm.role;
-        TEAM.dev.level = nextLevelUp(DATA.roles[dm.role], dm.level) || devLevelsAbove(dm)[0] || '';
-      } else { TEAM.dev.role = ''; TEAM.dev.level = ''; }
-      saveTeam(); renderTeam();
+    if (dirBtn) {
+      DEV.dir = dirBtn.dataset.ttdir;
+      DEV.ratings = {}; DEV.built = false;
+      if (DEV.dir === 'current') { DEV.tgtRole = DEV.role; DEV.tgtLevel = DEV.level; }
+      else if (DEV.dir === 'up') {
+        DEV.tgtRole = DEV.role;
+        DEV.tgtLevel = nextLevelUp(DATA.roles[DEV.role], DEV.level) || '';
+      } else { DEV.tgtRole = ''; DEV.tgtLevel = ''; }
+      saveDev(); renderDevelop();
       return;
     }
-    if (e.target.closest('#tt-dev-back')) {
-      TEAM.lens = 'coverage';
-      saveTeam(); renderTeam();
+    if (e.target.closest('[data-ttdextraadd]')) { addDevExtra(); return; }
+    var xrm = e.target.closest('[data-ttdextrarm]');
+    if (xrm) {
+      DEV.extras = DEV.extras.filter(function (x) { return x !== xrm.dataset.ttdextrarm; });
+      saveDev(); renderDevelop();
       return;
     }
-    if (e.target.closest('#tt-dev-build')) {
-      if (TEAM.dev) { TEAM.dev.built = true; saveTeam(); renderTeam(); }
-      var pl = document.getElementById('tt-devplan');
+    if (e.target.closest('#ttd-build')) {
+      DEV.built = true; saveDev(); renderDevelop();
+      var pl = document.getElementById('ttd-plan');
       if (pl) pl.scrollIntoView({ behavior: 'smooth' });
       return;
     }
@@ -1593,26 +1592,92 @@
     if (e.target.closest('#tt-print')) { print(); }
   });
 
-  /* Assess-and-plan: rating selects and target pickers re-render the develop view. */
+  /* ---------- Develop one person: sub-family + level → the ask → rate → plan ---------- */
+  var DEV = { role: '', level: '', dir: 'current', tgtRole: '', tgtLevel: '', ratings: {}, extras: [], built: false };
+  try {
+    var savedDev = JSON.parse(localStorage.getItem('sm_dev_v1') || 'null');
+    if (savedDev && savedDev.dir) DEV = savedDev;
+  } catch (e) {}
+  function saveDev() {
+    try { localStorage.setItem('sm_dev_v1', JSON.stringify(DEV)); } catch (e) {}
+  }
+
+  function initDevelop() {
+    var roleSel = document.getElementById('ttd-role');
+    if (!roleSel) return;
+    var byFamily = {};
+    Object.keys(DATA.roles).forEach(function (key) {
+      (byFamily[DATA.roles[key].family] = byFamily[DATA.roles[key].family] || []).push(key);
+    });
+    Object.keys(byFamily).sort().forEach(function (fam) {
+      var og = document.createElement('optgroup');
+      og.label = fam;
+      byFamily[fam].sort().forEach(function (key) {
+        var o = document.createElement('option');
+        o.value = key; o.textContent = key;
+        og.appendChild(o);
+      });
+      roleSel.appendChild(og);
+    });
+    roleSel.addEventListener('change', function () {
+      DEV = { role: roleSel.value, level: '', dir: 'current', tgtRole: roleSel.value, tgtLevel: '', ratings: {}, extras: [], built: false };
+      saveDev(); syncDevPickers(); renderDevelop();
+    });
+    document.getElementById('ttd-level').addEventListener('change', function () {
+      DEV.level = document.getElementById('ttd-level').value;
+      DEV.dir = 'current'; DEV.tgtRole = DEV.role; DEV.tgtLevel = DEV.level;
+      DEV.ratings = {}; DEV.built = false;
+      saveDev(); renderDevelop();
+    });
+    syncDevPickers();
+    renderDevelop();
+  }
+
+  function syncDevPickers() {
+    var roleSel = document.getElementById('ttd-role'), lvlSel = document.getElementById('ttd-level');
+    if (!roleSel) return;
+    roleSel.value = DEV.role;
+    lvlSel.innerHTML = '<option value="">Role level…</option>';
+    var role = DATA.roles[DEV.role];
+    if (role) roleLevels(role).forEach(function (l) {
+      var st = streamOf(l);
+      var o = document.createElement('option');
+      o.value = l; o.textContent = l + ' · ' + (st ? st.label : '');
+      lvlSel.appendChild(o);
+    });
+    lvlSel.value = DEV.level;
+  }
+
+  /* Target pickers, rating selects and the extras input re-render the develop view. */
   document.addEventListener('change', function (e) {
-    if (!TEAM.dev) return;
-    if (e.target.id === 'tt-dev-role') {
-      TEAM.dev.role = e.target.value;
-      var r = DATA.roles[TEAM.dev.role];
-      var lvls = r ? roleLevels(r) : [];
-      var curLvl = TEAM.members[TEAM.dev.i].level;
-      TEAM.dev.level = lvls.indexOf(curLvl) >= 0 ? curLvl : (lvls[0] || '');
-      TEAM.dev.ratings = {}; TEAM.dev.built = false;
-      saveTeam(); renderTeam();
-    } else if (e.target.id === 'tt-dev-level') {
-      TEAM.dev.level = e.target.value;
-      TEAM.dev.ratings = {}; TEAM.dev.built = false;
-      saveTeam(); renderTeam();
+    if (e.target.id === 'ttd-tgt-level') {
+      DEV.tgtLevel = e.target.value;
+      DEV.ratings = {}; DEV.built = false;
+      saveDev(); renderDevelop();
+    } else if (e.target.id === 'ttd-tgt-role') {
+      DEV.tgtRole = e.target.value;
+      var tr = DATA.roles[DEV.tgtRole];
+      var tl = tr ? roleLevels(tr) : [];
+      DEV.tgtLevel = tl.indexOf(DEV.level) >= 0 ? DEV.level : '';
+      DEV.ratings = {}; DEV.built = false;
+      saveDev(); renderDevelop();
     } else if (e.target.hasAttribute && e.target.hasAttribute('data-ttrate')) {
       var sk = e.target.dataset.ttrate, f = e.target.dataset.field;
-      (TEAM.dev.ratings[sk] = TEAM.dev.ratings[sk] || {})[f] = +e.target.value;
-      saveTeam(); renderTeam();
+      (DEV.ratings[sk] = DEV.ratings[sk] || {})[f] = +e.target.value;
+      saveDev(); renderDevelop();
     }
+  });
+
+  function addDevExtra() {
+    var inp = document.getElementById('ttd-extra');
+    if (!inp) return;
+    var v = (inp.value || '').trim();
+    if (!v || DEV.extras.indexOf(v) >= 0 || DEV.extras.length >= 10) return;
+    DEV.extras.push(v);
+    saveDev(); renderDevelop();
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.target.id === 'ttd-extra' && e.key === 'Enter') { e.preventDefault(); addDevExtra(); }
   });
 
   /* Expected proficiency as a 1-5 index at a level, falling back to the nearest level with data. */
@@ -1627,28 +1692,27 @@
     }
     return 0;
   }
-  function devLevelsAbove(m) {
-    var role = DATA.roles[m.role];
+  function devLevelsAbove(roleKey, level) {
+    var role = DATA.roles[roleKey];
     if (!role) return [];
-    var ci = LEVEL_ORDER.indexOf(m.level);
+    var ci = LEVEL_ORDER.indexOf(level);
     return roleLevels(role).filter(function (l) { return LEVEL_ORDER.indexOf(l) > ci; });
   }
 
   /* Target-role skills with pre-filled ratings: "needs to be" from the framework's expected
-     proficiency at the target role and level; "they're at" from the member's current role at
-     their current level — Awareness when the current role doesn't carry the skill at all.
-     Manager overrides live in TEAM.dev.ratings. */
+     proficiency at the target sub-family and level; "they're at" from the person's current
+     sub-family at their current level — Awareness when the current role doesn't carry the
+     skill at all. Manager overrides live in DEV.ratings. */
   function devSkillList() {
-    var d = TEAM.dev, m = TEAM.members[d.i];
-    var tgt = DATA.roles[d.role], cur = DATA.roles[m.role];
-    if (!tgt || !d.level) return [];
+    var tgt = DATA.roles[DEV.tgtRole], cur = DATA.roles[DEV.role];
+    if (!tgt || !DEV.tgtLevel) return [];
     var curBy = {};
     if (cur) cur.skills.forEach(function (s) { curBy[s.skill] = s; });
     return tgt.skills.map(function (s) {
       var c = curBy[s.skill];
-      var atPre = c ? (profIdxAt(c, m.level) || 1) : 1;
-      var needPre = profIdxAt(s, d.level) || 3;
-      var r = d.ratings[s.skill] || {};
+      var atPre = c ? (profIdxAt(c, DEV.level) || 1) : 1;
+      var needPre = profIdxAt(s, DEV.tgtLevel) || 3;
+      var r = DEV.ratings[s.skill] || {};
       return { skill: s, at: r.at || atPre, need: r.need || needPre, mapped: !!c };
     });
   }
@@ -1661,70 +1725,76 @@
       }).join('') + '</select>';
   }
 
-  function ttDevelop() {
-    var d = TEAM.dev;
-    if (!d || !TEAM.members[d.i]) { TEAM.lens = 'coverage'; return ttCoverage(); }
-    var m = TEAM.members[d.i];
-    var html = '<button type="button" class="tt-devback" id="tt-dev-back">&larr; Back to the team lenses</button>' +
-      '<p class="sf__cardfam">' + esc(memberLabel(m, d.i)) + '</p>' +
-      '<h3 class="tt__h">Develop this member</h3>' +
-      '<p class="tt__sub">Pick the direction, then rate each skill: where this person <b>is today</b> and where they <b>need to be</b>. ' +
-      'Both start pre-filled from the framework’s expectations — adjust them to your read. The plan builds from the gaps.</p>';
+  function levelOpts(levels, selected, placeholder) {
+    return '<option value="">' + placeholder + '</option>' + levels.map(function (l) {
+      var st = streamOf(l);
+      return '<option value="' + l + '"' + (selected === l ? ' selected' : '') + '>' + l + ' · ' + (st ? st.label : '') + '</option>';
+    }).join('');
+  }
 
+  function renderDevelop() {
+    var view = document.getElementById('ttd-view');
+    if (!view || !DATA) return;
+    if (!DATA.roles[DEV.role] || !DEV.level) {
+      view.innerHTML = '<p class="rolepanel__empty">Pick the sub-family and role level above — every skill mapped to that role loads here, ready to rate.</p>';
+      return;
+    }
+    var html = '<p class="tt__ask">Is this person growing in their <b>current role</b>, or toward something else?</p>';
     var dirs = [
-      ['current', 'Grow in their current role', esc(m.role) + ' at ' + esc(m.level)],
-      ['up', 'Step up in this track', 'A higher level in ' + esc(m.role)],
-      ['other', 'A different role', 'Upward in the sub-family or somewhere new entirely']
+      ['current', 'Develop in current role', esc(DEV.role) + ' at ' + esc(DEV.level)],
+      ['up', 'Grow to the next level', 'A higher level within ' + esc(DEV.role)],
+      ['other', 'Grow to transfer', 'A different sub-family entirely']
     ];
     html += '<div class="lensrow tt__dirrow">' + dirs.map(function (x) {
-      return '<button type="button" class="ttdir' + (d.dir === x[0] ? ' on' : '') + '" data-ttdir="' + x[0] + '">' +
+      return '<button type="button" class="ttdir' + (DEV.dir === x[0] ? ' on' : '') + '" data-ttdir="' + x[0] + '">' +
         '<b>' + x[1] + '</b><span>' + x[2] + '</span></button>';
     }).join('') + '</div>';
 
-    if (d.dir === 'up') {
-      var above = devLevelsAbove(m);
+    if (DEV.dir === 'up') {
+      var above = devLevelsAbove(DEV.role, DEV.level);
       if (!above.length) {
-        return html + '<p class="tt__sub"><b class="tt-flagtext">' + esc(m.level) + ' is the top mapped level for ' + esc(m.role) +
-          '.</b> Choose “A different role” to keep this person growing.</p>';
+        view.innerHTML = html + '<p class="tt__sub"><b class="tt-flagtext">' + esc(DEV.level) + ' is the top mapped level for ' + esc(DEV.role) +
+          '.</b> Choose “Grow to transfer” to keep this person moving.</p>';
+        return;
       }
-      html += '<div class="tt__addrow tt__targetrow"><label class="tt__targetlbl" for="tt-dev-level">Target level</label>' +
-        '<select id="tt-dev-level">' + above.map(function (l) {
-          var st = streamOf(l);
-          return '<option value="' + l + '"' + (d.level === l ? ' selected' : '') + '>' + l + ' · ' + (st ? st.label : '') + '</option>';
-        }).join('') + '</select></div>';
-    } else if (d.dir === 'other') {
+      html += '<div class="tt__addrow tt__targetrow"><label class="tt__targetlbl" for="ttd-tgt-level">New level</label>' +
+        '<select id="ttd-tgt-level">' + levelOpts(above, DEV.tgtLevel, 'Select the new level…') + '</select></div>';
+      if (!DEV.tgtLevel) {
+        view.innerHTML = html + '<p class="tt__sub">Select the new level — its expected proficiencies load into “needs to be” automatically.</p>';
+        return;
+      }
+    } else if (DEV.dir === 'other') {
       var byFam = {};
       Object.keys(DATA.roles).forEach(function (k) {
-        if (k === m.role) return;
+        if (k === DEV.role) return;
         (byFam[DATA.roles[k].family] = byFam[DATA.roles[k].family] || []).push(k);
       });
       var ropts = '';
       Object.keys(byFam).sort().forEach(function (fam) {
         ropts += '<optgroup label="' + esc(fam) + '">' + byFam[fam].sort().map(function (k) {
-          return '<option value="' + esc(k) + '"' + (d.role === k ? ' selected' : '') + '>' + esc(k) + '</option>';
+          return '<option value="' + esc(k) + '"' + (DEV.tgtRole === k ? ' selected' : '') + '>' + esc(k) + '</option>';
         }).join('') + '</optgroup>';
       });
       html += '<div class="tt__addrow tt__targetrow">' +
-        '<select id="tt-dev-role"><option value="">Destination role…</option>' + ropts + '</select>';
-      var tgtRole = DATA.roles[d.role];
-      if (tgtRole && d.role !== m.role) {
-        html += '<select id="tt-dev-level">' + roleLevels(tgtRole).map(function (l) {
-          var st = streamOf(l);
-          return '<option value="' + l + '"' + (d.level === l ? ' selected' : '') + '>' + l + ' · ' + (st ? st.label : '') + '</option>';
-        }).join('') + '</select>';
+        '<select id="ttd-tgt-role"><option value="">Destination sub-family…</option>' + ropts + '</select>';
+      var destRole = DATA.roles[DEV.tgtRole];
+      if (destRole && DEV.tgtRole !== DEV.role) {
+        html += '<select id="ttd-tgt-level">' + levelOpts(roleLevels(destRole), DEV.tgtLevel, 'Target level…') + '</select>';
       }
       html += '</div>';
-      if (!tgtRole) return html + '<p class="tt__sub">Pick the destination role and target level — the skills and expected proficiencies load from there.</p>';
+      if (!destRole || !DEV.tgtLevel) {
+        view.innerHTML = html + '<p class="tt__sub">Pick the destination sub-family and target level — its skills and expected proficiencies load automatically.</p>';
+        return;
+      }
     }
 
     var list = devSkillList();
-    if (!list.length) return html;
+    if (!list.length) { view.innerHTML = html; return; }
     var gaps = list.filter(function (g) { return g.need > g.at; });
-    var strengths = list.length - gaps.length;
 
-    html += '<p class="tt__sub tt__target">Target: <b>' + esc(d.role) + '</b> at <b>' + esc(d.level) + '</b> · ' +
+    html += '<p class="tt__sub tt__target">Target: <b>' + esc(DEV.tgtRole) + '</b> at <b>' + esc(DEV.tgtLevel) + '</b> · ' +
       list.length + ' skills to rate · <b class="tt-flagtext">' + gaps.length + ' gap' + plural(gaps.length) + '</b> · ' +
-      strengths + ' at or above target</p>';
+      (list.length - gaps.length) + ' at or above target</p>';
 
     html += '<div class="tablewrap tt__tablewrap"><table class="learntable tt__table tt__ratetable">' +
       '<thead><tr><th>Skill</th><th>They’re at</th><th>Needs to be</th><th>Gap</th></tr></thead><tbody>' +
@@ -1733,17 +1803,26 @@
         var gapCell = gap > 0 ? '<span class="tt-gapchip">+' + gap + '</span>' :
           gap === 0 ? '<span class="tt-okchip">at target</span>' : '<span class="tt-okchip">above</span>';
         return '<tr><td class="tt-skill"><button type="button" class="skill-link" data-skill="' + esc(g.skill.skill) +
-          '" data-kind="role" data-role="' + esc(d.role) + '">' + esc(g.skill.skill) + '</button>' +
+          '" data-kind="role" data-role="' + esc(DEV.tgtRole) + '">' + esc(g.skill.skill) + '</button>' +
           (g.mapped ? '' : '<span class="tt-flag">new to them</span>') + '</td>' +
           '<td>' + profSel(g.skill.skill, 'at', g.at) + '</td>' +
           '<td>' + profSel(g.skill.skill, 'need', g.need) + '</td>' +
           '<td>' + gapCell + '</td></tr>';
-      }).join('') + '</tbody></table></div>' +
-      '<div class="plan__actions"><button type="button" class="btn btn--dark" id="tt-dev-build">' +
-      (d.built ? 'Update the development plan' : 'Build the development plan') + '</button></div>';
+      }).join('') + '</tbody></table></div>';
 
-    if (d.built) html += ttDevPlan(list);
-    return html;
+    html += '<div class="tt__extras"><p class="sf__label">Other areas of development</p>' +
+      '<p class="tt__sub">Anything beyond the mapped skills — readiness for the current role or the future one. Each area joins the plan as its own row.</p>' +
+      '<div class="tt__addrow"><input type="text" id="ttd-extra" maxlength="80" placeholder="e.g. Executive presence, budget ownership, Oracle reporting…">' +
+      '<button type="button" class="btn btn--dark" data-ttdextraadd>Add area</button></div>' +
+      (DEV.extras.length ? '<ul class="pills sf__picked">' + DEV.extras.map(function (x) {
+        return '<li><span class="pill">' + esc(x) + '<button type="button" class="sf-x" data-ttdextrarm="' + esc(x) + '" aria-label="Remove">&times;</button></span></li>';
+      }).join('') + '</ul>' : '') + '</div>';
+
+    html += '<div class="plan__actions"><button type="button" class="btn btn--dark" id="ttd-build">' +
+      (DEV.built ? 'Update the development plan' : 'Build the development plan') + '</button></div>';
+
+    if (DEV.built) html += ttDevPlan(list);
+    view.innerHTML = html;
   }
 
   function ttDevRow(g, i) {
@@ -1757,13 +1836,13 @@
         return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">' + esc(c.n) + '</a>';
       }).join('') + '</span>' :
       '<span class="lt-none">Not in the Oracle catalog. Use the skill resources below and log the work in ' + oa('Oracle Grow', ORA.grow) + '.</span>';
-    var dk = 'dev:' + TEAM.dev.i + ':' + TEAM.dev.role + ':' + TEAM.dev.level + ':' + s.skill;
+    var dk = 'dev:' + DEV.role + ':' + DEV.tgtRole + ':' + DEV.tgtLevel + ':' + s.skill;
     var dv = DATES[dk] || '';
     return '<tr>' +
       '<td class="lt-done"><span class="ckbox" aria-hidden="true"></span></td>' +
       '<td class="lt-pri">' + (i + 1) + '</td>' +
       '<td class="lt-skill"><button type="button" class="skill-link" data-skill="' + esc(s.skill) +
-        '" data-kind="' + (g ? 'role' : 'univ') + '" data-role="' + esc(TEAM.dev.role) + '">' + esc(s.skill) + '</button></td>' +
+        '" data-kind="' + (g ? 'role' : 'univ') + '" data-role="' + esc(DEV.tgtRole) + '">' + esc(s.skill) + '</button></td>' +
       '<td class="lt-why">' + why + '</td>' +
       '<td class="lt-learn">' + learn + '</td>' +
       '<td class="lt-date"><input type="date" class="dateinput" data-datekey="' + esc(dk) + '"' +
@@ -1771,20 +1850,36 @@
       '</tr>';
   }
 
-  /* The ratings-driven plan: gaps only, biggest gap first; at-or-above skills become strengths. */
+  function ttExtraRow(name, n) {
+    var dk = 'dev:' + DEV.role + ':' + DEV.tgtRole + ':' + DEV.tgtLevel + ':extra:' + name;
+    var dv = DATES[dk] || '';
+    return '<tr>' +
+      '<td class="lt-done"><span class="ckbox" aria-hidden="true"></span></td>' +
+      '<td class="lt-pri">' + n + '</td>' +
+      '<td class="lt-skill">' + esc(name) + '</td>' +
+      '<td class="lt-why"><span class="lt-tag lt-tag--grow">Added</span> manager-identified development area</td>' +
+      '<td class="lt-learn"><span class="lt-none">Beyond the framework — agree the learning together and log it as a development goal in ' + oa('Oracle Grow', ORA.grow) + '.</span></td>' +
+      '<td class="lt-date"><input type="date" class="dateinput" data-datekey="' + esc(dk) + '"' +
+        (dv ? ' value="' + esc(dv) + '"' : '') + ' aria-label="Target date for ' + esc(name) + '"></td>' +
+      '</tr>';
+  }
+
+  /* The ratings-driven plan: gaps only, biggest gap first; at-or-above skills become strengths;
+     manager-added areas ride along as their own rows. */
   function ttDevPlan(list) {
-    var d = TEAM.dev, m = TEAM.members[d.i];
     var gaps = list.filter(function (g) { return g.need > g.at; }).sort(function (x, y) {
       return (y.need - y.at) - (x.need - x.at) || y.need - x.need || x.skill.skill.localeCompare(y.skill.skill);
     });
     var strengths = list.filter(function (g) { return g.need <= g.at; }).sort(function (x, y) {
       return y.at - x.at || x.skill.skill.localeCompare(y.skill.skill);
     });
-    var dirText = d.dir === 'current' ? 'growth in their current role, <b>' + esc(d.role) + '</b> at <b>' + esc(d.level) + '</b>' :
-      d.dir === 'up' ? 'a step up to <b>' + esc(d.level) + '</b> in <b>' + esc(d.role) + '</b>' :
-      'a pathway to <b>' + esc(d.role) + '</b> at <b>' + esc(d.level) + '</b>';
+    var dirText = DEV.dir === 'current' ? 'development in the current role, <b>' + esc(DEV.role) + '</b> at <b>' + esc(DEV.level) + '</b>' :
+      DEV.dir === 'up' ? 'growth to the next level: <b>' + esc(DEV.level) + ' → ' + esc(DEV.tgtLevel) + '</b> in <b>' + esc(DEV.role) + '</b>' :
+      'growth to transfer: <b>' + esc(DEV.role) + '</b> → <b>' + esc(DEV.tgtRole) + '</b> at <b>' + esc(DEV.tgtLevel) + '</b>';
 
-    var rows = [ttDevRow(null, 0)].concat(gaps.map(function (g, i) { return ttDevRow(g, i + 1); })).join('');
+    var rows = [ttDevRow(null, 0)];
+    gaps.forEach(function (g, i) { rows.push(ttDevRow(g, i + 1)); });
+    DEV.extras.forEach(function (x, i) { rows.push(ttExtraRow(x, gaps.length + 2 + i)); });
 
     var strengthHtml = strengths.length ?
       '<h4 class="tt__strengthh">Strengths to build on</h4>' +
@@ -1793,16 +1888,17 @@
         return '<li><span class="pill">' + esc(g.skill.skill) + ' · ' + PROF_NAMES[g.at - 1] + '</span></li>';
       }).join('') + '</ul>' : '';
 
-    return '<div class="tt__devplan" id="tt-devplan">' +
-      '<h3 class="tt__h">Development plan · ' + esc(memberLabel(m, d.i)) + '</h3>' +
+    return '<div class="tt__devplan" id="ttd-plan">' +
+      '<h3 class="tt__h">Development plan</h3>' +
       '<p class="tt__sub">Built from your ratings for ' + dirText + ': <b class="tt-flagtext">' + gaps.length +
-      ' gap skill' + plural(gaps.length) + '</b>, biggest gap first, plus AI Workforce Readiness — assumed for every role. ' +
+      ' gap skill' + plural(gaps.length) + '</b>, biggest gap first, plus AI Workforce Readiness — assumed for every role' +
+      (DEV.extras.length ? ' — and <b>' + DEV.extras.length + ' development area' + plural(DEV.extras.length) + '</b> you added' : '') + '. ' +
       'Print it and hand it over in your next development conversation. <b>Development, not evaluation</b> — no names on this page, and the plan lives only in your browser. ' +
-      'Have the member log each skill as a development goal in ' + oa('Oracle Grow', ORA.grow) + '.</p>' +
-      (gaps.length ? '' : '<p class="tt__sub"><b>No gaps at your current ratings.</b> Adjust “needs to be” upward where you want stretch, or point this member at a bigger target.</p>') +
+      'Have the person log each skill as a development goal in ' + oa('Oracle Grow', ORA.grow) + '.</p>' +
+      (gaps.length ? '' : '<p class="tt__sub"><b>No gaps at your current ratings.</b> Adjust “needs to be” upward where you want stretch, or point this person at a bigger target.</p>') +
       '<div class="tablewrap"><table class="learntable">' +
       '<thead><tr><th></th><th>#</th><th>Skill</th><th>Why it’s here</th><th>Oracle Learning</th><th>Target date</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody></table></div>' +
+      '<tbody>' + rows.join('') + '</tbody></table></div>' +
       skillResources(gaps.map(function (g) { return { skill: g.skill }; })) +
       strengthHtml +
       '<div class="plan__actions"><button type="button" class="btn" id="tt-print">Print this plan</button></div>' +

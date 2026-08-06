@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=12">
+<link rel="stylesheet" href="assets/css/styles.css?v=13">
 </head>
 <body>
 <a class="skip-link" href="#explore">Skip to the explorer</a>
@@ -117,9 +117,22 @@
       <p class="eyebrow">The manager view</p>
       <h2 class="h2">See your team&rsquo;s skills. <em>Fill the gaps.</em></h2>
       <p class="lead">Map your team by role and level &mdash; no names, nothing that identifies a person. See where coverage runs thin, where one person carries a skill alone, and what it takes to cover a critical role. Then hand each member a real development plan.</p>
-      <p class="tt__notice"><b>Development, not evaluation.</b> This roster lives only in your browser &mdash; nothing is uploaded or shared. Use it to prepare growth conversations, not to assess performance.</p>
+      <p class="tt__notice"><b>Development, not evaluation.</b> Everything here lives only in your browser &mdash; nothing is uploaded or shared. Use it to prepare growth conversations, not to assess performance.</p>
+
+      <div class="tt__develop" id="tt-develop">
+        <h3 class="tt__h">Develop one person</h3>
+        <p class="tt__sub">Select the sub-family and role level &mdash; no names, ever. Every skill mapped to that role populates automatically, ready to rate skill by skill: where they are, and where they need to be.</p>
+        <div class="tt__addrow">
+          <select id="ttd-role" aria-label="Sub-family"><option value="">Sub-family&hellip;</option></select>
+          <select id="ttd-level" aria-label="Role level"><option value="">Role level&hellip;</option></select>
+        </div>
+        <div class="tt__view" id="ttd-view" aria-live="polite"></div>
+      </div>
+
+      <hr class="tt__divide">
 
       <div class="tt__build">
+        <h3 class="tt__h">See the whole team</h3>
         <p class="sf__label">Build your roster <span class="sf__count" id="tt-count">0 members</span></p>
         <div class="tt__addrow">
           <select id="tt-role" aria-label="Member role"><option value="">Role&hellip;</option></select>
@@ -127,7 +140,7 @@
           <button type="button" class="btn btn--dark" id="tt-add">Add member</button>
         </div>
         <ul class="tt__roster" id="tt-roster"></ul>
-        <p class="tt__hint" id="tt-devhint" hidden>Select <b>Develop</b> on any member to rate their skill proficiency and build a personal development plan &mdash; in their current role, a step up, or a different role entirely.</p>
+        <p class="tt__hint" id="tt-devhint" hidden>Select <b>Develop</b> on any member to load them into the development builder above.</p>
       </div>
 
       <div class="tt__lens" id="tt-lens" hidden>
@@ -403,6 +416,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js?v=12"></script>
+<script src="assets/js/app.js?v=13"></script>
 </body>
 </html>
