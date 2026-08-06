@@ -731,4 +731,6 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 #teamtool .restype { border-color: rgba(28,28,28,.35); color: var(--ink-soft); }
 #teamtool .restype--free { border-color: var(--vu-oak); color: var(--vu-oak); }
 #teamtool .fresh { color: var(--gray-mid); }
+#teamtool .olink { color: var(--vu-oak); }
+#teamtool .olink:hover { color: var(--vu-black); }
 #teamtool[hidden] { display: none !important; }
