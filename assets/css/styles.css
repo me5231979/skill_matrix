@@ -703,4 +703,34 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt__devplan { margin-top: 2.6rem; border-top: 3px solid var(--vu-gold-flat); padding-top: 1.6rem; }
 .tt__strengthh { font-family: var(--font-serif); font-weight: 400; font-size: 1.15rem; margin-top: 1.8rem; }
 .tt__strengths .pill { border-color: var(--vu-gold-flat); }
+
+/* The manager experience sits on cream, but the plan table, tags, date inputs
+   and resource cards it reuses are styled for the dark plan section — re-ink
+   every white-on-dark rule for a light background here. */
+#teamtool .tablewrap { border-color: var(--sand); background: #fff; }
+#teamtool .learntable th { color: var(--vu-oak); background: #faf8f4; border-bottom-color: var(--sand); }
+#teamtool .learntable td { color: var(--vu-black); border-bottom-color: var(--line); }
+#teamtool .learntable .lt-pri { color: var(--vu-oak); }
+#teamtool .lt-skill .skill-link { color: var(--vu-black); }
+#teamtool .lt-skill .skill-link:hover { color: var(--vu-oak); }
+#teamtool .lt-why b { color: var(--vu-black); }
+#teamtool .lt-tag--bridge { color: var(--vu-oak); }
+#teamtool .lt-tag--grow { border-color: rgba(28,28,28,.4); color: var(--ink-soft); }
+#teamtool .lt-tag--univ { border-color: rgba(28,28,28,.6); color: var(--vu-black); }
+#teamtool .lt-orc a { color: var(--vu-oak); }
+#teamtool .lt-none { color: var(--ink-soft); }
+#teamtool .learntable .pmeter i { background: rgba(28,28,28,.14); }
+#teamtool .lt-prof { color: var(--ink-soft); }
+#teamtool .dateinput { color: var(--vu-black); background: #fff; border-color: var(--sand); color-scheme: light; }
+#teamtool .skillres > p { color: var(--ink-soft); }
+#teamtool .skillres > p b { color: var(--vu-black); }
+#teamtool .skillres__card { border-color: var(--sand); background: #fff; }
+#teamtool .skillres__card li a { color: var(--vu-black); border-bottom-color: rgba(28,28,28,.3); }
+#teamtool .skillres__card li a:hover { color: var(--vu-oak); border-bottom-color: var(--vu-oak); }
+#teamtool .skillres__for { color: var(--gray-mid); }
+#teamtool .restype { border-color: rgba(28,28,28,.35); color: var(--ink-soft); }
+#teamtool .restype--free { border-color: var(--vu-oak); color: var(--vu-oak); }
+#teamtool .fresh { color: var(--gray-mid); }
+#teamtool .olink { color: var(--vu-oak); }
+#teamtool .olink:hover { color: var(--vu-black); }
 #teamtool[hidden] { display: none !important; }
