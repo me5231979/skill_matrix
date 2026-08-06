@@ -671,6 +671,13 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt__hint { margin-top: .9rem; font-size: .85rem; color: var(--ink-soft); }
 .tt__hint[hidden] { display: none !important; }
 .tt__develop { margin-top: 2.4rem; }
+.tt__people { list-style: none; padding: 0; margin: 0 0 1.1rem; display: flex; flex-wrap: wrap; gap: .5rem; }
+.tt__person { cursor: pointer; }
+.tt__person.on { background: var(--vu-black); color: var(--vu-gold-flat); border-color: var(--vu-black); }
+.tt__person.on .sf-x { color: var(--vu-gold-flat); }
+.tt__addperson { font: 600 .85rem var(--font-sans); padding: .5rem 1.05rem; border-radius: 999px; cursor: pointer;
+  background: none; border: 1px dashed var(--vu-oak); color: var(--vu-oak); }
+.tt__addperson:hover { border-style: solid; }
 .tt__develop .tt__sub { margin-bottom: .9rem; }
 .tt__divide { border: 0; border-top: 1px solid var(--sand); margin: 3rem 0 2.6rem; }
 .tt__ask { font-family: var(--font-serif); font-size: 1.25rem; margin: 1.6rem 0 .8rem; }

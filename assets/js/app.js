@@ -341,7 +341,6 @@
     LIB = res[2] || [];
     init();
     initSkillsFirst();
-    initTeam();
     initDevelop();
   }).catch(function () {
     document.getElementById('from-panel').innerHTML =
@@ -470,7 +469,7 @@
     team: [
       ['Pick the person\u2019s role', 'Select the sub-family and role level \u2014 no names, ever. Every skill mapped to that role populates automatically.'],
       ['Rate and choose the direction', 'Skill by skill, set where they are and where they need to be \u2014 for the current role, the next level in the sub-family, or a transfer. Add your own development areas beyond the framework.'],
-      ['Get the plan \u2014 then the team', 'Gaps become a printable development plan with Oracle Learning links. Build a roster to see whole-team coverage, risk and readiness.']
+      ['Get the plan', 'Gaps become a printable development plan with Oracle Learning links. Add another person and keep going \u2014 each keeps their own ratings and plan.']
     ]
   };
   function applyHowCopy(path) {
@@ -478,7 +477,8 @@
       var el = document.querySelector('[data-how="' + (i + 1) + '"]');
       if (!el) return;
       el.querySelector('h3').textContent = c[0];
-      el.querySelector('p').textContent = c[1];
+      var ps = el.querySelectorAll('p');
+      ps[ps.length - 1].textContent = c[1];
     });
     document.querySelectorAll('.pathswitch__btn').forEach(function (x) {
       x.classList.toggle('on', x.dataset.path === path);
@@ -1425,109 +1425,8 @@
     }
   });
 
-  /* ---------- Manager team tool ---------- */
-  var TEAM = { members: [], lens: 'coverage', target: '', custom: [] };
-  try {
-    var saved = JSON.parse(localStorage.getItem('sm_team_v1') || 'null');
-    if (saved && saved.members) TEAM = saved;
-  } catch (e) {}
-  function saveTeam() {
-    try { localStorage.setItem('sm_team_v1', JSON.stringify(TEAM)); } catch (e) {}
-  }
-
-  function memberLabel(m, i) { return 'Member ' + (i + 1) + ' \u00b7 ' + m.role + ' \u00b7 ' + m.level; }
-  function memberProf(m, skillName) {
-    var role = DATA.roles[m.role];
-    if (!role) return null;
-    var s = role.skills.filter(function (x) { return x.skill === skillName; })[0];
-    if (!s) return null;
-    return { mapped: true, at: s.prof && s.prof[m.level] ? s.prof[m.level] : null };
-  }
-
-  function initTeam() {
-    var roleSel = document.getElementById('tt-role');
-    var lvlSel = document.getElementById('tt-level');
-    if (!roleSel) return;
-    var byFamily = {};
-    Object.keys(DATA.roles).forEach(function (key) {
-      var fam = DATA.roles[key].family;
-      (byFamily[fam] = byFamily[fam] || []).push(key);
-    });
-    Object.keys(byFamily).sort().forEach(function (fam) {
-      var og = document.createElement('optgroup');
-      og.label = fam;
-      byFamily[fam].sort().forEach(function (key) {
-        var o = document.createElement('option');
-        o.value = key; o.textContent = key;
-        og.appendChild(o);
-      });
-      roleSel.appendChild(og);
-    });
-    roleSel.addEventListener('change', function () {
-      lvlSel.innerHTML = '<option value="">Level\u2026</option>';
-      var role = DATA.roles[roleSel.value];
-      if (!role) return;
-      roleLevels(role).forEach(function (l) {
-        var st = streamOf(l);
-        var o = document.createElement('option');
-        o.value = l; o.textContent = l + ' \u00b7 ' + (st ? st.label : '');
-        lvlSel.appendChild(o);
-      });
-    });
-    document.getElementById('tt-add').addEventListener('click', function () {
-      if (!roleSel.value || !lvlSel.value || TEAM.members.length >= 20) return;
-      TEAM.members.push({ role: roleSel.value, level: lvlSel.value });
-      saveTeam(); renderTeam();
-    });
-    document.getElementById('tt-lens').addEventListener('click', function (e) {
-      var b = e.target.closest('.ttlens');
-      if (!b) return;
-      TEAM.lens = b.dataset.ttlens;
-      saveTeam(); renderTeam();
-    });
-    renderTeam();
-  }
-
-  function renderTeam() {
-    document.getElementById('tt-count').textContent = TEAM.members.length + ' member' + plural(TEAM.members.length);
-    document.getElementById('tt-roster').innerHTML = TEAM.members.map(function (m, i) {
-      return '<li><span class="pill">' + esc(memberLabel(m, i)) +
-        '<button type="button" class="tt-devbtn" data-ttdev="' + i + '">Develop</button>' +
-        '<button type="button" class="sf-x" data-ttremove="' + i + '" aria-label="Remove">&times;</button></span></li>';
-    }).join('');
-    var hint = document.getElementById('tt-devhint');
-    if (hint) hint.hidden = TEAM.members.length === 0;
-    document.getElementById('tt-lens').hidden = TEAM.members.length === 0;
-    document.querySelectorAll('.ttlens').forEach(function (b) {
-      b.classList.toggle('on', b.dataset.ttlens === TEAM.lens);
-    });
-    var view = document.getElementById('tt-view');
-    if (!TEAM.members.length) {
-      view.innerHTML = '<p class="rolepanel__empty">Add your team above \u2014 role and level per member \u2014 and the coverage view builds itself here.</p>';
-      return;
-    }
-    if (TEAM.lens === 'develop') TEAM.lens = 'coverage';
-    if (TEAM.lens === 'coverage') view.innerHTML = ttCoverage();
-    else if (TEAM.lens === 'stepup') view.innerHTML = ttStepup();
-    else if (TEAM.lens === 'target') view.innerHTML = ttTarget();
-    else view.innerHTML = ttCustom();
-  }
+  /* ---------- Manager view: develop your people, one at a time ---------- */
   document.addEventListener('click', function (e) {
-    var rm = e.target.closest('[data-ttremove]');
-    if (rm) {
-      TEAM.members.splice(+rm.dataset.ttremove, 1);
-      saveTeam(); renderTeam();
-      return;
-    }
-    var devBtn = e.target.closest('[data-ttdev]');
-    if (devBtn) {
-      var mm = TEAM.members[+devBtn.dataset.ttdev];
-      if (!mm) return;
-      DEV = { role: mm.role, level: mm.level, dir: 'current', tgtRole: mm.role, tgtLevel: mm.level, ratings: {}, extras: [], built: false };
-      saveDev(); syncDevPickers(); renderDevelop();
-      document.getElementById('tt-develop').scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
     var dirBtn = e.target.closest('[data-ttdir]');
     if (dirBtn) {
       DEV.dir = dirBtn.dataset.ttdir;
@@ -1553,53 +1452,64 @@
       if (pl) pl.scrollIntoView({ behavior: 'smooth' });
       return;
     }
-    var planBtn = e.target.closest('[data-ttplan]');
-    if (planBtn) {
-      var d = JSON.parse(planBtn.dataset.ttplan);
-      enterRolesPath();
-      fromSel.value = d.from;
-      if (d.up) {
-        toSel.value = '__up__';
-        syncLevelPicker();
-        document.getElementById('level-select').value = d.level;
-      } else {
-        toSel.value = d.to;
-        syncLevelPicker();
-      }
-      update();
-      document.getElementById('plan').scrollIntoView({ behavior: 'smooth' });
+    var prm = e.target.closest('[data-ttpersonrm]');
+    if (prm) {
+      PEOPLE.list.splice(+prm.dataset.ttpersonrm, 1);
+      if (!PEOPLE.list.length) PEOPLE.list.push(blankPerson());
+      if (PEOPLE.active >= PEOPLE.list.length) PEOPLE.active = PEOPLE.list.length - 1;
+      DEV = PEOPLE.list[PEOPLE.active];
+      saveDev(); syncDevPickers(); renderPeople(); renderDevelop();
       return;
     }
-    var tsel = e.target.closest('#tt-target-go');
-    if (tsel) {
-      TEAM.target = document.getElementById('tt-target-sel').value;
-      saveTeam(); renderTeam();
+    var psel = e.target.closest('[data-ttperson]');
+    if (psel) {
+      PEOPLE.active = +psel.dataset.ttperson;
+      DEV = PEOPLE.list[PEOPLE.active];
+      saveDev(); syncDevPickers(); renderPeople(); renderDevelop();
       return;
     }
-    var addCustom = e.target.closest('[data-ttcustomadd]');
-    if (addCustom) {
-      var v = document.getElementById('tt-custom-sel').value;
-      if (v && TEAM.custom.indexOf(v) < 0 && TEAM.custom.length < 15) TEAM.custom.push(v);
-      saveTeam(); renderTeam();
-      return;
-    }
-    var rmCustom = e.target.closest('[data-ttcustomrm]');
-    if (rmCustom) {
-      TEAM.custom = TEAM.custom.filter(function (x) { return x !== rmCustom.dataset.ttcustomrm; });
-      saveTeam(); renderTeam();
+    if (e.target.closest('#ttd-addperson')) {
+      PEOPLE.list.push(blankPerson());
+      PEOPLE.active = PEOPLE.list.length - 1;
+      DEV = PEOPLE.list[PEOPLE.active];
+      saveDev(); syncDevPickers(); renderPeople(); renderDevelop();
       return;
     }
     if (e.target.closest('#tt-print')) { print(); }
   });
 
-  /* ---------- Develop one person: sub-family + level → the ask → rate → plan ---------- */
-  var DEV = { role: '', level: '', dir: 'current', tgtRole: '', tgtLevel: '', ratings: {}, extras: [], built: false };
+  /* ---------- Develop your people: one at a time, add as many as you manage ---------- */
+  function blankPerson() {
+    return { role: '', level: '', dir: 'current', tgtRole: '', tgtLevel: '', ratings: {}, extras: [], built: false };
+  }
+  var PEOPLE = { list: [blankPerson()], active: 0 };
   try {
-    var savedDev = JSON.parse(localStorage.getItem('sm_dev_v1') || 'null');
-    if (savedDev && savedDev.dir) DEV = savedDev;
+    var savedPeople = JSON.parse(localStorage.getItem('sm_people_v1') || 'null');
+    if (savedPeople && savedPeople.list && savedPeople.list.length) PEOPLE = savedPeople;
+    else {
+      var savedDev = JSON.parse(localStorage.getItem('sm_dev_v1') || 'null');
+      if (savedDev && savedDev.dir) PEOPLE = { list: [savedDev], active: 0 };
+    }
   } catch (e) {}
+  if (PEOPLE.active >= PEOPLE.list.length) PEOPLE.active = 0;
+  var DEV = PEOPLE.list[PEOPLE.active];
   function saveDev() {
-    try { localStorage.setItem('sm_dev_v1', JSON.stringify(DEV)); } catch (e) {}
+    try { localStorage.setItem('sm_people_v1', JSON.stringify(PEOPLE)); } catch (e) {}
+  }
+
+  function personLabel(p, i) {
+    return 'Person ' + (i + 1) + (p.role && p.level ? ' · ' + p.role + ' · ' + p.level : ' · not set yet');
+  }
+  function renderPeople() {
+    var ul = document.getElementById('ttd-people');
+    if (!ul) return;
+    ul.innerHTML = PEOPLE.list.map(function (p, i) {
+      return '<li><span class="pill tt__person' + (i === PEOPLE.active ? ' on' : '') + '" data-ttperson="' + i + '">' +
+        esc(personLabel(p, i)) +
+        (PEOPLE.list.length > 1 ? '<button type="button" class="sf-x" data-ttpersonrm="' + i + '" aria-label="Remove person">&times;</button>' : '') +
+        '</span></li>';
+    }).join('') +
+    '<li><button type="button" class="tt__addperson" id="ttd-addperson">+ Add another person</button></li>';
   }
 
   function initDevelop() {
@@ -1620,16 +1530,17 @@
       roleSel.appendChild(og);
     });
     roleSel.addEventListener('change', function () {
-      DEV = { role: roleSel.value, level: '', dir: 'current', tgtRole: roleSel.value, tgtLevel: '', ratings: {}, extras: [], built: false };
-      saveDev(); syncDevPickers(); renderDevelop();
+      PEOPLE.list[PEOPLE.active] = DEV = { role: roleSel.value, level: '', dir: 'current', tgtRole: roleSel.value, tgtLevel: '', ratings: {}, extras: [], built: false };
+      saveDev(); syncDevPickers(); renderPeople(); renderDevelop();
     });
     document.getElementById('ttd-level').addEventListener('change', function () {
       DEV.level = document.getElementById('ttd-level').value;
       DEV.dir = 'current'; DEV.tgtRole = DEV.role; DEV.tgtLevel = DEV.level;
       DEV.ratings = {}; DEV.built = false;
-      saveDev(); renderDevelop();
+      saveDev(); renderPeople(); renderDevelop();
     });
     syncDevPickers();
+    renderPeople();
     renderDevelop();
   }
 
@@ -1903,155 +1814,6 @@
       strengthHtml +
       '<div class="plan__actions"><button type="button" class="btn" id="tt-print">Print this plan</button></div>' +
       '</div>';
-  }
-
-  /* Lens 1: team skill coverage with single-holder risk */
-  function ttCoverage() {
-    var skills = {};
-    TEAM.members.forEach(function (m, i) {
-      var role = DATA.roles[m.role];
-      if (!role) return;
-      role.skills.forEach(function (s) {
-        (skills[s.skill] = skills[s.skill] || { cat: s.category, holders: [] }).holders.push(i);
-      });
-    });
-    var names = Object.keys(skills).sort(function (x, y) {
-      return skills[x].holders.length - skills[y].holders.length || x.localeCompare(y);
-    });
-    var singles = names.filter(function (n) { return skills[n].holders.length === 1; });
-    var head = TEAM.members.map(function (m, i) {
-      return '<th title="' + esc(m.role + ' \u00b7 ' + m.level) + '">M' + (i + 1) + '</th>';
-    }).join('');
-    var rows = names.map(function (n) {
-      var e_ = skills[n];
-      var single = e_.holders.length === 1;
-      var cells = TEAM.members.map(function (m, i) {
-        if (e_.holders.indexOf(i) < 0) return '<td class="tt-no"></td>';
-        var p = memberProf(m, n);
-        return '<td class="tt-yes">' + (p && p.at ? esc(p.at).slice(0, 3) + '.' : '\u25cf') + '</td>';
-      }).join('');
-      return '<tr' + (single ? ' class="tt-single"' : '') + '><td class="tt-skill">' +
-        '<button type="button" class="skill-link" data-skill="' + esc(n) + '" data-kind="role" data-role="' +
-        esc(TEAM.members[e_.holders[0]].role) + '">' + esc(n) + '</button>' +
-        (single ? '<span class="tt-flag">single holder</span>' : '') + '</td>' + cells + '</tr>';
-    }).join('');
-    return '<h3 class="tt__h">Coverage across ' + TEAM.members.length + ' member' + plural(TEAM.members.length) + '</h3>' +
-      '<p class="tt__sub">' + names.length + ' skills mapped across the team \u00b7 <b class="tt-flagtext">' + singles.length +
-      ' held by a single member</b> \u2014 your succession risk. Cells show expected proficiency at that member\u2019s level (Awa/Dev/Int/Adv/Exp).</p>' +
-      '<div class="tablewrap tt__tablewrap"><table class="learntable tt__table">' +
-      '<thead><tr><th>Skill</th>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<div class="plan__actions"><button type="button" class="btn" id="tt-print">Print team snapshot</button></div>';
-  }
-
-  /* Lens 2: level-up readiness per member */
-  function ttStepup() {
-    var cards = TEAM.members.map(function (m, i) {
-      var role = DATA.roles[m.role];
-      if (!role) return '';
-      var nxt = nextLevelUp(role, m.level);
-      var inner;
-      if (!nxt) {
-        inner = '<p class="tt__cardnote">Top of this track \u2014 develop toward a destination role instead.</p>' +
-          '<button type="button" class="btn btn--dark" data-ttplan=\'' + JSON.stringify({ from: m.role, up: false, to: '' }) + '\'>Open the explorer</button>';
-      } else {
-        var la = levelAnalyze(role, m.level, nxt);
-        inner = '<p class="tt__cardnote"><b>' + esc(m.level) + ' \u2192 ' + esc(nxt) + '</b>: ' +
-          la.deepen.length + ' skill' + plural(la.deepen.length) + ' deepen, ' +
-          la.fresh.length + ' new expectation' + plural(la.fresh.length) + '. Step-up readiness ' + la.pct + '%.</p>' +
-          '<button type="button" class="btn btn--dark" data-ttplan=\'' + JSON.stringify({ from: m.role, up: true, level: m.level }) + '\'>Build step-up plan</button>';
-      }
-      return '<div class="sf__card"><p class="sf__cardfam">' + esc(memberLabel(m, i)) + '</p><h4>' + esc(m.role) + '</h4>' + inner + '</div>';
-    }).join('');
-    return '<h3 class="tt__h">Level-up readiness</h3>' +
-      '<p class="tt__sub">The bench-building view: each member\u2019s step to the next level in their track. Plans print ready to hand over.</p>' +
-      '<div class="sf__cards">' + cards + '</div>';
-  }
-
-  /* Lens 3: cover a target role */
-  function ttTarget() {
-    var opts = '';
-    var byFamily = {};
-    Object.keys(DATA.roles).forEach(function (key) {
-      (byFamily[DATA.roles[key].family] = byFamily[DATA.roles[key].family] || []).push(key);
-    });
-    Object.keys(byFamily).sort().forEach(function (fam) {
-      opts += '<optgroup label="' + esc(fam) + '">' + byFamily[fam].sort().map(function (k) {
-        return '<option value="' + esc(k) + '"' + (TEAM.target === k ? ' selected' : '') + '>' + esc(k) + '</option>';
-      }).join('') + '</optgroup>';
-    });
-    var pickHtml = '<div class="tt__addrow"><select id="tt-target-sel"><option value="">Role your team must cover\u2026</option>' + opts + '</select>' +
-      '<button type="button" class="btn btn--dark" id="tt-target-go">Assess coverage</button></div>';
-    if (!TEAM.target || !DATA.roles[TEAM.target]) {
-      return '<h3 class="tt__h">Cover a role</h3><p class="tt__sub">New work landing on the team? A critical role to backfill? Pick it and see how close each member is.</p>' + pickHtml;
-    }
-    var target = DATA.roles[TEAM.target];
-    var ranked = TEAM.members.map(function (m, i) {
-      var from = DATA.roles[m.role];
-      var a = from === target ? { pct: 100, matches: target.skills, bridges: [], growth: [] } : analyze(from, target);
-      return { i: i, m: m, a: a };
-    }).sort(function (x, y) { return y.a.pct - x.a.pct; });
-    var covered = {};
-    TEAM.members.forEach(function (m) {
-      var role = DATA.roles[m.role];
-      role.skills.forEach(function (s) { covered[s.skill] = true; });
-    });
-    var missing = target.skills.filter(function (s) { return !covered[s.skill]; });
-    var cards = ranked.map(function (r) {
-      return '<div class="sf__card"><p class="sf__cardfam">' + esc(memberLabel(r.m, r.i)) + '</p>' +
-        '<h4>' + r.a.pct + '% ready</h4>' +
-        '<div class="sf__cardbar"><i style="width:' + r.a.pct + '%"></i></div>' +
-        '<p class="tt__cardnote">' + r.a.matches.length + ' matched \u00b7 ' + r.a.bridges.length + ' bridge \u00b7 ' +
-        r.a.growth.length + ' to grow</p>' +
-        (r.m.role === TEAM.target ? '<p class="tt__cardnote">Already in this role.</p>' :
-        '<button type="button" class="btn btn--dark" data-ttplan=\'' + JSON.stringify({ from: r.m.role, up: false, to: TEAM.target }) + '\'>Build pathway plan</button>') +
-        '</div>';
-    }).join('');
-    return '<h3 class="tt__h">Covering: ' + esc(TEAM.target) + '</h3>' + pickHtml +
-      '<p class="tt__sub">Ranked by readiness. ' + (missing.length ?
-        '<b class="tt-flagtext">' + missing.length + ' of the role\u2019s skills exist nowhere on your team:</b> ' +
-        missing.slice(0, 8).map(function (s) { return esc(s.skill); }).join(' \u00b7 ') + (missing.length > 8 ? ' +' + (missing.length - 8) + ' more' : '') :
-        'Every skill this role needs exists somewhere on your team.') + '</p>' +
-      '<div class="sf__cards">' + cards + '</div>' +
-      '<div class="plan__actions"><button type="button" class="btn" id="tt-print">Print team snapshot</button></div>';
-  }
-
-  /* Lens 4: custom skill push */
-  function ttCustom() {
-    var opts = '';
-    var byCat = {};
-    LIB.forEach(function (r) { (byCat[r[1] || 'Other'] = byCat[r[1] || 'Other'] || []).push(r[0]); });
-    Object.keys(byCat).sort().forEach(function (c) {
-      opts += '<optgroup label="' + esc(c) + '">' + byCat[c].map(function (n) {
-        return '<option value="' + esc(n) + '">' + esc(n) + '</option>';
-      }).join('') + '</optgroup>';
-    });
-    var pick = '<div class="tt__addrow"><select id="tt-custom-sel"><option value="">Add a skill to the push\u2026</option>' + opts + '</select>' +
-      '<button type="button" class="btn btn--dark" data-ttcustomadd>Add skill</button></div>' +
-      '<ul class="pills sf__picked">' + TEAM.custom.map(function (n) {
-        return '<li><span class="pill">' + esc(n) + '<button type="button" class="sf-x" data-ttcustomrm="' + esc(n) + '" aria-label="Remove">&times;</button></span></li>';
-      }).join('') + '</ul>';
-    if (!TEAM.custom.length) {
-      return '<h3 class="tt__h">A skill push</h3><p class="tt__sub">Driving something across the whole team \u2014 AI readiness, a new system, safety recerts? Pick the skills and see who already carries them.</p>' + pick;
-    }
-    var rows = TEAM.custom.map(function (n) {
-      var holders = TEAM.members.map(function (m, i) {
-        var role = DATA.roles[m.role];
-        var has = role && role.skills.some(function (s) { return s.skill === n; });
-        return has ? 'M' + (i + 1) : null;
-      }).filter(Boolean);
-      var oc = oracleCoursesFor(n);
-      return '<tr><td class="tt-skill">' + esc(n) + '</td>' +
-        '<td>' + (holders.length ? holders.join(', ') : '<b class="tt-flagtext">no one yet</b>') + '</td>' +
-        '<td>' + (oc.length ? oc.slice(0, 2).map(function (c) {
-          return '<a href="' + ORACLE.prefix + c.id + '" target="_blank" rel="noopener">' + esc(c.n) + '</a>';
-        }).join('<br>') : '<span class="lt-none">Not in the Oracle catalog \u2014 use skill resources and log it in Grow.</span>') + '</td></tr>';
-    }).join('');
-    return '<h3 class="tt__h">A skill push</h3>' + pick +
-      '<p class="tt__sub">Who carries each skill today (by role profile), and where to send everyone else. Every member should log the goal in Oracle Grow.</p>' +
-      '<div class="tablewrap tt__tablewrap"><table class="learntable tt__table">' +
-      '<thead><tr><th>Skill</th><th>Held today by</th><th>Oracle Learning</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody></table></div>' +
-      '<div class="plan__actions"><button type="button" class="btn" id="tt-print">Print team snapshot</button></div>';
   }
 
   /* ---------- Utils ---------- */
