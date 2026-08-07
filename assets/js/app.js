@@ -334,6 +334,7 @@
      sub-family, so every picker searches these and resolves to {s: sub-family, l: level}.
      s is null for roles the framework has not profiled yet (Executive, Temporary Services). */
   var JOBROLES = [];
+  var JOBROLES_BUILT = '';
 
   Promise.all([
     fetch('assets/data/sbja.json').then(function (r) { return r.json(); }),
@@ -344,6 +345,7 @@
     DATA = res[0];
     if (res[1]) ORACLE = res[1];
     JOBROLES = (res[2] && res[2].roles) || [];
+    JOBROLES_BUILT = (res[2] && res[2].built) || '';
     LIB = res[3] || [];
     init();
     initSkillsFirst();
@@ -356,6 +358,13 @@
 
   function oracleCoursesFor(skillName) {
     return ORACLE.skills[skillName] || [];
+  }
+
+  /* Engagement events for the FY27 measure ("staff reached, engagement monitored").
+     Vercel Analytics custom events — counts only, never a job title or anything that could
+     identify a person. Silent no-op when analytics is not loaded. */
+  function track(name, props) {
+    try { if (typeof window.va === 'function') window.va('event', { name: name, data: props || {} }); } catch (e) {}
   }
 
   /* ---------- Setup ---------- */
@@ -503,6 +512,7 @@
   }
   function enterRolesPath() {
     applyHowCopy('roles');
+    track('path_chosen', { path: 'my_role' });
     showOnly('myrole');
     document.getElementById('mode-banner').hidden = true;
     document.getElementById('explore').classList.remove('skillsmode');
@@ -510,11 +520,13 @@
   }
   function enterSkillsPath() {
     applyHowCopy('skills');
+    track('path_chosen', { path: 'my_skills' });
     showOnly('skillsfirst');
     if (fromSel.value || toSel.value) { fromSel.value = ''; toSel.value = ''; if (DATA) update(); }
   }
   function enterTeamPath() {
     applyHowCopy('team');
+    track('path_chosen', { path: 'my_team' });
     showOnly('teamtool');
     if (fromSel.value || toSel.value) { fromSel.value = ''; toSel.value = ''; if (DATA) update(); }
   }
@@ -1046,9 +1058,9 @@
         '" data-kind="' + (s === AI_READINESS ? 'univ' : 'role') + '" data-role="' + esc(roleKey) + '">' +
         esc(s.skill) + '</button>' + profMeter(s.prof) +
         (profRange(s.prof) ? '<span class="lt-prof">Target: ' + profRange(s.prof) + '</span>' : '') + '</td>' +
-      '<td class="lt-why">' + why + '</td>' +
-      '<td class="lt-learn">' + learn + '</td>' +
-      '<td class="lt-date"><input type="date" class="dateinput" data-datekey="' + esc(dk) + '"' +
+      '<td class="lt-why" data-label="Why it\u2019s here">' + why + '</td>' +
+      '<td class="lt-learn" data-label="Oracle Learning">' + learn + '</td>' +
+      '<td class="lt-date" data-label="Target date"><input type="date" class="dateinput" data-datekey="' + esc(dk) + '"' +
         (dv ? ' value="' + esc(dv) + '"' : '') + ' aria-label="Target date for ' + esc(s.skill) + '"></td>' +
       '</tr>';
   }
@@ -1452,9 +1464,11 @@
       p.tgtRole = r.s || ''; p.tgtLevel = r.l || '';
       PEOPLE.list[PEOPLE.active] = DEV = p;
       input.value = r.n;
+      track('role_selected', { scope: 'manager', profiled: r.s ? 'yes' : 'no' });
       saveDev(); renderPeople(); renderDevelop();
     });
     syncDevPickers();
+    stampFreshness();
     renderPeople();
     renderDevelop();
   }
@@ -1560,6 +1574,7 @@
     var buildBtn = e.target.closest('[data-auditbuild]');
     if (buildBtn) {
       var sc3 = buildBtn.dataset.auditbuild, st3 = stateFor(sc3);
+      track('plan_built', { scope: sc3, direction: st3.dir, profiled: st3.tgtRole ? 'yes' : 'no' });
       st3.built = true; saveFor(sc3); renderFor(sc3);
       var pl = document.getElementById(sc3 + '-plan');
       if (pl) pl.scrollIntoView({ behavior: 'smooth' });
@@ -1591,6 +1606,7 @@
     var printBtn = e.target.closest('[data-print]');
     if (printBtn) {
       var host = printBtn.closest('.tt__devplan');
+      track('plan_printed', { scope: host ? (host.id === 'me-plan' ? 'me' : 'manager') : 'skills_first' });
       document.body.classList.toggle('printing-audit', !!host);
       print();
       document.body.classList.remove('printing-audit');
@@ -1899,9 +1915,9 @@
         return '<tr><td class="tt-skill"><button type="button" class="skill-link" data-skill="' + esc(g.skill.skill) +
           '" data-kind="role" data-role="' + esc(st.tgtRole) + '">' + esc(g.skill.skill) + '</button>' +
           (g.mapped ? '' : '<span class="tt-flag">' + M.newFlag + '</span>') + '</td>' +
-          '<td>' + profSel(M, g.skill.skill, 'at', g.at) + '</td>' +
-          '<td>' + profSel(M, g.skill.skill, 'need', g.need) + '</td>' +
-          '<td>' + gapCell + '</td></tr>';
+          '<td data-label="' + M.at + '">' + profSel(M, g.skill.skill, 'at', g.at) + '</td>' +
+          '<td data-label="' + M.need + '">' + profSel(M, g.skill.skill, 'need', g.need) + '</td>' +
+          '<td data-label="Gap">' + gapCell + '</td></tr>';
       }).join('') + '</tbody></table></div>';
 
     html += auditExtras(st, M);
@@ -1964,9 +1980,9 @@
       '<td class="lt-pri">' + (i + 1) + '</td>' +
       '<td class="lt-skill"><button type="button" class="skill-link" data-skill="' + esc(s.skill) +
         '" data-kind="' + (g ? 'role' : 'univ') + '" data-role="' + esc(st.tgtRole || '') + '">' + esc(s.skill) + '</button></td>' +
-      '<td class="lt-why">' + why + '</td>' +
-      '<td class="lt-learn">' + learn + '</td>' +
-      '<td class="lt-date"><input type="date" class="dateinput" data-datekey="' + esc(dk) + '"' +
+      '<td class="lt-why" data-label="Why it\u2019s here">' + why + '</td>' +
+      '<td class="lt-learn" data-label="Oracle Learning">' + learn + '</td>' +
+      '<td class="lt-date" data-label="Target date"><input type="date" class="dateinput" data-datekey="' + esc(dk) + '"' +
         (dv ? ' value="' + esc(dv) + '"' : '') + ' aria-label="Target date for ' + esc(s.skill) + '"></td>' +
       '</tr>';
   }
@@ -2065,10 +2081,23 @@
       ME.jobRole = r.n; ME.jobFamily = r.f; ME.role = r.s || ''; ME.level = r.l || '';
       ME.tgtRole = r.s || ''; ME.tgtLevel = r.l || '';
       document.getElementById('mr-search').value = r.n;
+      track('role_selected', { scope: 'me', profiled: r.s ? 'yes' : 'no' });
       saveMe(); renderMyRole();
     });
     if (ME.jobRole) document.getElementById('mr-search').value = ME.jobRole;
+    stampFreshness();
     renderMyRole();
+  }
+
+  /* Say how current the mapping is: staff should know when a title list is a snapshot. */
+  function stampFreshness() {
+    if (!JOBROLES_BUILT) return;
+    var txt = JOBROLES.length + ' Vanderbilt job titles \u00b7 job architecture as of ' + JOBROLES_BUILT +
+      '. If your title is missing or wrong, tell your Engagement Consultant.';
+    ['mr-fresh', 'ttd-fresh'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    });
   }
 
   function renderMyRole() {

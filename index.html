@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=17">
+<link rel="stylesheet" href="assets/css/styles.css?v=19">
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
@@ -127,6 +127,7 @@
           <input type="text" id="mr-search" placeholder="Type your job title &mdash; e.g. Student Advisor, Program Management&hellip;" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="mr-suggest" aria-label="Search your job title">
           <div class="rs__suggest" id="mr-suggest" hidden role="listbox"></div>
         </div>
+        <p class="rs__fresh" id="mr-fresh"></p>
         <div class="mr__chosen" id="mr-chosen" hidden></div>
       </div>
 
@@ -156,6 +157,7 @@
           <input type="text" id="ttd-search" placeholder="Search their job title &mdash; e.g. Instructional Designer&hellip;" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ttd-suggest" aria-label="Search their job title">
           <div class="rs__suggest" id="ttd-suggest" hidden role="listbox"></div>
         </div>
+        <p class="rs__fresh" id="ttd-fresh"></p>
         <div class="mr__chosen" id="ttd-chosen" hidden></div>
         <div class="tt__view" id="ttd-view" aria-live="polite"></div>
       </div>
@@ -420,6 +422,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js?v=17"></script>
+<script src="assets/js/app.js?v=19"></script>
 </body>
 </html>

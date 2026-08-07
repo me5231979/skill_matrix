@@ -719,6 +719,7 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .rs__name { display: block; font: 600 .95rem var(--font-sans); color: var(--vu-black); }
 .rs__meta { display: block; margin-top: .12rem; font-size: .78rem; color: var(--ink-soft); }
 .rs__none { padding: .85rem .95rem; font-size: .86rem; color: var(--ink-soft); margin: 0; }
+.rs__fresh { margin-top: .5rem; font-size: .78rem; color: var(--ink-soft); }
 .rs__hint { padding: .55rem .95rem; margin: 0; font-size: .76rem; color: var(--ink-soft);
   background: var(--cream); border-bottom: 1px solid var(--line); }
 
@@ -805,3 +806,37 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 #teamtool .olink { color: var(--vu-oak); }
 #teamtool .olink:hover { color: var(--vu-black); }
 #teamtool[hidden] { display: none !important; }
+
+/* ---------- Phones: the rating and plan tables stack into cards ----------
+   A four-column rating table is 680px wide — it forced a nested horizontal scroll on the
+   core interaction. Below 700px each row becomes a card with its own labels. */
+@media (max-width: 700px) {
+  .tt__ratetable, .tt__ratetable tbody, .tt__ratetable tr, .tt__ratetable td,
+  .tt__devplan .learntable, .tt__devplan .learntable tbody,
+  .tt__devplan .learntable tr, .tt__devplan .learntable td { display: block; width: 100%; }
+  .tt__ratetable thead, .tt__devplan .learntable thead { display: none; }
+  .tt__ratetable tr, .tt__devplan .learntable tr { background: #fff; border: 1px solid var(--sand);
+    border-radius: 6px; margin-bottom: .75rem; padding: .85rem 1rem; }
+  .tt__ratetable td, .tt__devplan .learntable td { border: 0; padding: .3rem 0; text-align: left; }
+  .tt__ratetable td[data-label]::before, .tt__devplan .learntable td[data-label]::before {
+    content: attr(data-label); display: block; margin-bottom: .2rem;
+    font: 700 .66rem var(--font-condensed); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--vu-oak-text); }
+  .tt__ratetable td.tt-skill, .tt__devplan .learntable td.lt-skill {
+    font-weight: 600; border-bottom: 1px solid var(--line); padding-bottom: .5rem; margin-bottom: .35rem; }
+  /* 16px stops iOS zooming the page when a control is tapped; 44px is the touch target. */
+  .tt__ratetable select, .tt__devplan .dateinput { width: 100%; min-height: 44px; font-size: 16px; }
+  .tt__devplan .learntable td.lt-pri { font: 700 .7rem var(--font-condensed); color: var(--vu-oak-text); }
+  .tt__devplan .learntable td.lt-done { padding-bottom: .4rem; }
+  /* .learntable carries min-width:680px for the desktop grid — release it when stacked. */
+  .tt__ratetable, .tt__devplan .learntable { min-width: 0; }
+  .tablewrap, .tt__tablewrap { overflow-x: visible; }
+  .rs input[type="text"], .tt__addrow input[type="text"], .tt__addrow select,
+  .mr__lvlwrap select { font-size: 16px; min-height: 44px; }
+  .mr__lvlwrap { display: flex; margin-left: 0; margin-top: .6rem; }
+  .mr__lvlwrap select { flex: 1; }
+  .ttdir { flex: 1 1 100%; }
+  .pathswitch__label { display: none; }
+  .planhead__top { flex-direction: column; }
+  .planhead__print { width: 100%; }
+}
