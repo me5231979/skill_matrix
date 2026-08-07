@@ -1588,7 +1588,13 @@
       saveDev(); syncDevPickers(); renderPeople(); renderDevelop();
       return;
     }
-    if (e.target.closest('#tt-print')) { print(); }
+    var printBtn = e.target.closest('[data-print]');
+    if (printBtn) {
+      var host = printBtn.closest('.tt__devplan');
+      document.body.classList.toggle('printing-audit', !!host);
+      print();
+      document.body.classList.remove('printing-audit');
+    }
   });
 
   /* ---------- Job-role search: staff know their title, not their sub-family ---------- */
@@ -1628,46 +1634,87 @@
     return -1;
   }
 
-  /* One type-ahead, three experiences. onPick receives the job-role record. */
+  /* Titles most people hold, shown before anyone types, so the field browses as well as
+     searches. Sorted by headcount: the list opens on the roles most staff actually sit in. */
+  function commonRoles(limit) {
+    return JOBROLES.slice()
+      .sort(function (a, b) { return b.h - a.h || a.n.localeCompare(b.n); })
+      .slice(0, limit || 12);
+  }
+
+  /* One combobox, three experiences. Type to search, or open it and browse.
+     onPick receives the job-role record. */
   function attachRoleSearch(input, suggest, onPick) {
-    if (!input) return;
-    var active = -1, current = [];
+    if (!input || !suggest) return;
+    var active = -1, current = [], browsing = false;
+    var listId = suggest.id;
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-expanded', 'false');
+    if (listId) input.setAttribute('aria-controls', listId);
+    suggest.setAttribute('role', 'listbox');
+
     function close() {
       suggest.hidden = true; suggest.innerHTML = ''; active = -1; current = [];
       input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
     }
+    function optId(i) { return (listId || 'rs') + '-opt-' + i; }
     function draw() {
-      if (!current.length) {
-        suggest.innerHTML = '<p class="rs__none">No job title matches that. Try fewer words, or a word from the middle of your title.</p>';
+      if (!JOBROLES.length) {
+        suggest.innerHTML = '<p class="rs__none">Job titles could not be loaded. Refresh the page to try again.</p>';
         suggest.hidden = false; input.setAttribute('aria-expanded', 'true');
         return;
       }
-      suggest.innerHTML = current.map(function (r, i) {
-        var st = r.l ? streamOf(r.l) : null;
-        return '<button type="button" class="rs__opt' + (i === active ? ' on' : '') + '" role="option" data-rsi="' + i + '">' +
-          '<span class="rs__name">' + esc(r.n) + '</span>' +
-          '<span class="rs__meta">' + esc(r.f) +
-          (r.l ? ' · ' + esc(r.l) + (st ? ' ' + esc(st.label) : '') : '') +
-          (r.s ? '' : ' · <i>no skill profile yet</i>') + '</span></button>';
-      }).join('');
+      if (!current.length) {
+        suggest.innerHTML = '<p class="rs__none">No job title matches that. Try fewer words, or a word from the middle of your title.</p>';
+        suggest.hidden = false; input.setAttribute('aria-expanded', 'true');
+        input.removeAttribute('aria-activedescendant');
+        return;
+      }
+      suggest.innerHTML = (browsing ? '<p class="rs__hint">Most common titles &mdash; start typing to search all ' + JOBROLES.length + '.</p>' : '') +
+        current.map(function (r, i) {
+          var st = r.l ? streamOf(r.l) : null;
+          return '<button type="button" class="rs__opt' + (i === active ? ' on' : '') + '" role="option" id="' + optId(i) +
+            '" aria-selected="' + (i === active ? 'true' : 'false') + '" data-rsi="' + i + '">' +
+            '<span class="rs__name">' + esc(r.n) + '</span>' +
+            '<span class="rs__meta">' + esc(r.f) +
+            (r.l ? ' · ' + esc(r.l) + (st ? ' ' + esc(st.label) : '') : '') +
+            (r.s ? '' : ' · <i>no skill profile yet</i>') + '</span></button>';
+        }).join('');
       suggest.hidden = false;
       input.setAttribute('aria-expanded', 'true');
+      if (active >= 0) {
+        input.setAttribute('aria-activedescendant', optId(active));
+        var el = suggest.querySelector('.rs__opt.on');
+        if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+      } else {
+        input.removeAttribute('aria-activedescendant');
+      }
     }
-    input.addEventListener('input', function () {
-      current = searchRoles(input.value, 12); active = -1; draw();
-    });
-    input.addEventListener('focus', function () {
-      if (input.value.trim()) { current = searchRoles(input.value, 12); draw(); }
-    });
+    function refresh() {
+      var q = input.value.trim();
+      browsing = !q;
+      current = q ? searchRoles(q, 12) : commonRoles(12);
+      active = -1;
+      draw();
+    }
+    input.addEventListener('input', refresh);
+    input.addEventListener('focus', refresh);
+    input.addEventListener('click', function () { if (suggest.hidden) refresh(); });
     input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' && suggest.hidden) { e.preventDefault(); refresh(); return; }
       if (suggest.hidden || !current.length) return;
       if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active + 1, current.length - 1); draw(); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); draw(); }
+      else if (e.key === 'Home') { e.preventDefault(); active = 0; draw(); }
+      else if (e.key === 'End') { e.preventDefault(); active = current.length - 1; draw(); }
       else if (e.key === 'Enter') {
         e.preventDefault();
         var pick = current[active < 0 ? 0 : active];
         if (pick) { close(); onPick(pick); }
-      } else if (e.key === 'Escape') { close(); }
+      } else if (e.key === 'Escape') { e.preventDefault(); close(); }
+      else if (e.key === 'Tab') { close(); }
     });
     suggest.addEventListener('mousedown', function (e) {
       var b = e.target.closest('[data-rsi]');
@@ -1686,7 +1733,7 @@
     scope: 'me',
     ask: 'Are you growing in your <b>current role</b>, or toward something else?',
     dirs: [
-      ['current', 'Grow in my current role', function (st) { return esc(st.jobRole) + ' at ' + esc(st.level); }],
+      ['current', 'Grow in my current role', function (st) { return esc(st.jobRole) + (st.level ? ' at ' + esc(st.level) : ''); }],
       ['up', 'Grow to the next level', function (st) { return 'A higher level in my sub-family'; }],
       ['other', 'Grow to transfer', function () { return 'A different role somewhere else at Vanderbilt'; }]
     ],
@@ -1707,7 +1754,7 @@
     scope: 'mgr',
     ask: 'Is this person growing in their <b>current role</b>, or toward something else?',
     dirs: [
-      ['current', 'Grow in their current role', function (st) { return esc(st.jobRole || st.role) + ' at ' + esc(st.level); }],
+      ['current', 'Grow in their current role', function (st) { return esc(st.jobRole || st.role) + (st.level ? ' at ' + esc(st.level) : ''); }],
       ['up', 'Grow to the next level', function (st) { return 'A higher level in their sub-family'; }],
       ['other', 'Grow to transfer', function () { return 'A different sub-family entirely'; }]
     ],
@@ -1779,7 +1826,17 @@
   }
 
   /* Direction chooser + destination pickers + rating table + extras + plan. */
+  /* Everything above the plan is "work" — hidden when the plan is printed. */
   function auditBody(st, M) {
+    return '<div class="audit__work">' + auditWork(st, M) + '</div>' + (st.built ? auditTail(st, M) : '');
+  }
+  function auditTail(st, M) {
+    if (!st.tgtRole) return auditPlan(st, [], M);
+    var list = auditList(st);
+    return list.length ? auditPlan(st, list, M) : '';
+  }
+
+  function auditWork(st, M) {
     var html = '<p class="tt__ask">' + M.ask + '</p>';
     html += '<div class="lensrow tt__dirrow">' + M.dirs.map(function (x) {
       return '<button type="button" class="ttdir' + (st.dir === x[0] ? ' on' : '') + '" data-ttdir="' + x[0] +
@@ -1787,10 +1844,14 @@
     }).join('') + '</div>';
 
     if (st.dir === 'up') {
-      var above = st.role ? levelsAbove(st.role, st.level) : [];
+      if (!st.role) {
+        return html + '<p class="tt__sub"><b class="tt-flagtext">This title has no mapped skill profile,</b> so there is no level ladder to step up. ' +
+          'Choose “Grow to transfer” and search a title that is mapped, or stay on “current role” to work from the core competencies.</p>';
+      }
+      var above = levelsAbove(st.role, st.level);
       if (!above.length) {
         return html + '<p class="tt__sub"><b class="tt-flagtext">' + esc(st.level || 'This level') +
-          ' is the top mapped level for ' + esc(st.role || 'this role') +
+          ' is the top mapped level for ' + esc(st.role) +
           '.</b> Choose “Grow to transfer” to keep moving.</p>';
       }
       html += '<div class="tt__addrow tt__targetrow"><label class="tt__targetlbl" for="' + M.scope + '-tgt-level">New level</label>' +
@@ -1846,7 +1907,6 @@
     html += auditExtras(st, M);
     html += '<div class="plan__actions"><button type="button" class="btn btn--dark" data-auditbuild="' + M.scope + '">' +
       (st.built ? M.rebuild : M.build) + '</button></div>';
-    if (st.built) html += auditPlan(st, list, M);
     return html;
   }
 
@@ -1869,15 +1929,14 @@
     html += auditExtras(st, M);
     html += '<div class="plan__actions"><button type="button" class="btn btn--dark" data-auditbuild="' + M.scope + '">' +
       (st.built ? M.rebuild : M.build) + '</button></div>';
-    if (st.built) html += auditPlan(st, [], M);
     return html;
   }
 
   function auditExtras(st, M) {
     return '<div class="tt__extras"><p class="sf__label">' + M.extrasLabel + '</p>' +
       '<p class="tt__sub">' + M.extrasHelp + '</p>' +
-      '<div class="tt__addrow"><input type="text" data-extrainput="' + M.scope + '" maxlength="80" placeholder="' +
-      M.extrasPlaceholder + '">' +
+      '<div class="tt__addrow"><input type="text" data-extrainput="' + M.scope + '" maxlength="80" aria-label="' +
+      M.extrasLabel + '" placeholder="' + M.extrasPlaceholder + '">' +
       '<button type="button" class="btn btn--dark" data-extraadd="' + M.scope + '">Add area</button></div>' +
       (st.extras.length ? '<ul class="pills sf__picked">' + st.extras.map(function (x) {
         return '<li><span class="pill">' + esc(x) + '<button type="button" class="sf-x" data-extrarm="' + esc(x) +
@@ -1934,7 +1993,7 @@
     });
     var mine = M.scope === 'me';
     var dirText = !st.tgtRole ? (mine ? 'growth in <b>' + esc(st.jobRole) + '</b>' : 'growth in <b>' + esc(st.jobRole || st.role) + '</b>') :
-      st.dir === 'current' ? 'development in the current role, <b>' + esc(st.jobRole || st.role) + '</b> at <b>' + esc(st.level) + '</b>' :
+      st.dir === 'current' ? 'development in the current role, <b>' + esc(st.jobRole || st.role) + '</b>' + (st.level ? ' at <b>' + esc(st.level) + '</b>' : '') :
       st.dir === 'up' ? 'growth to the next level: <b>' + esc(st.level) + ' → ' + esc(st.tgtLevel) + '</b> in <b>' + esc(st.tgtRole) + '</b>' :
       'growth to transfer: <b>' + esc(st.jobRole || st.role) + '</b> → <b>' + esc(st.tgtJobRole || st.tgtRole) + '</b> at <b>' + esc(st.tgtLevel) + '</b>';
 
@@ -1949,20 +2008,42 @@
         return '<li><span class="pill">' + esc(g.skill.skill) + ' · ' + PROF_NAMES[g.at - 1] + '</span></li>';
       }).join('') + '</ul>' : '';
 
+    var steps = mine ? [
+      ['Talk it through', 'Take this to your manager and your Engagement Consultant. Agree what matters most and what is realistic this year.'],
+      ['Set the dates', 'Put a target date on each row below. A skill without a date rarely moves.'],
+      ['Log it in Oracle', 'Create a development goal in Oracle Grow for each skill, enrol in the linked learning, and add the skill to your Talent Profile once you have built it.']
+    ] : [
+      ['Share it, don’t score it', 'Hand this to the person as a growth conversation. It is a development roadmap, not a performance rating.'],
+      ['Agree the dates together', 'Put a target date on each row below and decide together what is realistic this year.'],
+      ['Log it in Oracle', 'Have them create a development goal in Oracle Grow for each skill, enrol in the linked learning, and add each skill to their Talent Profile once built.']
+    ];
+
     return '<div class="tt__devplan" id="' + M.scope + '-plan">' +
-      '<h3 class="tt__h">' + M.planTitle + '</h3>' +
-      '<p class="tt__sub">Built from ' + (mine ? 'your' : 'your') + ' ratings for ' + dirText + ': <b class="tt-flagtext">' +
-      gaps.length + ' gap skill' + plural(gaps.length) + '</b>, biggest gap first, plus AI Workforce Readiness — assumed for every role' +
-      (st.extras.length ? ' — and <b>' + st.extras.length + ' development area' + plural(st.extras.length) + '</b> named above' : '') + '. ' +
-      (mine ? '' : '<b>Development, not evaluation</b> — no names on this page, and the plan lives only in your browser. ') +
-      M.ownerLine + oa('Oracle Grow', ORA.grow) + '.</p>' +
+      '<div class="planhead">' +
+        '<div class="planhead__top">' +
+          '<div><p class="planhead__eyebrow">For development</p>' +
+          '<h3 class="tt__h">' + M.planTitle + '</h3></div>' +
+          '<button type="button" class="btn planhead__print" data-print>Print this plan</button>' +
+        '</div>' +
+        '<p class="planhead__what">Built from ' + (mine ? 'your' : 'your') + ' ratings for ' + dirText + ': <b class="tt-flagtext">' +
+        gaps.length + ' gap skill' + plural(gaps.length) + '</b>, biggest gap first, plus AI Workforce Readiness — assumed for every role' +
+        (st.extras.length ? ' — and <b>' + st.extras.length + ' development area' + plural(st.extras.length) + '</b> named above' : '') + '.</p>' +
+        '<ol class="planhead__steps">' + steps.map(function (s) {
+          return '<li><b>' + s[0] + '</b><span>' + s[1] + '</span></li>';
+        }).join('') + '</ol>' +
+        '<p class="planhead__note"><b>Growth is guaranteed. Placement is not.</b> This is a development roadmap, not a promise of placement. ' +
+        'Completing it builds real readiness, but it does not guarantee selection for, or transfer into, any role — internal openings are filled ' +
+        'through Vanderbilt’s standard recruitment process. What the work does guarantee: the skills are ' + (mine ? 'yours' : 'theirs') + '.' +
+        (mine ? '' : ' <b>Development, not evaluation</b> — no names appear on this page, and nothing here is uploaded or shared.') + '</p>' +
+      '</div>' +
       (gaps.length || !list.length ? '' : '<p class="tt__sub">' + M.noGaps + '</p>') +
       '<div class="tablewrap"><table class="learntable">' +
       '<thead><tr><th></th><th>#</th><th>Skill</th><th>Why it’s here</th><th>Oracle Learning</th><th>Target date</th></tr></thead>' +
       '<tbody>' + rows.join('') + '</tbody></table></div>' +
       skillResources(gaps.map(function (g) { return { skill: g.skill }; })) +
       strengthHtml +
-      '<div class="plan__actions"><button type="button" class="btn" id="tt-print">Print this plan</button></div>' +
+      '<p class="planhead__note planhead__note--foot">' + M.ownerLine + oa('Oracle Grow', ORA.grow) + '.</p>' +
+      '<div class="plan__actions"><button type="button" class="btn" data-print>Print this plan</button></div>' +
       '</div>';
   }
 

@@ -41,7 +41,8 @@
 
 /* ---------- 3. Base ---------- */
 * { box-sizing: border-box; margin: 0; }
-html { scroll-behavior: smooth; }
+/* The nav is fixed, so every scroll target needs to clear it or its first line hides. */
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 1rem); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body { font-family: var(--font-sans); color: var(--vu-black); background: var(--vu-white);
   line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -463,6 +464,17 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 /* ---------- 17. Print (the L&D plan is the takeaway) ---------- */
 @media print {
   .nav, .hero, .statbar, .growth, #how, #explore, .plan__actions, .footer, .modal { display: none !important; }
+  /* Printing a development plan: drop the pickers, ratings and chrome, keep the plan. */
+  .printing-audit .pathswitch, .printing-audit .audit__work, .printing-audit .mr__pick,
+  .printing-audit .tt__people, .printing-audit .tt__notice, .printing-audit .eyebrow,
+  .printing-audit #myrole .h2, .printing-audit #teamtool .h2, .printing-audit .lead,
+  .printing-audit .tt__develop > .tt__h, .printing-audit .tt__develop > .tt__sub { display: none !important; }
+  .printing-audit #myrole, .printing-audit #teamtool { display: block !important; }
+  .planhead { border-color: #999; border-top-color: #946E24; page-break-inside: avoid; page-break-after: avoid; }
+  .planhead__eyebrow { color: #946E24 !important; }
+  .planhead__steps li, .planhead__what, .planhead__note { color: #000 !important; }
+  .tt__devplan { border-top-color: #946E24; }
+  .tt__devplan .learntable a { color: #000 !important; }
   body { background: #fff; color: #000; font-size: 11pt; }
   .section, #plan { padding: 0; }
   .wrap { max-width: none; padding-inline: 0; }
@@ -651,7 +663,7 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt__view { margin-top: 2rem; }
 .tt__h { font-family: var(--font-serif); font-weight: 400; font-size: 1.6rem; }
 .tt__sub { color: var(--ink-soft); font-size: .93rem; margin: .5rem 0 1.2rem; max-width: 80ch; }
-.tt-flagtext { color: var(--vu-oak); }
+.tt-flagtext { color: var(--vu-oak-text); }
 .tt__tablewrap { background: #fff; }
 .tt__table td, .tt__table th { text-align: center; }
 .tt__table td.tt-skill, .tt__table th:first-child { text-align: left; }
@@ -659,8 +671,8 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt__table .tt-no { background: #faf8f4; }
 .tt__table tr.tt-single td.tt-skill { border-left: 3px solid var(--vu-gold-flat); }
 .tt-flag { display: inline-block; margin-left: .5rem; font-family: var(--font-condensed); font-weight: 700;
-  font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--vu-oak);
-  border: 1px dashed var(--vu-oak); border-radius: 3px; padding: .12rem .4rem; }
+  font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--vu-oak-text);
+  border: 1px dashed var(--vu-oak-text); border-radius: 3px; padding: .12rem .4rem; }
 .tt__cardnote { font-size: .84rem; color: var(--ink-soft); margin: .4rem 0 .9rem; }
 
 /* Assess-and-plan: develop a single member */
@@ -670,6 +682,27 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt-devbtn:hover { background: var(--vu-oak); color: #fff; }
 .tt__hint { margin-top: .9rem; font-size: .85rem; color: var(--ink-soft); }
 .tt__hint[hidden] { display: none !important; }
+/* Oak is 4.2:1 on cream — below AA for body text. This deeper oak clears 4.5:1 on both
+   cream and white, and is used wherever oak carries meaning as text. */
+:root { --vu-oak-text: #805F1E; }
+
+/* ---------- Development plan header ---------- */
+.planhead { background: #fff; border: 1px solid var(--sand); border-top: 3px solid var(--vu-gold-flat);
+  border-radius: 0 0 6px 6px; padding: 1.4rem 1.5rem; margin-bottom: 1.8rem; }
+.planhead__top { display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; }
+.planhead__eyebrow { font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; font-size: .72rem; color: var(--vu-oak-text); margin-bottom: .2rem; }
+.planhead__print { flex: none; }
+.planhead__what { margin-top: .7rem; font-size: .92rem; color: var(--ink-soft); }
+.planhead__steps { margin: 1.1rem 0 0; padding-left: 1.15rem; display: grid; gap: .55rem; }
+.planhead__steps li { font-size: .88rem; color: var(--ink-soft); }
+.planhead__steps b { display: block; color: var(--vu-black); font-size: .92rem; }
+.planhead__note { margin-top: 1.1rem; padding-top: .9rem; border-top: 1px solid var(--line);
+  font-size: .84rem; color: var(--ink-soft); }
+.planhead__note b { color: var(--vu-black); }
+.planhead__note--foot { margin-top: 1.6rem; border-top: 0; padding-top: 0; }
+
 /* ---------- Job-role search (all three experiences) ---------- */
 .rs { position: relative; margin-top: .5rem; }
 .rs input[type="text"] { width: 100%; padding: .95rem 1.1rem; border: 1px solid var(--sand);
@@ -686,6 +719,8 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .rs__name { display: block; font: 600 .95rem var(--font-sans); color: var(--vu-black); }
 .rs__meta { display: block; margin-top: .12rem; font-size: .78rem; color: var(--ink-soft); }
 .rs__none { padding: .85rem .95rem; font-size: .86rem; color: var(--ink-soft); margin: 0; }
+.rs__hint { padding: .55rem .95rem; margin: 0; font-size: .76rem; color: var(--ink-soft);
+  background: var(--cream); border-bottom: 1px solid var(--line); }
 
 /* ---------- Chosen role header ---------- */
 .mr__pick { margin-top: 2.2rem; }
@@ -694,7 +729,7 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .mr__chosen[hidden] { display: none !important; }
 .mr__title { font-family: var(--font-serif); font-size: 1.35rem; }
 .mr__maps { margin-top: .3rem; font-size: .88rem; color: var(--ink-soft); }
-.mr__note { margin-top: .5rem; font-size: .8rem; color: var(--vu-oak); }
+.mr__note { margin-top: .5rem; font-size: .8rem; color: var(--vu-oak-text); }
 .mr__lvlwrap { display: inline-flex; align-items: center; gap: .5rem; margin-left: .9rem; }
 .mr__lvlwrap label { font-weight: 600; color: var(--vu-black); }
 .mr__lvlwrap select { padding: .4rem .55rem; border: 1px solid var(--sand); border-radius: 4px;
@@ -712,7 +747,7 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt__person.on { background: var(--vu-black); color: var(--vu-gold-flat); border-color: var(--vu-black); }
 .tt__person.on .sf-x { color: var(--vu-gold-flat); }
 .tt__addperson { font: 600 .85rem var(--font-sans); padding: .5rem 1.05rem; border-radius: 999px; cursor: pointer;
-  background: none; border: 1px dashed var(--vu-oak); color: var(--vu-oak); }
+  background: none; border: 1px dashed var(--vu-oak-text); color: var(--vu-oak-text); }
 .tt__addperson:hover { border-style: solid; }
 .tt__develop .tt__sub { margin-bottom: .9rem; }
 .tt__divide { border: 0; border-top: 1px solid var(--sand); margin: 3rem 0 2.6rem; }
@@ -736,7 +771,7 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt-gapchip { display: inline-block; min-width: 2.2rem; font: 700 .78rem var(--font-sans);
   color: #fff; background: var(--vu-oak); border-radius: 999px; padding: .18rem .5rem; }
 .tt-okchip { font: 600 .74rem var(--font-sans); color: var(--ink-soft); }
-.tt__devplan { margin-top: 2.6rem; border-top: 3px solid var(--vu-gold-flat); padding-top: 1.6rem; }
+.tt__devplan { margin-top: 2.6rem; padding-top: 1.6rem; scroll-margin-top: calc(var(--nav-h) + 1rem); }
 .tt__strengthh { font-family: var(--font-serif); font-weight: 400; font-size: 1.15rem; margin-top: 1.8rem; }
 .tt__strengths .pill { border-color: var(--vu-gold-flat); }
 
