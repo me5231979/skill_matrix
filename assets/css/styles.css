@@ -670,6 +670,42 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
 .tt-devbtn:hover { background: var(--vu-oak); color: #fff; }
 .tt__hint { margin-top: .9rem; font-size: .85rem; color: var(--ink-soft); }
 .tt__hint[hidden] { display: none !important; }
+/* ---------- Job-role search (all three experiences) ---------- */
+.rs { position: relative; margin-top: .5rem; }
+.rs input[type="text"] { width: 100%; padding: .95rem 1.1rem; border: 1px solid var(--sand);
+  border-radius: 4px; font: 500 1rem var(--font-sans); background: #fff; }
+.rs input[type="text"]:focus { outline: 2px solid var(--vu-gold-flat); outline-offset: 1px; border-color: var(--vu-gold-flat); }
+.rs__suggest { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px);
+  background: #fff; border: 1px solid var(--sand); border-radius: 4px; max-height: 340px;
+  overflow-y: auto; box-shadow: 0 10px 30px rgba(28,28,28,.14); }
+.rs__suggest[hidden] { display: none !important; }
+.rs__opt { display: block; width: 100%; text-align: left; background: none; border: 0;
+  border-bottom: 1px solid var(--line); padding: .7rem .95rem; cursor: pointer; }
+.rs__opt:last-child { border-bottom: 0; }
+.rs__opt:hover, .rs__opt.on { background: var(--cream); }
+.rs__name { display: block; font: 600 .95rem var(--font-sans); color: var(--vu-black); }
+.rs__meta { display: block; margin-top: .12rem; font-size: .78rem; color: var(--ink-soft); }
+.rs__none { padding: .85rem .95rem; font-size: .86rem; color: var(--ink-soft); margin: 0; }
+
+/* ---------- Chosen role header ---------- */
+.mr__pick { margin-top: 2.2rem; }
+.mr__chosen { margin-top: 1.1rem; background: #fff; border-left: 3px solid var(--vu-gold-flat);
+  padding: 1rem 1.2rem; border-radius: 0 4px 4px 0; }
+.mr__chosen[hidden] { display: none !important; }
+.mr__title { font-family: var(--font-serif); font-size: 1.35rem; }
+.mr__maps { margin-top: .3rem; font-size: .88rem; color: var(--ink-soft); }
+.mr__note { margin-top: .5rem; font-size: .8rem; color: var(--vu-oak); }
+.mr__lvlwrap { display: inline-flex; align-items: center; gap: .5rem; margin-left: .9rem; }
+.mr__lvlwrap label { font-weight: 600; color: var(--vu-black); }
+.mr__lvlwrap select { padding: .4rem .55rem; border: 1px solid var(--sand); border-radius: 4px;
+  font: 500 .84rem var(--font-sans); background: #fff; }
+.mr__noprofile { background: #fff; border: 1px solid var(--sand); border-radius: 6px;
+  padding: 1.1rem 1.3rem; margin: 1.4rem 0; }
+.mr__noprofile h4 { font-family: var(--font-serif); font-weight: 400; font-size: 1.15rem; }
+.mr__noprofile p { margin-top: .5rem; font-size: .9rem; color: var(--ink-soft); }
+.tt__targetsearch { margin: 1.2rem 0; max-width: 560px; }
+#myrole[hidden] { display: none !important; }
+
 .tt__develop { margin-top: 2.4rem; }
 .tt__people { list-style: none; padding: 0; margin: 0 0 1.1rem; display: flex; flex-wrap: wrap; gap: .5rem; }
 .tt__person { cursor: pointer; }

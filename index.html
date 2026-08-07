@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Talent Compass | Vanderbilt Career Pathways</title>
-<meta name="description" content="Know exactly where you can go. Pick two Vanderbilt roles, see what carries over and what to grow and get a printable learning plan.">
+<meta name="description" content="Know exactly where you can go. Search your Vanderbilt job title, rate your skills against what the role expects and get a printable development plan.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Talent Compass | Vanderbilt Career Pathways">
-<meta property="og:description" content="Know exactly where you can go. See where your skills can take you across 18 job families and 92 roles.">
+<meta property="og:description" content="Know exactly where you can go. Search your job title, see the skills your role expects and build a plan across 1,098 Vanderbilt job titles.">
 <meta property="og:url" content="https://me5231979.github.io/skill_matrix/">
 <meta property="og:image" content="https://me5231979.github.io/skill_matrix/assets/img/social-card-talent-compass.jpg">
 <meta property="og:image:width" content="1200">
@@ -20,14 +20,14 @@
 <link rel="apple-touch-icon" href="assets/img/favicon-96.png">
 <link rel="preload" href="assets/fonts/libre-caslon-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=14">
+<link rel="stylesheet" href="assets/css/styles.css?v=15">
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<a class="skip-link" href="#explore">Skip to the explorer</a>
+<a class="skip-link" href="#myrole">Skip to the compass</a>
 
 <!-- ===================== NAV ===================== -->
 <header class="nav" id="nav">
@@ -37,7 +37,6 @@
   </a>
   <nav class="nav__links" aria-label="Sections">
     <a href="#how">How it works</a>
-    <a href="#explore">Explorer</a>
     <a href="#plan">Your plan</a>
     <button type="button" class="btn" id="nav-path">Map a path</button>
   </nav>
@@ -58,7 +57,7 @@
       <img src="assets/img/vu-v-icon.png" alt="Vanderbilt V" width="72" height="66" class="hero__mark" data-reveal>
       <p class="eyebrow" data-reveal>Vanderbilt &middot; Talent Compass</p>
       <h1 class="h-hero" data-reveal>Know <em class="gold-text">exactly</em> where you can go.</h1>
-      <p class="lead" data-reveal>Every Vanderbilt role is built on skills. Now your path forward is too. Pick two roles. See what you already bring, what closes the gap and what to grow next. The Summit is closer than you think.</p>
+      <p class="lead" data-reveal>Every Vanderbilt role is built on skills. Now your path forward is too. Search your job title, rate yourself against what the role expects, and get a plan for where you want to go next. The Summit is closer than you think.</p>
       <div class="hero__cta" data-reveal>
         <button type="button" class="btn" id="hero-path">Choose your path</button>
         <a class="btn btn--ghost" href="#how">How it works</a>
@@ -69,8 +68,8 @@
   <!-- ============ STAT BAR ============ -->
   <section class="statbar" aria-label="Framework at a glance">
     <div class="wrap">
-      <p class="stat" data-reveal><b>18</b><span>Job families</span></p>
-      <p class="stat" data-reveal><b>92</b><span>Roles mapped</span></p>
+      <p class="stat" data-reveal><b>92</b><span>Skill profiles</span></p>
+      <p class="stat" data-reveal><b>1,098</b><span>Job titles mapped</span></p>
       <p class="stat" data-reveal><b>954</b><span>Skill mappings</span></p>
       <p class="stat" data-reveal><b>7</b><span>Core competencies</span></p>
       <p class="stat" data-reveal><b>4,410</b><span>Skills in the library</span></p>
@@ -109,6 +108,32 @@
     </div>
   </section>
 
+  <!-- ============ MY ROLE (staff self-audit) ============ -->
+  <section class="section on-cream" id="myrole" hidden>
+    <div class="wrap">
+      <div class="pathswitch" role="group" aria-label="Search by role, skills or team">
+        <span class="pathswitch__label">Searching by</span>
+        <button type="button" class="pathswitch__btn ps-role on" data-path="roles">My role</button>
+        <button type="button" class="pathswitch__btn ps-skills" data-path="skills">My skills</button>
+        <button type="button" class="pathswitch__btn ps-team" data-path="team">My team</button>
+      </div>
+      <p class="eyebrow">Your path</p>
+      <h2 class="h2">Start with <em>your job title.</em></h2>
+      <p class="lead">Search the title on your offer letter or in Oracle &mdash; no need to know your job family or sub-family. Your skills load with the proficiency the framework expects, you rate yourself against them, and the plan builds from the gaps.</p>
+
+      <div class="mr__pick">
+        <p class="sf__label">1 &middot; Find your job title</p>
+        <div class="rs">
+          <input type="text" id="mr-search" placeholder="Type your job title &mdash; e.g. Student Advisor, Program Management&hellip;" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="mr-suggest" aria-label="Search your job title">
+          <div class="rs__suggest" id="mr-suggest" hidden role="listbox"></div>
+        </div>
+        <div class="mr__chosen" id="mr-chosen" hidden></div>
+      </div>
+
+      <div class="tt__view" id="mr-view" aria-live="polite"></div>
+    </div>
+  </section>
+
   <!-- ============ TEAM TOOL ============ -->
   <section class="section on-cream" id="teamtool" hidden>
     <div class="wrap">
@@ -120,17 +145,18 @@
       </div>
       <p class="eyebrow">The manager view</p>
       <h2 class="h2">See your team&rsquo;s skills. <em>Fill the gaps.</em></h2>
-      <p class="lead">Develop your people one at a time &mdash; no names, nothing that identifies anyone. Pick the sub-family and role level, rate skills against where they need to be, choose the direction, and hand over a real development plan.</p>
+      <p class="lead">Develop your people one at a time &mdash; no names, nothing that identifies anyone. Search their job title, rate skills against where they need to be, choose the direction, and hand over a real development plan.</p>
       <p class="tt__notice"><b>Development, not evaluation.</b> Everything here lives only in your browser &mdash; nothing is uploaded or shared. Use it to prepare growth conversations, not to assess performance.</p>
 
       <div class="tt__develop" id="tt-develop">
         <h3 class="tt__h">Develop one person</h3>
-        <p class="tt__sub">Select the sub-family and role level &mdash; every skill mapped to that role populates automatically, ready to rate skill by skill: where they are, and where they need to be. Add another person any time &mdash; each keeps their own ratings and plan.</p>
+        <p class="tt__sub">Search their job title &mdash; every skill mapped to that role populates automatically, ready to rate skill by skill: where they are, and where they need to be. Add another person any time &mdash; each keeps their own ratings and plan.</p>
         <ul class="pills tt__people" id="ttd-people"></ul>
-        <div class="tt__addrow">
-          <select id="ttd-role" aria-label="Sub-family"><option value="">Sub-family&hellip;</option></select>
-          <select id="ttd-level" aria-label="Role level"><option value="">Role level&hellip;</option></select>
+        <div class="rs">
+          <input type="text" id="ttd-search" placeholder="Search their job title &mdash; e.g. Instructional Designer&hellip;" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ttd-suggest" aria-label="Search their job title">
+          <div class="rs__suggest" id="ttd-suggest" hidden role="listbox"></div>
         </div>
+        <div class="mr__chosen" id="ttd-chosen" hidden></div>
         <div class="tt__view" id="ttd-view" aria-live="polite"></div>
       </div>
     </div>
@@ -157,9 +183,8 @@
             <div class="sf__suggest" id="sf-suggest" hidden></div>
           </div>
           <div class="sf__browse">
-            <span class="sf__or">or browse</span>
-            <select id="sf-cat" aria-label="Browse by skill category"><option value="">All categories&hellip;</option></select>
-            <select id="sf-skillsel" aria-label="Pick a skill"><option value="">Pick a skill to add&hellip;</option></select>
+            <span class="sf__or">or narrow to</span>
+            <select id="sf-cat" aria-label="Narrow the search to one skill category"><option value="">All categories&hellip;</option></select>
           </div>
           <ul class="pills sf__picked" id="sf-picked"></ul>
         </div>
@@ -395,6 +420,6 @@
   </div>
 </dialog>
 
-<script src="assets/js/app.js?v=14"></script>
+<script src="assets/js/app.js?v=15"></script>
 </body>
 </html>
