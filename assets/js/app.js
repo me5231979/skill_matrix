@@ -1,5 +1,5 @@
 /* =====================================================================
-   VANDERBILT TALENT COMPASS — CAREER PATHWAYS EXPLORER
+   VANDERBILT TALENT PORTAL — CAREER PATHWAYS EXPLORER
    Data: assets/data/sbja.json (extracted from the SBJA workbook).
    ===================================================================== */
 (function () {

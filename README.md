@@ -1,4 +1,4 @@
-# Talent Compass — Vanderbilt Career Pathways Explorer
+# Talent Portal — Vanderbilt Career Pathways Explorer
 
 A single-page app built on Vanderbilt's **Skills-Based Job Architecture** (SBJA).
 
@@ -9,7 +9,7 @@ covering 98% of active headcount. Titles the framework hasn't profiled yet (Exec
 Temporary Services) still get the seven core competencies, free-entry development areas and a
 transfer plan toward any profiled role.
 
-Pick a role and a destination and the compass shows:
+Pick a role and a destination and the portal shows:
 
 - **Core competencies** (gold) — Vanderbilt's seven competencies: four shared by all staff,
   three applying at management and executive levels
