@@ -1,5 +1,5 @@
 /* =====================================================================
-   VANDERBILT TALENT PORTAL — CAREER PATHWAYS EXPLORER
+   VANDERBILT TRANSFER PORTAL — CAREER PATHWAYS EXPLORER
    Data: assets/data/sbja.json (extracted from the SBJA workbook).
    ===================================================================== */
 (function () {
