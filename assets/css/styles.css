@@ -847,3 +847,71 @@ button.pill--univ:hover, button.pill--univ:focus-visible { border-color: var(--v
   .planhead__top { flex-direction: column; }
   .planhead__print { width: 100%; }
 }
+
+/* ---------- Browse-all destination list ---------- */
+.rolebrowse { margin-top: 1rem; border: 1px solid var(--sand); border-radius: 6px; background: #fff; }
+.rolebrowse > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: .5rem;
+  padding: .7rem 1rem; font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; font-size: .72rem; color: var(--vu-oak); }
+.rolebrowse > summary::-webkit-details-marker { display: none; }
+.rolebrowse > summary::after { content: '\25BE'; margin-left: auto; transition: transform .2s; }
+.rolebrowse[open] > summary { border-bottom: 1px solid var(--line); }
+.rolebrowse[open] > summary::after { transform: rotate(180deg); }
+.rolebrowse__list { max-height: 340px; overflow-y: auto; overscroll-behavior: contain; }
+.rolebrowse__fam { position: sticky; top: 0; z-index: 1; background: #faf8f4;
+  font-family: var(--font-condensed); font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  font-size: .66rem; color: var(--vu-oak); padding: .45rem 1rem; margin: 0; border-bottom: 1px solid var(--line); }
+.rolebrowse__opt { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+  width: 100%; text-align: left; padding: .5rem 1rem; background: none; border: 0;
+  border-bottom: 1px solid var(--line); cursor: pointer; font-size: .86rem; color: var(--vu-black); font-family: inherit; }
+.rolebrowse__opt:hover { background: rgba(207,174,112,.14); }
+.rolebrowse__opt small { color: var(--gray-mid, #6B6B6B); font-size: .72rem; flex: none; text-align: right; }
+
+/* ---------- The development plan as the black plan document ----------
+   The audit sections sit on cream and re-ink the shared plan components for light
+   backgrounds; .devdoc wraps the built plan in the dark #plan treatment, so every
+   path ends in the same black document. Screen-only: print keeps the light re-ink. */
+@media screen {
+  #myrole .devdoc, #teamtool .devdoc { background: #1C1C1C; border-radius: 10px; border-top: 0;
+    padding: 1.9rem clamp(1rem, 3vw, 2.1rem) 2.1rem; }
+  #myrole .devdoc h3, #teamtool .devdoc h3, #myrole .devdoc h4, #teamtool .devdoc h4 { color: #fff; }
+  #myrole .devdoc .tt__sub, #teamtool .devdoc .tt__sub { color: rgba(255,255,255,.7); }
+  #myrole .devdoc .tablewrap, #teamtool .devdoc .tablewrap { background: transparent; border-color: rgba(255,255,255,.16); }
+  #myrole .devdoc .learntable th, #teamtool .devdoc .learntable th { color: var(--vu-gold-flat);
+    background: rgba(255,255,255,.04); border-bottom-color: rgba(255,255,255,.2); }
+  #myrole .devdoc .learntable td, #teamtool .devdoc .learntable td { color: rgba(255,255,255,.82);
+    border-bottom-color: rgba(255,255,255,.1); }
+  #myrole .devdoc .learntable .lt-pri, #teamtool .devdoc .learntable .lt-pri { color: var(--vu-gold-flat); }
+  #myrole .devdoc .lt-skill .skill-link, #teamtool .devdoc .lt-skill .skill-link { color: #fff; }
+  #myrole .devdoc .lt-skill .skill-link:hover, #teamtool .devdoc .lt-skill .skill-link:hover { color: var(--vu-gold-flat); }
+  #myrole .devdoc .lt-why b, #teamtool .devdoc .lt-why b { color: #fff; }
+  #myrole .devdoc .lt-orc a, #teamtool .devdoc .lt-orc a { color: var(--vu-gold-flat); }
+  #myrole .devdoc .lt-none, #teamtool .devdoc .lt-none { color: rgba(255,255,255,.5); }
+  #myrole .devdoc .learntable .pmeter i, #teamtool .devdoc .learntable .pmeter i { background: rgba(255,255,255,.18); }
+  #myrole .devdoc .lt-prof, #teamtool .devdoc .lt-prof { color: rgba(255,255,255,.6); }
+  #myrole .devdoc .dateinput, #teamtool .devdoc .dateinput { color: #fff; background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.3); color-scheme: dark; }
+  #myrole .devdoc .skillres > p, #teamtool .devdoc .skillres > p { color: rgba(255,255,255,.65); }
+  #myrole .devdoc .skillres > p b, #teamtool .devdoc .skillres > p b { color: #fff; }
+  #myrole .devdoc .skillres__card, #teamtool .devdoc .skillres__card { border-color: rgba(255,255,255,.14); background: transparent; }
+  #myrole .devdoc .skillres__card h4, #teamtool .devdoc .skillres__card h4 { color: var(--vu-gold-flat); }
+  #myrole .devdoc .skillres__card li a, #teamtool .devdoc .skillres__card li a { color: rgba(255,255,255,.85);
+    border-bottom-color: rgba(255,255,255,.25); }
+  #myrole .devdoc .skillres__card li a:hover, #teamtool .devdoc .skillres__card li a:hover { color: var(--vu-gold-flat);
+    border-bottom-color: var(--vu-gold-flat); }
+  #myrole .devdoc .skillres__for, #teamtool .devdoc .skillres__for { color: rgba(255,255,255,.5); }
+  #myrole .devdoc .restype, #teamtool .devdoc .restype { border-color: rgba(255,255,255,.35); color: rgba(255,255,255,.7); }
+  #myrole .devdoc .restype--free, #teamtool .devdoc .restype--free { border-color: var(--vu-gold-flat); color: var(--vu-gold-flat); }
+  #myrole .devdoc .olink, #teamtool .devdoc .olink { color: var(--vu-gold-flat); }
+  #myrole .devdoc .olink:hover, #teamtool .devdoc .olink:hover { color: var(--vu-highlight, #ECB748); }
+  #myrole .devdoc .pill, #teamtool .devdoc .pill { background: transparent; color: rgba(255,255,255,.85);
+    border: 1px solid rgba(207,174,112,.6); }
+  #myrole .devdoc .lt-tag--bridge, #teamtool .devdoc .lt-tag--bridge { color: var(--vu-gold-flat); border-color: var(--vu-gold-flat); }
+  #myrole .devdoc .lt-tag--grow, #teamtool .devdoc .lt-tag--grow { border-color: rgba(255,255,255,.4); color: rgba(255,255,255,.75); }
+  #myrole .devdoc .lt-tag--univ, #teamtool .devdoc .lt-tag--univ { border-color: rgba(255,255,255,.6); color: #fff; }
+  #myrole .devdoc .ckbox, #teamtool .devdoc .ckbox { border-color: rgba(255,255,255,.45); }
+}
+@media screen and (max-width: 700px) {
+  #myrole .devdoc .learntable tr, #teamtool .devdoc .learntable tr { background: #242424; border-color: rgba(255,255,255,.16); }
+  #myrole .devdoc .learntable td, #teamtool .devdoc .learntable td { color: rgba(255,255,255,.82); }
+}

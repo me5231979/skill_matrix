@@ -1658,6 +1658,42 @@
       .slice(0, limit || 12);
   }
 
+  /* Browse every mapped title in a scrollable list — no typing needed.
+     Grouped by job family; open until a destination is picked. */
+  var BROWSE_CACHE = '';
+  function browsePanel(scope, st) {
+    if (!BROWSE_CACHE) {
+      var by = {}, count = 0;
+      JOBROLES.forEach(function (r, i) { if (r.s) { (by[r.f] = by[r.f] || []).push(i); count++; } });
+      BROWSE_CACHE = '<details class="rolebrowse"{OPEN}><summary>Or scroll all ' + count +
+        ' mapped titles and click yours</summary><div class="rolebrowse__list">' +
+        Object.keys(by).sort().map(function (fam) {
+          return '<p class="rolebrowse__fam">' + esc(fam) + '</p>' +
+            by[fam].sort(function (a, b) { return JOBROLES[a].n.localeCompare(JOBROLES[b].n); })
+              .map(function (i) {
+                var r = JOBROLES[i];
+                return '<button type="button" class="rolebrowse__opt" data-jrpick="' + i + '" data-scope="{S}">' +
+                  '<span>' + esc(r.n) + '</span><small>' + esc(r.s) + (r.l ? ' · ' + esc(r.l) : '') + '</small></button>';
+              }).join('');
+        }).join('') + '</div></details>';
+    }
+    return BROWSE_CACHE.split('{S}').join(scope).replace('{OPEN}', st.tgtRole ? '' : ' open');
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-jrpick]');
+    if (!b) return;
+    var r = JOBROLES[+b.dataset.jrpick];
+    var scope = b.dataset.scope;
+    if (!r || !r.s || !scope) return;
+    var st = stateFor(scope);
+    st.tgtJobRole = r.n; st.tgtRole = r.s;
+    var levels = roleLevels(DATA.roles[r.s]);
+    st.tgtLevel = r.l && levels.indexOf(r.l) >= 0 ? r.l : (levels.indexOf(st.level) >= 0 ? st.level : '');
+    st.ratings = {}; st.built = false;
+    saveFor(scope); renderFor(scope);
+    track('browse_pick', { role: r.n });
+  });
+
   /* One combobox, three experiences. Type to search, or open it and browse.
      onPick receives the job-role record. */
   function attachRoleSearch(input, suggest, onPick) {
@@ -1880,7 +1916,8 @@
       html += '<div class="tt__targetsearch"><p class="sf__label">Destination job title</p><div class="rs">' +
         '<input type="text" id="' + M.scope + '-tgt-search" data-tgtsearch="' + M.scope +
         '" placeholder="Search the job title you’re aiming at…" autocomplete="off" aria-label="Search the destination job title">' +
-        '<div class="rs__suggest" id="' + M.scope + '-tgt-suggest" hidden></div></div>';
+        '<div class="rs__suggest" id="' + M.scope + '-tgt-suggest" hidden></div></div>' +
+        browsePanel(M.scope, st);
       if (st.tgtRole) {
         html += '<p class="mr__maps">Aiming at <b>' + esc(st.tgtJobRole || st.tgtRole) + '</b>' +
           ' — maps to the <b>' + esc(st.tgtRole) + '</b> profile' +
@@ -2008,7 +2045,9 @@
       return y.at - x.at || x.skill.skill.localeCompare(y.skill.skill);
     });
     var mine = M.scope === 'me';
-    var dirText = !st.tgtRole ? (mine ? 'growth in <b>' + esc(st.jobRole) + '</b>' : 'growth in <b>' + esc(st.jobRole || st.role) + '</b>') :
+    var your = mine ? 'your' : 'their';
+    var you = mine ? 'you' : 'they';
+    var dirText = !st.tgtRole ? 'growth in <b>' + esc(st.jobRole || st.role) + '</b>' :
       st.dir === 'current' ? 'development in the current role, <b>' + esc(st.jobRole || st.role) + '</b>' + (st.level ? ' at <b>' + esc(st.level) + '</b>' : '') :
       st.dir === 'up' ? 'growth to the next level: <b>' + esc(st.level) + ' → ' + esc(st.tgtLevel) + '</b> in <b>' + esc(st.tgtRole) + '</b>' :
       'growth to transfer: <b>' + esc(st.jobRole || st.role) + '</b> → <b>' + esc(st.tgtJobRole || st.tgtRole) + '</b> at <b>' + esc(st.tgtLevel) + '</b>';
@@ -2017,6 +2056,63 @@
     gaps.forEach(function (g, i) { rows.push(auditRow(st, g, i + 1, M)); });
     st.extras.forEach(function (x, i) { rows.push(auditExtraRow(st, x, gaps.length + 2 + i)); });
 
+    var isTransfer = st.dir === 'other' && !!st.tgtRole;
+    var isUp = st.dir === 'up' && !!st.tgtRole;
+    var destFam = isTransfer && DATA.roles[st.tgtRole] ? DATA.roles[st.tgtRole].family : '';
+    var work = gaps.length + st.extras.length;
+    var months = work > 5 ? 12 : work > 2 ? 9 : 6;
+    var mid = months === 6 ? 4 : months - 3;
+    var today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    /* Phase 01: align and set up in Oracle */
+    var p1 = [
+      mine ?
+        ck('<b>Meet with your manager</b>: share this printed plan, agree on the direction and timeline and add it to your development conversation notes. Growth here is a conversation, and developing talent across Vanderbilt is part of every manager\u2019s job.') :
+        ck('<b>Hand this plan over as a growth conversation</b>: agree on the direction and timeline together and add it to your development conversation notes. It is a roadmap, never a rating.'),
+      ck('Open ' + your + ' ' + oa('Talent Profile', ORA.talent) + ' and add current skills with honest proficiency, including the strengths listed below.'),
+      isTransfer ?
+        ck('In ' + oa('Oracle Grow', ORA.grow) + ', add <b>' + esc(st.tgtRole) + '</b> as a career/role of interest so recommendations start pointing at the destination.') :
+        ck('In ' + oa('Oracle Grow', ORA.grow) + ', review the suggested skills and growth recommendations for ' + your + ' role and accept what fits.'),
+      ck('In the ' + oa('Skills Center', ORA.skills) + ', review the AI-suggested skills for ' + your + ' profile and accept the ones that fit.'),
+      ck('Create one <b>development goal per skill</b> in the table below' + (isTransfer ? ', tagged to the role of interest.' : '.'))
+    ];
+    if (isTransfer && mine) p1.push(ck('Serious about the move? Say so in your ' + oa('Talent Profile', ORA.talent) + ': indicate your interest in a new role and your target timeframe, so your manager and recruiters can see it.'));
+    if (isTransfer) p1.push(ck('Reach out to someone in ' + esc(st.tgtRole) + (destFam ? ' (' + esc(destFam) + ')' : '') + ' for an informal conversation about the work.'));
+
+    /* Phase 02: build the skills */
+    var p2 = [
+      ck('Work the development table top to bottom, one skill at a time, starting from the <b>Oracle Learning</b> links.'),
+      ck('Complete <b>AI Workforce Readiness</b> first: it compounds every other skill ' + you + ' build' + (mine ? '' : 's') + '.'),
+      ck('Pick one certification from the <b>skill resources</b> below and set a completion date.'),
+      ck('Learning outside Oracle (podcasts, videos, certifications)? <b>Flag it in ' + oa('Oracle Grow', ORA.grow) + '</b>: add it to that skill\u2019s development goal so it counts in ' + your + ' talent record.'),
+      ck('Practice in place: volunteer for one task in the current role that uses a growth skill.'),
+      ck('<b>Monthly check-in</b>: review progress against this table and update goal status in Oracle so the record travels with ' + you + '.')
+    ];
+    if (isTransfer) p2.push(ck('If the pathway needs formal support, engage the <b>Engagement Consultant / HCM partner</b> to help broker cross-department options.'));
+
+    /* Phase 03: direction-specific finish */
+    var p3title = isTransfer ? 'Prove it & land it' : isUp ? 'Perform at the next level' : 'Prove it in the role';
+    var p3 = isTransfer ? [
+      ck('Take one gig or short assignment with the ' + (destFam ? esc(destFam) + ' ' : '') + 'team from the <b>Gigs</b> section in Oracle, once Gigs launch.'),
+      ck('Watch the ' + oa('Opportunity Marketplace', ORA.market) + ' for openings in ' + esc(st.tgtRole) + ', with the Opportunity filter set to Career Roles.'),
+      ck('Update ' + your + ' ' + oa('Talent Profile', ORA.talent) + ' with every completed course and new skill so recruiters and Grow can see it.'),
+      mine ?
+        ck('Refresh your r\u00e9sum\u00e9 in skills language. Lead with matched and newly built skills. <button type="button" class="olink eg-resume">See an example</button>') :
+        ck('Help them refresh their r\u00e9sum\u00e9 in skills language, leading with matched and newly built skills.'),
+      ck('<b>Final conversation</b>: confirm readiness and loop in the Engagement Consultant / HCM partner on internal openings.'),
+      ck('Apply through Vanderbilt\u2019s internal mobility process with the portfolio of completions.')
+    ] : isUp ? [
+      ck('Act at the next level now: take on one piece of work that ' + esc(st.tgtLevel || 'the next level') + ' owns, with ' + (mine ? 'your manager\u2019s' : 'your') + ' support.'),
+      ck('Update ' + your + ' ' + oa('Talent Profile', ORA.talent) + ' with every completed course and new skill.'),
+      ck('Watch the ' + oa('Opportunity Marketplace', ORA.market) + ' for postings at the target level. Internal application is competitive; this plan is the preparation.'),
+      ck('<b>Final conversation</b>: review the evidence together and agree what readiness looks like on paper.')
+    ] : [
+      ck('Bring the new skills into everyday work: pick one recurring task and raise the bar on it.'),
+      ck('Update ' + your + ' ' + oa('Talent Profile', ORA.talent) + ' with every completed course and new skill.'),
+      ck('Re-rate ' + (mine ? 'yourself' : 'them') + ' in this tool and watch the gaps close; carry what remains into next year\u2019s goals.'),
+      ck('<b>Wrap-up conversation</b>: review what was built and choose the next direction: deeper, up a level, or a transfer.')
+    ];
+
     var strengthHtml = strengths.length ?
       '<h4 class="tt__strengthh">Strengths to build on</h4>' +
       '<p class="tt__sub">' + M.strengthsHelp + '</p>' +
@@ -2024,43 +2120,63 @@
         return '<li><span class="pill">' + esc(g.skill.skill) + ' · ' + PROF_NAMES[g.at - 1] + '</span></li>';
       }).join('') + '</ul>' : '';
 
-    var steps = mine ? [
-      ['Talk it through', 'Take this to your manager and your Engagement Consultant. Agree what matters most and what is realistic this year.'],
-      ['Set the dates', 'Put a target date on each row below. A skill without a date rarely moves.'],
-      ['Log it in Oracle', 'Create a development goal in Oracle Grow for each skill, enrol in the linked learning, and add the skill to your Talent Profile once you have built it.']
-    ] : [
-      ['Share it, don’t score it', 'Hand this to the person as a growth conversation. It is a development roadmap, not a performance rating.'],
-      ['Agree the dates together', 'Put a target date on each row below and decide together what is realistic this year.'],
-      ['Log it in Oracle', 'Have them create a development goal in Oracle Grow for each skill, enrol in the linked learning, and add each skill to their Talent Profile once built.']
-    ];
+    return '<div class="tt__devplan devdoc" id="' + M.scope + '-plan"><div class="plandoc">' +
 
-    return '<div class="tt__devplan" id="' + M.scope + '-plan">' +
-      '<div class="planhead">' +
-        '<div class="planhead__top">' +
-          '<div><p class="planhead__eyebrow">For development</p>' +
-          '<h3 class="tt__h">' + M.planTitle + '</h3></div>' +
-          '<button type="button" class="btn planhead__print" data-print>Print this plan</button>' +
+      '<div class="plandoc__head">' +
+        '<div class="plandoc__meta">' +
+          metaCell(mine ? 'Staff member' : 'Team member', '<span class="fillin"></span>') +
+          metaCell('Current role', esc(st.jobRole || st.role || '') + (st.level ? ' <small>(' + esc(st.level) + ')</small>' : '')) +
+          metaCell('Direction', isTransfer ? 'Transfer: ' + esc(st.tgtJobRole || st.tgtRole) : isUp ? 'Next level: ' + esc(st.tgtLevel) : 'Grow in role') +
+          metaCell('Gaps to close', '' + (work + 1)) +
+          metaCell('Plan horizon', months + ' months') +
+          metaCell('Created', esc(today) + ' &middot; ' + (mine ? 'Manager' : 'Growth conversation') + ' review: <span class="fillin fillin--sm"></span>') +
         '</div>' +
-        '<p class="planhead__what">Built from ' + (mine ? 'your' : 'your') + ' ratings for ' + dirText + ': <b class="tt-flagtext">' +
-        gaps.length + ' gap skill' + plural(gaps.length) + '</b>, biggest gap first, plus AI Workforce Readiness — assumed for every role' +
-        (st.extras.length ? ' — and <b>' + st.extras.length + ' development area' + plural(st.extras.length) + '</b> named above' : '') + '.</p>' +
-        '<ol class="planhead__steps">' + steps.map(function (s) {
-          return '<li><b>' + s[0] + '</b><span>' + s[1] + '</span></li>';
-        }).join('') + '</ol>' +
-        '<p class="planhead__note"><b>Growth is guaranteed. Placement is not.</b> This is a development roadmap, not a promise of placement. ' +
-        'Completing it builds real readiness, but it does not guarantee selection for, or transfer into, any role — internal openings are filled ' +
-        'through Vanderbilt’s standard recruitment process. What the work does guarantee: the skills are ' + (mine ? 'yours' : 'theirs') + '.' +
-        (mine ? '' : ' <b>Development, not evaluation</b> — no names appear on this page, and nothing here is uploaded or shared.') + '</p>' +
+        '<p class="plandoc__summary">' + M.planTitle + ', built from ' + your + ' ratings for ' + dirText + ': <b>' +
+          gaps.length + ' gap skill' + plural(gaps.length) + '</b>, biggest gap first, plus AI Workforce Readiness, assumed for every role' +
+          (st.extras.length ? ', and <b>' + st.extras.length + ' development area' + plural(st.extras.length) + '</b> named above' : '') +
+          '. <b>This plan is ' + your + 's to drive.</b> It closes the gaps in three phases with Oracle checkpoints; growth is guaranteed, placement is not.</p>' +
       '</div>' +
-      (gaps.length || !list.length ? '' : '<p class="tt__sub">' + M.noGaps + '</p>') +
-      '<div class="tablewrap"><table class="learntable">' +
-      '<thead><tr><th></th><th>#</th><th>Skill</th><th>Why it’s here</th><th>Oracle Learning</th><th>Target date</th></tr></thead>' +
-      '<tbody>' + rows.join('') + '</tbody></table></div>' +
+
+      '<div class="phases">' +
+        phase('01', 'Align & set up in Oracle', 'Weeks 1\u20134', p1) +
+        phase('02', 'Build the skills', 'Months 2\u2013' + mid, p2) +
+        phase('03', p3title, 'Months ' + mid + '\u2013' + months, p3) +
+      '</div>' +
+
+      '<div class="learnlist">' +
+        '<h3>Skill development table</h3>' +
+        '<p>Biggest gap first, with AI Workforce Readiness up top (universal). For every row: enroll from its Oracle Learning links, create a development goal in ' + oa('Oracle Grow', ORA.grow) + (isTransfer ? ' tagged to the role of interest' : '') + ', and add the skill to ' + your + ' ' + oa('Talent Profile', ORA.talent) + ' once built.</p>' +
+        (gaps.length || !list.length ? '' : '<p class="tt__sub">' + M.noGaps + '</p>') +
+        '<div class="tablewrap"><table class="learntable">' +
+        '<thead><tr><th></th><th>#</th><th>Skill</th><th>Why it\u2019s here</th><th>Oracle Learning</th><th>Target date</th></tr></thead>' +
+        '<tbody>' + rows.join('') + '</tbody></table></div>' +
+      '</div>' +
+
       skillResources(gaps.map(function (g) { return { skill: g.skill }; })) +
       strengthHtml +
-      '<p class="planhead__note planhead__note--foot">' + M.ownerLine + oa('Oracle Grow', ORA.grow) + '.</p>' +
+
+      '<div class="oracle">' +
+        '<h3>' + (mine ? 'Your' : 'The') + ' Oracle playbook</h3>' +
+        '<p>Everything above, as a single tour through Oracle. New to Grow, Oracle Learning, or the Talent Marketplace? Start with Vanderbilt\u2019s <a class="oracle__help" href="https://www.vanderbilt.edu/pcb/talent-marketplace/" target="_blank" rel="noopener">Talent Marketplace resource page</a>.</p>' +
+        '<ol class="oracle__steps">' +
+          oStep('Tag the skills', 'Open the ' + oa('Talent Profile', ORA.talent) + ' and add current skills with proficiency. This feeds every recommendation Oracle makes. See the full picture in the ' + oa('Skills Center', ORA.skills) + '.') +
+          oStep('Open Oracle Grow', oa('Oracle Grow', ORA.grow) + ' builds a personalized page from role plus skills. Review its suggested skills and accept what fits.') +
+          (isTransfer ? oStep('Declare the destination', 'In ' + oa('Oracle Grow', ORA.grow) + ', add <b>' + esc(st.tgtRole) + '</b> as a career or role of interest, and record the interest and timeframe in the ' + oa('Talent Profile', ORA.talent) + '. Declarations stay private to ' + you + '.') : '') +
+          oStep('Create development goals', 'One goal per row of the table, so progress is visible to ' + (mine ? 'you and your manager' : 'both of you') + '.') +
+          oStep('Enroll in Oracle Learning', 'The table deep-links to matched courses. For anything not linked, open Me \u2192 <b>Learning</b> and search the skill.') +
+          oStep('Gigs and open roles', 'Watch the ' + oa('Opportunity Marketplace', ORA.market) + ' with the Opportunity filter set to Career Roles: careers show with or without an open requisition. Gigs add real practice once they launch.') +
+          oStep('Close the loop', 'Completed learning updates the ' + oa('Talent Profile', ORA.talent) + '. Re-run this tool as the profile grows and watch the gaps close.') +
+        '</ol>' +
+      '</div>' +
+
+      '<div class="plandoc__note">' +
+        '<p class="plandoc__note-label">A note on outcomes</p>' +
+        '<p><b>Growth is guaranteed. Placement is not.</b> This is a development roadmap, not a promise of placement. Completing it builds real readiness, but it does not guarantee selection for, or transfer into, any role; internal openings are filled through Vanderbilt\u2019s standard recruitment process. What the work does guarantee: the skills are ' + (mine ? 'yours' : 'theirs') + '.</p>' +
+        (mine ? '' : '<p><b>Development, not evaluation.</b> No names appear on this page, and nothing here is uploaded or shared.</p>') +
+      '</div>' +
+
       '<div class="plan__actions"><button type="button" class="btn" data-print>Print this plan</button></div>' +
-      '</div>';
+      '</div></div>';
   }
 
   /* ---------- Staff experience: my job title -> my level -> audit -> plan ---------- */
