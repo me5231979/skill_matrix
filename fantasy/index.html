@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draft War Room — Fantasy Football Pick Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#2b3444;
+  --text:#e6edf3; --dim:#8b98a9; --accent:#3fb950; --accent2:#2ea043;
+  --gold:#d4a73f; --danger:#f85149;
+  --qb:#e05d5d; --rb:#3fc1a8; --wr:#5b9df9; --te:#e8944a; --k:#a97ff2; --dst:#8b98a9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:6px;padding:6px 12px}
+button:hover{border-color:var(--dim)}
+button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:600}
+button.primary:hover{background:var(--accent)}
+button.danger{color:var(--danger)}
+button.small{padding:2px 8px;font-size:12px}
+input,select{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+h1{font-size:18px;letter-spacing:.02em}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:8px}
+.pos{display:inline-block;min-width:34px;text-align:center;font-size:11px;font-weight:700;border-radius:4px;padding:1px 5px;color:#0d1117}
+.pos.QB{background:var(--qb)} .pos.RB{background:var(--rb)} .pos.WR{background:var(--wr)}
+.pos.TE{background:var(--te)} .pos.K{background:var(--k)} .pos.DST{background:var(--dst)}
+
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header .spacer{flex:1}
+header .sub{color:var(--dim);font-size:12px}
+
+#clockBar{display:flex;align-items:center;gap:14px;padding:10px 16px;background:linear-gradient(90deg,#12241a,#161b22);border-bottom:1px solid var(--line);flex-wrap:wrap}
+#clockBar .pickno{font-size:22px;font-weight:800;color:var(--accent)}
+#clockBar .team{font-size:16px;font-weight:600}
+#clockBar .you{background:var(--gold);color:#111;border-radius:4px;padding:1px 8px;font-size:12px;font-weight:800;margin-left:6px}
+#clockBar .meta{color:var(--dim);font-size:12px}
+
+main{display:grid;grid-template-columns:290px 1fr 330px;gap:12px;padding:12px 16px;align-items:start}
+@media(max-width:1100px){main{grid-template-columns:1fr 1fr}#rightCol{grid-column:1/-1}}
+@media(max-width:760px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.panel + .panel{margin-top:12px}
+
+/* pick log / rosters */
+#teamTabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+#teamTabs button{padding:3px 8px;font-size:12px}
+#teamTabs button.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.rosterList{list-style:none}
+.rosterList li{display:flex;gap:8px;align-items:center;padding:4px 2px;border-bottom:1px dashed var(--line);font-size:13px}
+.rosterList li .slot{width:38px;color:var(--dim);font-size:11px;font-weight:700}
+.rosterList li.empty .name{color:#3d4757}
+.logList{list-style:none;max-height:260px;overflow:auto}
+.logList li{display:flex;gap:8px;align-items:center;padding:3px 2px;font-size:12.5px;border-bottom:1px dashed var(--line)}
+.logList li .pk{color:var(--dim);width:44px}
+.logList li .tm{color:var(--dim);margin-left:auto;text-align:right;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* available players */
+#filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+#filters button.posf.active{border-color:var(--accent);color:var(--accent);font-weight:700}
+#search{flex:1;min-width:140px}
+table{width:100%;border-collapse:collapse}
+#playersTable{display:block;max-height:63vh;overflow:auto}
+#playersTable table th{position:sticky;top:0;background:var(--panel);z-index:1}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:5px 6px;border-bottom:1px solid #202839;font-size:13px;white-space:nowrap}
+td.num,th.num{text-align:right}
+tr.playerRow:hover{background:#1b2331}
+.risk{font-size:11px;font-weight:700}
+.risk.low{color:var(--accent)} .risk.mid{color:var(--gold)} .risk.high{color:var(--danger)}
+
+/* recommendations */
+.recCard{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px;background:var(--panel2)}
+.recCard.top{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.recCard .head{display:flex;align-items:center;gap:8px}
+.recCard .name{font-weight:700}
+.recCard .score{margin-left:auto;font-weight:800;color:var(--accent)}
+.recCard ul{list-style:none;margin-top:5px}
+.recCard li{font-size:12px;color:var(--dim);padding-left:14px;position:relative}
+.recCard li::before{content:"›";position:absolute;left:2px;color:var(--accent)}
+.recCard .bar{height:4px;border-radius:2px;background:#2b3444;margin-top:7px;overflow:hidden}
+.recCard .bar i{display:block;height:100%;background:var(--accent)}
+.recCard .draftBtn{margin-top:8px;width:100%}
+
+/* board */
+#boardWrap{overflow:auto;max-height:70vh}
+#board td,#board th{border:1px solid var(--line);font-size:11px;padding:3px 5px;min-width:96px;white-space:normal}
+#board th.rnd{min-width:34px;text-align:center;color:var(--dim)}
+#board td .bp{font-weight:600}
+#board td .bpos{font-size:10px;font-weight:800;border-radius:3px;padding:0 3px;color:#0d1117;margin-right:3px}
+#board td.me{outline:2px solid var(--gold);outline-offset:-2px}
+#board td.onclock{outline:2px dashed var(--accent);outline-offset:-2px}
+.cQB{background:var(--qb)}.cRB{background:var(--rb)}.cWR{background:var(--wr)}.cTE{background:var(--te)}.cK{background:var(--k)}.cDST{background:var(--dst)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px;z-index:50}
+.modal.open{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;max-width:640px;width:100%}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:10px 0}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-bottom:3px}
+.field input,.field select{width:100%}
+#teamNames{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;margin:10px 0}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.note{font-size:12px;color:var(--dim);margin-top:8px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--accent);color:var(--text);padding:8px 16px;border-radius:8px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏈 Draft War Room</h1>
+  <span class="sub" id="leagueSub"></span>
+  <span class="sub" id="saveState"></span>
+  <span class="spacer"></span>
+  <button id="btnBoard">Draft board</button>
+  <button id="btnSettings">Settings</button>
+  <button id="btnImport">Import ranks (CSV)</button>
+  <button id="btnExport" class="small">Export</button>
+  <button id="btnLoad" class="small">Load</button>
+  <button id="btnReset" class="danger small">Reset draft</button>
+</header>
+
+<div id="clockBar"></div>
+
+<main>
+  <!-- LEFT: rosters + log -->
+  <div id="leftCol">
+    <div class="panel">
+      <h2>Rosters</h2>
+      <div id="teamTabs"></div>
+      <ul class="rosterList" id="rosterList"></ul>
+    </div>
+    <div class="panel">
+      <h2 style="display:flex;align-items:center">Pick log <button id="btnUndo" class="small" style="margin-left:auto">↩ Undo last</button></h2>
+      <ul class="logList" id="logList"></ul>
+    </div>
+  </div>
+
+  <!-- CENTER: available players -->
+  <div class="panel" id="centerCol">
+    <h2>Available players</h2>
+    <div id="filters">
+      <input id="search" type="search" placeholder="Search player / team…">
+      <button class="posf small active" data-pos="ALL">All</button>
+      <button class="posf small" data-pos="QB">QB</button>
+      <button class="posf small" data-pos="RB">RB</button>
+      <button class="posf small" data-pos="WR">WR</button>
+      <button class="posf small" data-pos="TE">TE</button>
+      <button class="posf small" data-pos="K">K</button>
+      <button class="posf small" data-pos="DST">DST</button>
+      <button id="btnAddPlayer" class="small" title="Add a player missing from the pool">+ Player</button>
+    </div>
+    <div id="playersTable"></div>
+  </div>
+
+  <!-- RIGHT: recommendations -->
+  <div id="rightCol">
+    <div class="panel">
+      <h2 id="recTitle">Recommended for your pick</h2>
+      <div id="recList"></div>
+    </div>
+    <div class="panel">
+      <h2>My roster needs</h2>
+      <div id="needsBox" style="font-size:13px"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Setup / settings modal -->
+<div class="modal" id="setupModal">
+  <div class="box">
+    <h1 style="margin-bottom:4px">League setup</h1>
+    <p class="note">Everything is stored locally in your browser — record every pick as your draft happens and the recommendations update live.</p>
+    <div class="grid2">
+      <div class="field"><label>Teams</label><select id="cfgTeams"></select></div>
+      <div class="field"><label>Your draft slot</label><select id="cfgSlot"></select></div>
+      <div class="field"><label>Scoring</label>
+        <select id="cfgScoring"><option value="ppr">PPR</option><option value="half">Half-PPR</option><option value="std">Standard</option></select>
+      </div>
+    </div>
+    <h2 style="margin-top:8px">Starting lineup</h2>
+    <div class="grid2">
+      <div class="field"><label>QB</label><input id="cfgQB" type="number" min="0" max="3" value="1"></div>
+      <div class="field"><label>RB</label><input id="cfgRB" type="number" min="0" max="4" value="2"></div>
+      <div class="field"><label>WR</label><input id="cfgWR" type="number" min="0" max="4" value="2"></div>
+      <div class="field"><label>TE</label><input id="cfgTE" type="number" min="0" max="2" value="1"></div>
+      <div class="field"><label>FLEX (R/W/T)</label><input id="cfgFLEX" type="number" min="0" max="3" value="1"></div>
+      <div class="field"><label>K</label><input id="cfgK" type="number" min="0" max="1" value="1"></div>
+      <div class="field"><label>DST</label><input id="cfgDST" type="number" min="0" max="1" value="1"></div>
+      <div class="field"><label>Bench</label><input id="cfgBN" type="number" min="0" max="10" value="6"></div>
+    </div>
+    <h2 style="margin-top:8px">Team names (optional)</h2>
+    <div id="teamNames"></div>
+    <p class="note">⚠ Changing team count or lineup after picks are made restarts the draft. The built-in board is a 2026 preseason consensus — use <b>Import ranks (CSV)</b> to load fresh ADP/rankings (e.g. a FantasyPros export) any time.</p>
+    <div class="actions">
+      <button id="setupCancel">Cancel</button>
+      <button id="setupSave" class="primary">Start / save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Draft board modal -->
+<div class="modal" id="boardModal">
+  <div class="box" style="max-width:96vw">
+    <h1 style="margin-bottom:10px">Draft board</h1>
+    <div id="boardWrap"></div>
+    <div class="actions"><button id="boardClose" class="primary">Close</button></div>
+  </div>
+</div>
+
+<!-- CSV import modal -->
+<div class="modal" id="importModal">
+  <div class="box">
+    <h1>Import rankings (CSV)</h1>
+    <p class="note">Paste or upload a CSV with at least <b>player name</b> and <b>position</b> columns; <b>rank/ADP</b>, <b>team</b> and <b>tier</b> are picked up when present. FantasyPros “Download CSV” exports work as-is. This replaces the player pool; already-drafted players are re-matched by name.</p>
+    <p style="margin:10px 0"><input type="file" id="csvFile" accept=".csv,text/csv"></p>
+    <textarea id="csvText" style="width:100%;height:180px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px;font:12px ui-monospace,monospace" placeholder='"RK","TIERS","PLAYER NAME","TEAM","POS","BYE WEEK"...'></textarea>
+    <div class="actions">
+      <button id="importCancel">Cancel</button>
+      <button id="importGo" class="primary">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add player modal -->
+<div class="modal" id="addModal">
+  <div class="box" style="max-width:420px">
+    <h1>Add player</h1>
+    <div class="grid2">
+      <div class="field" style="grid-column:1/-1"><label>Name</label><input id="addName"></div>
+      <div class="field"><label>Position</label>
+        <select id="addPos"><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DST</option></select></div>
+      <div class="field"><label>Team</label><input id="addTeam" maxlength="4" placeholder="FA"></div>
+      <div class="field"><label>ADP / rank</label><input id="addAdp" type="number" min="1" value="250"></div>
+    </div>
+    <div class="actions">
+      <button id="addCancel">Cancel</button>
+      <button id="addGo" class="primary">Add</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<input type="file" id="loadFile" accept=".json,application/json" style="display:none">
+
+<script id="ffstate" type="application/json"></script>
+<script>
+"use strict";
+/* =====================================================================
+   Built-in player pool — 2026 preseason consensus (PPR lean).
+   Array order = overall rank; entries: [name, pos, team, posTier].
+   Replace any time via CSV import; teams/ranks are editable data, not gospel.
+===================================================================== */
+const SEED = [
+["Ja'Marr Chase","WR","CIN",1],["Bijan Robinson","RB","ATL",1],["Saquon Barkley","RB","PHI",1],
+["Jahmyr Gibbs","RB","DET",1],["Justin Jefferson","WR","MIN",1],["CeeDee Lamb","WR","DAL",1],
+["Malik Nabers","WR","NYG",1],["Puka Nacua","WR","LAR",1],["Ashton Jeanty","RB","LV",1],
+["Amon-Ra St. Brown","WR","DET",1],["Jaxon Smith-Njigba","WR","SEA",1],["De'Von Achane","RB","MIA",2],
+["Christian McCaffrey","RB","SF",2],["Nico Collins","WR","HOU",2],["Brian Thomas Jr.","WR","JAX",2],
+["Drake London","WR","ATL",2],["Derrick Henry","RB","BAL",2],["Jonathan Taylor","RB","IND",2],
+["A.J. Brown","WR","PHI",2],["Josh Jacobs","RB","GB",2],["Brock Bowers","TE","LV",1],
+["Bucky Irving","RB","TB",2],["Ladd McConkey","WR","LAC",2],["Chase Brown","RB","CIN",3],
+["Trey McBride","TE","ARI",1],["Tee Higgins","WR","CIN",3],["Kyren Williams","RB","LAR",3],
+["James Cook","RB","BUF",3],["Josh Allen","QB","BUF",1],["Lamar Jackson","QB","BAL",1],
+["Rashee Rice","WR","KC",3],["Terry McLaurin","WR","WAS",3],["George Pickens","WR","DAL",3],
+["Garrett Wilson","WR","NYJ",3],["Breece Hall","RB","NYJ",3],["Jayden Daniels","QB","WAS",1],
+["Kenneth Walker III","RB","SEA",3],["Omarion Hampton","RB","LAC",3],["Marvin Harrison Jr.","WR","ARI",3],
+["Davante Adams","WR","LAR",3],["Tetairoa McMillan","WR","CAR",3],["Quinshon Judkins","RB","CLE",3],
+["Chuba Hubbard","RB","CAR",4],["Jalen Hurts","QB","PHI",1],["Mike Evans","WR","TB",4],
+["DK Metcalf","WR","PIT",4],["Xavier Worthy","WR","KC",4],["Emeka Egbuka","WR","TB",4],
+["Joe Burrow","QB","CIN",1],["DJ Moore","WR","CHI",4],["Zay Flowers","WR","BAL",4],
+["Courtland Sutton","WR","DEN",4],["James Conner","RB","ARI",4],["Alvin Kamara","RB","NO",4],
+["TreVeyon Henderson","RB","NE",4],["Rome Odunze","WR","CHI",4],["Jameson Williams","WR","DET",4],
+["David Montgomery","RB","DET",4],["George Kittle","TE","SF",2],["Travis Hunter","WR","JAX",4],
+["D'Andre Swift","RB","CHI",4],["Aaron Jones","RB","MIN",5],["RJ Harvey","RB","DEN",5],
+["Jaylen Waddle","WR","MIA",5],["Calvin Ridley","WR","TEN",5],["Sam LaPorta","TE","DET",2],
+["Patrick Mahomes","QB","KC",2],["Isiah Pacheco","RB","KC",5],["Tony Pollard","RB","TEN",5],
+["Jerry Jeudy","WR","CLE",5],["Jordan Addison","WR","MIN",5],["Chris Godwin","WR","TB",5],
+["Kaleb Johnson","RB","PIT",5],["Baker Mayfield","QB","TB",2],["Jaylen Warren","RB","PIT",5],
+["Travis Etienne","RB","JAX",5],["Bo Nix","QB","DEN",2],["Stefon Diggs","WR","NE",5],
+["T.J. Hockenson","TE","MIN",2],["Deebo Samuel","WR","WAS",5],["Jakobi Meyers","WR","LV",5],
+["Tyrone Tracy Jr.","RB","NYG",6],["Cam Skattebo","RB","NYG",6],["Javonte Williams","RB","DAL",6],
+["Justin Herbert","QB","LAC",2],["Ricky Pearsall","WR","SF",6],["Matthew Golden","WR","GB",6],
+["Chris Olave","WR","NO",6],["Khalil Shakir","WR","BUF",6],["Jauan Jennings","WR","SF",6],
+["Zach Charbonnet","RB","SEA",6],["Brian Robinson Jr.","RB","SF",6],["Tucker Kraft","TE","GB",3],
+["Rico Dowdle","RB","CAR",6],["Najee Harris","RB","LAC",6],["Jordan Mason","RB","MIN",6],
+["Caleb Williams","QB","CHI",3],["Drake Maye","QB","NE",3],["Josh Downs","WR","IND",6],
+["Cooper Kupp","WR","SEA",6],["Michael Pittman Jr.","WR","IND",6],["Darnell Mooney","WR","ATL",6],
+["Keon Coleman","WR","BUF",6],["Luther Burden III","WR","CHI",7],["Jayden Reed","WR","GB",7],
+["Tank Bigsby","RB","JAX",7],["Tyjae Spears","RB","TEN",7],["J.K. Dobbins","RB","DEN",7],
+["Rhamondre Stevenson","RB","NE",7],["Austin Ekeler","RB","WAS",7],["Trey Benson","RB","ARI",7],
+["Mark Andrews","TE","BAL",3],["David Njoku","TE","CLE",3],["Evan Engram","TE","DEN",3],
+["Kyler Murray","QB","ARI",3],["Dak Prescott","QB","DAL",3],["Brock Purdy","QB","SF",3],
+["Jared Goff","QB","DET",3],["Rashid Shaheed","WR","NO",7],["Marvin Mims","WR","DEN",7],
+["Cedric Tillman","WR","CLE",7],["Hollywood Brown","WR","KC",7],["Jack Bech","WR","LV",7],
+["Tre Harris","WR","LAC",7],["Jayden Higgins","WR","HOU",7],["Kyle Williams","WR","NE",7],
+["Joe Mixon","RB","HOU",7],["Nick Chubb","RB","HOU",7],["Tyler Allgeier","RB","ATL",8],
+["Ray Davis","RB","BUF",8],["Braelon Allen","RB","NYJ",8],["Blake Corum","RB","LAR",8],
+["Isaac Guerendo","RB","SF",8],["Dylan Sampson","RB","CLE",8],["Bhayshul Tuten","RB","JAX",8],
+["Jerome Ford","RB","CLE",8],["Tyler Warren","TE","IND",3],["Colston Loveland","TE","CHI",4],
+["Travis Kelce","TE","KC",4],["Jake Ferguson","TE","DAL",4],["Dalton Kincaid","TE","BUF",4],
+["Justin Fields","QB","NYJ",4],["Jordan Love","QB","GB",4],["C.J. Stroud","QB","HOU",4],
+["Trevor Lawrence","QB","JAX",4],["J.J. McCarthy","QB","MIN",4],["Michael Penix Jr.","QB","ATL",4],
+["Tua Tagovailoa","QB","MIA",4],["Matthew Stafford","QB","LAR",4],["Wan'Dale Robinson","WR","NYG",8],
+["Christian Kirk","WR","HOU",8],["Keenan Allen","WR","LAC",8],["Romeo Doubs","WR","GB",8],
+["Quentin Johnston","WR","LAC",8],["Alec Pierce","WR","IND",8],["Joshua Palmer","WR","BUF",8],
+["DeMario Douglas","WR","NE",8],["Dontayvion Wicks","WR","GB",8],["Adonai Mitchell","WR","IND",8],
+["Pat Bryant","WR","DEN",8],["Savion Williams","WR","GB",8],["Kayshon Boutte","WR","NE",8],
+["Xavier Legette","WR","CAR",8],["Dyami Brown","WR","JAX",8],["Amari Cooper","WR","FA",9],
+["DeAndre Hopkins","WR","BAL",9],["Devin Neal","RB","NO",8],["Kendre Miller","RB","NO",8],
+["Jaydon Blue","RB","DAL",8],["Ollie Gordon II","RB","MIA",8],["DJ Giddens","RB","IND",8],
+["Jarquez Hunter","RB","LAR",9],["Will Shipley","RB","PHI",9],["Roschon Johnson","RB","CHI",9],
+["Antonio Gibson","RB","NE",9],["Kimani Vidal","RB","LAC",9],["Justice Hill","RB","BAL",9],
+["Kareem Hunt","RB","KC",9],["Samaje Perine","RB","CIN",9],["Keaton Mitchell","RB","BAL",9],
+["Sean Tucker","RB","TB",9],["Kyle Pitts","TE","ATL",4],["Dallas Goedert","TE","PHI",4],
+["Hunter Henry","TE","NE",5],["Jonnu Smith","TE","PIT",5],["Pat Freiermuth","TE","PIT",5],
+["Zach Ertz","TE","WAS",5],["Isaiah Likely","TE","BAL",5],["Mason Taylor","TE","NYJ",5],
+["Harold Fannin Jr.","TE","CLE",5],["Brenton Strange","TE","JAX",5],["Cade Otton","TE","TB",5],
+["Chig Okonkwo","TE","TEN",6],["Dalton Schultz","TE","HOU",6],["Elijah Arroyo","TE","SEA",6],
+["Theo Johnson","TE","NYG",6],["Ja'Tavion Sanders","TE","CAR",6],["Mike Gesicki","TE","CIN",6],
+["Juwan Johnson","TE","NO",6],["Darren Waller","TE","MIA",6],["Bryce Young","QB","CAR",5],
+["Geno Smith","QB","LV",5],["Sam Darnold","QB","SEA",5],["Cam Ward","QB","TEN",5],
+["Jaxson Dart","QB","NYG",5],["Aaron Rodgers","QB","PIT",5],["Anthony Richardson","QB","IND",5],
+["Daniel Jones","QB","IND",5],["Tyler Shough","QB","NO",6],["Shedeur Sanders","QB","CLE",6],
+["Dillon Gabriel","QB","CLE",6],["Russell Wilson","QB","NYG",6],
+["Brandon Aubrey","K","DAL",1],["Jake Bates","K","DET",1],["Cameron Dicker","K","LAC",1],
+["Chris Boswell","K","PIT",1],["Ka'imi Fairbairn","K","HOU",1],["Tyler Bass","K","BUF",2],
+["Harrison Butker","K","KC",2],["Chase McLaughlin","K","TB",2],["Wil Lutz","K","DEN",2],
+["Jason Sanders","K","MIA",2],["Evan McPherson","K","CIN",2],["Jason Myers","K","SEA",2],
+["Cairo Santos","K","CHI",3],["Jake Elliott","K","PHI",3],["Younghoe Koo","K","ATL",3],
+["Broncos D/ST","DST","DEN",1],["Eagles D/ST","DST","PHI",1],["Ravens D/ST","DST","BAL",1],
+["Steelers D/ST","DST","PIT",1],["Texans D/ST","DST","HOU",1],["Vikings D/ST","DST","MIN",2],
+["Bills D/ST","DST","BUF",2],["Lions D/ST","DST","DET",2],["Packers D/ST","DST","GB",2],
+["Chiefs D/ST","DST","KC",2],["Seahawks D/ST","DST","SEA",2],["Chargers D/ST","DST","LAC",2],
+["Jets D/ST","DST","NYJ",3],["49ers D/ST","DST","SF",3],["Cowboys D/ST","DST","DAL",3]
+];
+
+/* ============================ state ============================ */
+const LS_KEY = "ffdraft.v1";
+let S = null; // {cfg, players[], picks[], viewTeam}
+
+function defaultState(){
+  return {
+    cfg:{teams:12, slot:1, scoring:"ppr", qb:1, rb:2, wr:2, te:1, flex:1, k:1, dst:1, bn:6,
+         names:[]},
+    players: SEED.map((p,i)=>({id:i+1, name:p[0], pos:p[1], team:p[2], tier:p[3], adp:i+1})),
+    picks: [],       // array of player ids, index = overall pick - 1
+    viewTeam: null,  // roster tab
+    started:false
+  };
+}
+function save(){
+  S.savedAt = Date.now();
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
+  scheduleCloudSave();
+}
+// State can live in two places: localStorage (fast, this browser only) and the
+// #ffstate block embedded in the page itself when hosted as a Claude artifact
+// (durable, follows the artifact everywhere). Boot from whichever is newest.
+function load(){
+  let local=null, embedded=null;
+  try{ const raw = localStorage.getItem(LS_KEY); if(raw) local = JSON.parse(raw); }catch(e){}
+  try{
+    const n = document.getElementById("ffstate");
+    if(n && n.textContent.trim()) embedded = JSON.parse(n.textContent);
+  }catch(e){}
+  const valid = d => d && d.cfg && d.players;
+  if(!valid(local)) local=null;
+  if(!valid(embedded)) embedded=null;
+  const best = !local ? embedded : !embedded ? local :
+    ((local.savedAt||0) >= (embedded.savedAt||0) ? local : embedded);
+  if(best){ S = best; return true; }
+  return false;
+}
+function storageWorks(){
+  try{ localStorage.setItem("ffdraft.test","1"); localStorage.removeItem("ffdraft.test"); return true; }
+  catch(e){ return false; }
+}
+
+/* ---- artifact self-save: republish the page with state embedded ---- */
+let PRISTINE=null, artifactNS=undefined, cloudDirty=false, cloudTimer=null, cloudBusy=false;
+const CLOUD_DEBOUNCE_MS = 20000;
+async function initCloud(){
+  if(!(window.claude && typeof window.claude.use==="function")){ artifactNS=null; updateSaveState(); return; }
+  artifactNS = await window.claude.use("artifact").catch(()=>null);
+  updateSaveState();
+  if(artifactNS && cloudDirty) scheduleCloudSave();
+}
+function scheduleCloudSave(){
+  cloudDirty = true;
+  if(!artifactNS) return;
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(cloudSave, CLOUD_DEBOUNCE_MS);
+  updateSaveState();
+}
+async function cloudSave(){
+  if(!artifactNS || cloudBusy || !cloudDirty) return;
+  if(document.querySelector(".modal.open")){ // don't reload the page under an open dialog
+    clearTimeout(cloudTimer); cloudTimer=setTimeout(cloudSave, 5000); return;
+  }
+  cloudBusy = true; updateSaveState("saving");
+  try{
+    const json = JSON.stringify(S).replace(/</g,"\\u003c");
+    const html = PRISTINE.replace(/(<script id="ffstate"[^>]*>)[\s\S]*?(<\/script>)/, (m,a,b)=>a+json+b);
+    await artifactNS.publish(html); // every open view, this one included, reloads to the saved version
+    cloudDirty = false;
+  }catch(e){ /* conflict: another view published; the reload brings the winner */ }
+  cloudBusy = false; updateSaveState();
+}
+function updateSaveState(mode){
+  const el=document.getElementById("saveState"); if(!el) return;
+  if(artifactNS===undefined){ el.textContent=""; return; }
+  if(!artifactNS){ el.textContent = storageWorks()? "· saved in this browser" : "· ⚠ storage unavailable — use Export"; return; }
+  el.textContent = mode==="saving" ? "· saving to artifact…" : cloudDirty ? "· unsaved changes (auto-saves shortly)" : "· ✓ saved to artifact";
+}
+
+/* ======================= draft math ======================= */
+const totalRounds = c => c.qb+c.rb+c.wr+c.te+c.flex+c.k+c.dst+c.bn;
+const totalPicks  = c => totalRounds(c)*c.teams;
+function teamAtPick(p, T){ // 1-based overall pick -> 1-based team slot
+  const r = Math.ceil(p/T), i = p-(r-1)*T;
+  return (r%2===1) ? i : T-i+1;
+}
+function pickLabel(p, T){ const r=Math.ceil(p/T), i=p-(r-1)*T; return r+"."+String(i).padStart(2,"0"); }
+function myNextPicks(fromExclusive){ // overall pick numbers belonging to me after `fromExclusive`
+  const out=[], T=S.cfg.teams, N=totalPicks(S.cfg);
+  for(let p=fromExclusive+1;p<=N;p++) if(teamAtPick(p,T)===S.cfg.slot) out.push(p);
+  return out;
+}
+const currentPick = () => S.picks.length+1;
+const draftDone   = () => S.picks.length >= totalPicks(S.cfg);
+function teamName(t){ return (S.cfg.names[t-1]||"").trim() || "Team "+t; }
+function teamPicks(t){ // player objects drafted by team t, in order
+  const out=[], T=S.cfg.teams;
+  S.picks.forEach((pid,i)=>{ if(teamAtPick(i+1,T)===t) out.push(byId(pid)); });
+  return out;
+}
+const byId = id => S.players.find(p=>p.id===id);
+const isDrafted = id => S.picks.includes(id);
+const available = () => S.players.filter(p=>!S.picks.includes(p.id));
+
+/* =================== projections & value model =================== */
+// Season-point curves by positional rank (half-PPR base), tuned to recent seasons.
+function projPts(pos, r){
+  let v;
+  switch(pos){
+    case "QB": v = r<=12 ? 395-9*(r-1) : 292-5*(r-12); break;
+    case "RB": v = 315*Math.pow(0.972, r-1); if(r>30) v = 315*Math.pow(0.972,29)*Math.pow(0.95,r-30); break;
+    case "WR": v = 300*Math.pow(0.981, r-1); if(r>45) v = 300*Math.pow(0.981,44)*Math.pow(0.96,r-45); break;
+    case "TE": v = r<=3 ? 255-25*(r-1) : Math.max(60, 200*Math.pow(0.93, r-3)); break;
+    case "K":  v = Math.max(90, 152-3*r); break;
+    case "DST":v = Math.max(70, 135-4*r); break;
+    default: v = 50;
+  }
+  const sc = S ? S.cfg.scoring : "ppr";
+  if(sc==="ppr"){ if(pos==="WR"||pos==="TE") v*=1.08; if(pos==="RB") v*=1.04; }
+  if(sc==="std"){ if(pos==="WR"||pos==="TE") v*=0.92; if(pos==="RB") v*=0.96; }
+  return Math.max(20, v);
+}
+// positional rank among ALL players (by adp) — stable even after picks
+function posRank(pl){
+  let r=1;
+  for(const q of S.players) if(q.pos===pl.pos && q.adp < pl.adp) r++;
+  return r;
+}
+function replacementRank(pos){
+  const c=S.cfg, T=c.teams;
+  switch(pos){
+    case "QB": return Math.round(T*c.qb)+3;
+    case "RB": return Math.round(T*(c.rb+0.45*c.flex))+3;
+    case "WR": return Math.round(T*(c.wr+0.50*c.flex))+3;
+    case "TE": return Math.round(T*(c.te+0.05*c.flex))+2;
+    case "K": case "DST": return T+1;
+  }
+  return T*2;
+}
+function vor(pl){ return projPts(pl.pos, posRank(pl)) - projPts(pl.pos, replacementRank(pl.pos)); }
+
+// P(player still available at overall pick t), from ADP with widening uncertainty
+function survives(pl, t){
+  const sigma = 5 + 0.09*pl.adp;
+  const z = (t - pl.adp)/sigma;
+  const gone = 1/(1+Math.exp(-1.702*z)); // logistic ≈ normal CDF
+  return Math.min(1, Math.max(0, 1-gone));
+}
+
+/* =================== my roster needs =================== */
+function slotFill(t){ // returns {slots:[{slot,player|null}], counts:{pos:n}, openStarters:{pos:bool}, flexOpen:bool}
+  const c=S.cfg, mine=teamPicks(t);
+  const counts={QB:0,RB:0,WR:0,TE:0,K:0,DST:0};
+  mine.forEach(p=>counts[p.pos] = (counts[p.pos]||0)+1);
+  const need = {QB:c.qb,RB:c.rb,WR:c.wr,TE:c.te,K:c.k,DST:c.dst};
+  const slots=[]; const used={QB:0,RB:0,WR:0,TE:0,K:0,DST:0};
+  const pool = mine.slice();
+  const fillPos = pos => {
+    for(let i=0;i<need[pos];i++){
+      const idx = pool.findIndex(p=>p.pos===pos);
+      const pl = idx>=0 ? pool.splice(idx,1)[0] : null;
+      if(pl) used[pos]++;
+      slots.push({slot:pos, player:pl});
+    }
+  };
+  ["QB","RB","WR","TE"].forEach(fillPos);
+  let flexOpen=0;
+  for(let i=0;i<c.flex;i++){
+    const idx = pool.findIndex(p=>["RB","WR","TE"].includes(p.pos));
+    const pl = idx>=0 ? pool.splice(idx,1)[0] : null;
+    if(!pl) flexOpen++;
+    slots.push({slot:"FLEX", player:pl});
+  }
+  ["K","DST"].forEach(fillPos);
+  pool.forEach(p=>slots.push({slot:"BN", player:p}));
+  for(let i=slots.filter(s=>s.slot==="BN").length; i<c.bn; i++) slots.push({slot:"BN", player:null});
+  const openStarters={};
+  for(const pos of ["QB","RB","WR","TE","K","DST"]) openStarters[pos] = used[pos] < need[pos];
+  return {slots, counts, openStarters, flexOpen: flexOpen>0};
+}
+function needMult(pos, fill, roundsLeft){
+  const c=S.cfg;
+  if(pos==="K"||pos==="DST"){
+    if(!fill.openStarters[pos]) return 0.05;                    // never draft 2
+    const kdNeeded = (fill.openStarters.K?1:0)+(fill.openStarters.DST?1:0);
+    return roundsLeft <= kdNeeded+1 ? 1.15 : 0.12;              // only at the end
+  }
+  if(fill.openStarters[pos]) return 1.0;
+  if(["RB","WR","TE"].includes(pos) && fill.flexOpen) return 0.9;
+  if(pos==="QB") return fill.counts.QB>=2 ? 0.12 : 0.35;        // backup QB, once
+  if(pos==="TE") return fill.counts.TE>=2 ? 0.15 : 0.4;
+  return 0.62;                                                  // RB/WR depth always has value
+}
+
+/* =================== recommendations =================== */
+function recommend(){
+  if(draftDone()) return [];
+  const now = currentPick();
+  const fill = slotFill(S.cfg.slot);
+  const mineOnClock = teamAtPick(now, S.cfg.teams)===S.cfg.slot;
+  const future = myNextPicks(now); // strictly after current pick
+  const target = mineOnClock ? (future[0] || now) : (teamAtPick(now,S.cfg.teams)!==S.cfg.slot && myNextPicks(now-1)[0]) || now;
+  const myPicksLeft = (mineOnClock?1:0)+future.length;
+  const roundsLeft = myPicksLeft;
+  const avail = available();
+
+  const tierCount = {};
+  avail.forEach(p=>{ const k=p.pos+"|"+p.tier; tierCount[k]=(tierCount[k]||0)+1; });
+
+  const scored = avail.map(p=>{
+    const v = vor(p);
+    const nm = needMult(p.pos, fill, roundsLeft);
+    const surv = survives(p, target);
+    let score = v*nm*(1+0.25*(1-surv));
+    const reasons=[];
+    if(v>0) reasons.push(`+${v.toFixed(0)} pts over replacement ${p.pos}${posRank(p)<=3?" — elite at the position":""}`);
+    const left = tierCount[p.pos+"|"+p.tier];
+    if(left===1) reasons.push(`Last player left in ${p.pos} Tier ${p.tier}`);
+    else if(left<=3 && p.tier<=4) reasons.push(`${p.pos} Tier ${p.tier} is drying up — ${left} left`);
+    const pct = Math.round(surv*100);
+    if(pct<40) reasons.push(`Only ~${pct}% chance he lasts to your next pick (${future[0]?pickLabel(future[0],S.cfg.teams):"—"})`);
+    else if(pct>85 && p.adp>now+8) reasons.push(`Likely still there later (~${pct}%) — can wait`);
+    if(fill.openStarters[p.pos]) reasons.push(`Fills your open ${p.pos} starter slot`);
+    else if(["RB","WR","TE"].includes(p.pos) && fill.flexOpen) reasons.push(`Slides into your open FLEX`);
+    else if(p.pos!=="K"&&p.pos!=="DST") reasons.push(`Depth/upside — ${p.pos} starters are set`);
+    if((p.pos==="K"||p.pos==="DST") && nm<0.5) reasons.push(`Too early for ${p.pos} — wait for the last rounds`);
+    return {p, score, v, surv, reasons};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  return scored.slice(0,5);
+}
+
+/* =================== rendering =================== */
+const $ = s => document.querySelector(s);
+let posFilter="ALL";
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
+
+function render(){
+  renderHeader(); renderClock(); renderTabs(); renderRoster(); renderLog(); renderPlayers(); renderRecs(); renderNeeds();
+  save();
+}
+function renderHeader(){
+  const c=S.cfg;
+  $("#leagueSub").textContent = `${c.teams} teams · ${c.scoring.toUpperCase()==="STD"?"Standard":c.scoring==="half"?"Half-PPR":"PPR"} · you pick ${ordinal(c.slot)} · ${totalRounds(c)} rounds`;
+}
+function ordinal(n){ const s=["th","st","nd","rd"],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function renderClock(){
+  const el=$("#clockBar");
+  if(draftDone()){ el.innerHTML = `<span class="pickno">Draft complete 🎉</span><span class="meta">${S.picks.length} picks recorded — check the board for the full results.</span>`; return; }
+  const p=currentPick(), T=S.cfg.teams, t=teamAtPick(p,T), me = t===S.cfg.slot;
+  const nxt = myNextPicks(me ? p : p-1);
+  const untilMine = me ? 0 : (nxt[0] ? nxt[0]-p : "—");
+  el.innerHTML = `
+    <span class="pickno">Pick ${pickLabel(p,T)}</span>
+    <span class="team">${esc(teamName(t))}${me?'<span class="you">YOU</span>':""}</span>
+    <span class="meta">overall #${p} · ${me ? "you're on the clock — see recommendations →" : `${untilMine} pick${untilMine===1?"":"s"} until your turn (${nxt[0]?pickLabel(nxt[0],T):"—"})`}</span>`;
+}
+function renderTabs(){
+  const box=$("#teamTabs"); box.innerHTML="";
+  const view = S.viewTeam || S.cfg.slot;
+  for(let t=1;t<=S.cfg.teams;t++){
+    const b=document.createElement("button");
+    b.textContent = t===S.cfg.slot ? teamName(t)+" ★" : teamName(t);
+    if(t===view) b.classList.add("active");
+    b.onclick=()=>{S.viewTeam=t; render();};
+    box.appendChild(b);
+  }
+}
+function renderRoster(){
+  const t = S.viewTeam || S.cfg.slot;
+  const fill = slotFill(t);
+  const ul=$("#rosterList"); ul.innerHTML="";
+  fill.slots.forEach(s=>{
+    const li=document.createElement("li");
+    if(!s.player) li.classList.add("empty");
+    li.innerHTML = `<span class="slot">${s.slot}</span>` + (s.player
+      ? `<span class="pos ${s.player.pos}">${s.player.pos}</span><span class="name">${esc(s.player.name)}</span><span style="margin-left:auto;color:var(--dim);font-size:11px">${esc(s.player.team)}</span>`
+      : `<span class="name">—</span>`);
+    ul.appendChild(li);
+  });
+}
+function renderLog(){
+  const ul=$("#logList"); ul.innerHTML="";
+  const T=S.cfg.teams;
+  for(let i=S.picks.length-1;i>=0;i--){
+    const pl=byId(S.picks[i]); if(!pl) continue;
+    const li=document.createElement("li");
+    li.innerHTML=`<span class="pk">${pickLabel(i+1,T)}</span><span class="pos ${pl.pos}">${pl.pos}</span><span>${esc(pl.name)}</span><span class="tm">${esc(teamName(teamAtPick(i+1,T)))}</span>`;
+    ul.appendChild(li);
+  }
+  if(!S.picks.length) ul.innerHTML=`<li style="color:var(--dim)">No picks yet — when anyone drafts, record it here by hitting “Draft” on the player.</li>`;
+}
+function renderPlayers(){
+  const q = $("#search").value.trim().toLowerCase();
+  const now=currentPick();
+  const me = !draftDone() && teamAtPick(now,S.cfg.teams)===S.cfg.slot;
+  const future = draftDone()? [] : myNextPicks(me?now:now-1);
+  const target = future[0] || now;
+  let rows = available()
+    .filter(p=>posFilter==="ALL"||p.pos===posFilter)
+    .filter(p=>!q || p.name.toLowerCase().includes(q) || p.team.toLowerCase().includes(q))
+    .sort((a,b)=>a.adp-b.adp).slice(0,150);
+  const html = ["<table><thead><tr><th class='num'>ADP</th><th>Player</th><th></th><th>Tm</th><th class='num'>Tier</th><th class='num'>VOR</th><th class='num' title='Chance the player is still available at your next pick'>@Next</th><th></th></tr></thead><tbody>"];
+  for(const p of rows){
+    const s=Math.round(survives(p,target)*100);
+    const cls = s>=70?"low":s>=40?"mid":"high";
+    html.push(`<tr class="playerRow"><td class="num" style="color:var(--dim)">${p.adp}</td><td><b>${esc(p.name)}</b></td><td><span class="pos ${p.pos}">${p.pos}</span></td><td style="color:var(--dim)">${esc(p.team)}</td><td class="num" style="color:var(--dim)">${p.tier||"—"}</td><td class="num">${vor(p).toFixed(0)}</td><td class="num"><span class="risk ${cls}">${s}%</span></td><td><button class="small primary" data-draft="${p.id}" ${draftDone()?"disabled":""}>Draft</button></td></tr>`);
+  }
+  html.push("</tbody></table>");
+  if(!rows.length) html.splice(0,html.length,"<p style='color:var(--dim);padding:10px'>No players match.</p>");
+  $("#playersTable").innerHTML=html.join("");
+  $("#playersTable").querySelectorAll("[data-draft]").forEach(b=>b.onclick=()=>draftPlayer(+b.dataset.draft));
+}
+function renderRecs(){
+  const box=$("#recList");
+  if(draftDone()){ box.innerHTML=`<p style="color:var(--dim)">Draft complete — nice work.</p>`; return; }
+  const me = teamAtPick(currentPick(),S.cfg.teams)===S.cfg.slot;
+  $("#recTitle").textContent = me ? "You're on the clock — best picks" : "If you were picking now";
+  const recs = recommend();
+  const max = recs.length? recs[0].score : 1;
+  box.innerHTML = recs.map((r,i)=>`
+    <div class="recCard ${i===0?"top":""}">
+      <div class="head"><span class="pos ${r.p.pos}">${r.p.pos}</span><span class="name">${esc(r.p.name)}</span>
+        <span style="color:var(--dim);font-size:12px">${esc(r.p.team)}</span><span class="score">${r.score.toFixed(0)}</span></div>
+      <ul>${r.reasons.slice(0,3).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+      <div class="bar"><i style="width:${Math.max(6,100*r.score/max).toFixed(0)}%"></i></div>
+      ${me?`<button class="draftBtn primary small" data-draft="${r.p.id}">Draft ${esc(r.p.name)}</button>`:""}
+    </div>`).join("");
+  box.querySelectorAll("[data-draft]").forEach(b=>b.onclick=()=>draftPlayer(+b.dataset.draft));
+}
+function renderNeeds(){
+  const fill=slotFill(S.cfg.slot);
+  const open=[];
+  for(const pos of ["QB","RB","WR","TE","K","DST"]) if(fill.openStarters[pos]) open.push(pos);
+  if(fill.flexOpen) open.push("FLEX");
+  const nxt=myNextPicks(currentPick()-1);
+  $("#needsBox").innerHTML = `
+    <p>${open.length? "Open starter slots: "+open.map(p=>`<span class="pos ${p==="FLEX"?"dst":p}">${p}</span>`).join(" ") : "✅ All starters filled — draft best value / upside."}</p>
+    <p style="margin-top:8px;color:var(--dim)">Roster: ${["QB","RB","WR","TE","K","DST"].map(p=>`${p} ${fill.counts[p]||0}`).join(" · ")}</p>
+    <p style="margin-top:8px;color:var(--dim)">Your picks left: ${nxt.length}${nxt.length?` — next at ${nxt.slice(0,3).map(p=>pickLabel(p,S.cfg.teams)).join(", ")}${nxt.length>3?"…":""}`:""}</p>`;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* =================== actions =================== */
+function draftPlayer(id){
+  if(draftDone()) return;
+  const pl=byId(id); if(!pl || isDrafted(id)) return;
+  const p=currentPick(), t=teamAtPick(p,S.cfg.teams);
+  S.picks.push(id);
+  toast(`${pickLabel(p,S.cfg.teams)} — ${teamName(t)} drafts ${pl.name}`);
+  render();
+}
+function undo(){
+  if(!S.picks.length) return;
+  const id=S.picks.pop(); const pl=byId(id);
+  toast(`Undid pick: ${pl?pl.name:"?"}`);
+  render();
+}
+
+/* =================== board modal =================== */
+function renderBoard(){
+  const T=S.cfg.teams, R=totalRounds(S.cfg), now=currentPick();
+  let h="<table id='board'><thead><tr><th class='rnd'></th>";
+  for(let t=1;t<=T;t++) h+=`<th${t===S.cfg.slot?" style='color:var(--gold)'":""}>${esc(teamName(t))}${t===S.cfg.slot?" ★":""}</th>`;
+  h+="</tr></thead><tbody>";
+  for(let r=1;r<=R;r++){
+    h+=`<tr><th class='rnd'>${r}</th>`;
+    for(let t=1;t<=T;t++){
+      // overall pick for team t in round r
+      const i = (r%2===1)? t : T-t+1;
+      const p = (r-1)*T + i;
+      const pid = S.picks[p-1];
+      const pl = pid? byId(pid): null;
+      const cls = (t===S.cfg.slot?"me ":"") + (p===now && !draftDone() ? "onclock":"");
+      h+=`<td class="${cls}">` + (pl? `<span class="bpos c${pl.pos}">${pl.pos}</span><span class="bp">${esc(pl.name)}</span>` : `<span style="color:#39424f">${pickLabel(p,T)}</span>`) + "</td>";
+    }
+    h+="</tr>";
+  }
+  h+="</tbody></table>";
+  $("#boardWrap").innerHTML=h;
+}
+
+/* =================== setup modal =================== */
+function openSetup(){
+  const c=S.cfg;
+  const selT=$("#cfgTeams"); selT.innerHTML="";
+  for(let n=4;n<=16;n++){ const o=document.createElement("option"); o.value=n; o.textContent=n; selT.appendChild(o); }
+  selT.value=c.teams;
+  const fillSlots=()=>{ const selS=$("#cfgSlot"); selS.innerHTML="";
+    for(let n=1;n<=+selT.value;n++){ const o=document.createElement("option"); o.value=n; o.textContent=ordinal(n); selS.appendChild(o); }
+    selS.value=Math.min(c.slot,+selT.value);
+    const tn=$("#teamNames"); tn.innerHTML="";
+    for(let n=1;n<=+selT.value;n++){ const inp=document.createElement("input"); inp.placeholder="Team "+n+(n===+$("#cfgSlot").value?" (you)":""); inp.value=c.names[n-1]||""; inp.dataset.i=n-1; tn.appendChild(inp); }
+  };
+  selT.onchange=fillSlots; fillSlots();
+  $("#cfgScoring").value=c.scoring;
+  $("#cfgQB").value=c.qb;$("#cfgRB").value=c.rb;$("#cfgWR").value=c.wr;$("#cfgTE").value=c.te;
+  $("#cfgFLEX").value=c.flex;$("#cfgK").value=c.k;$("#cfgDST").value=c.dst;$("#cfgBN").value=c.bn;
+  $("#setupModal").classList.add("open");
+}
+function saveSetup(){
+  const old=S.cfg;
+  const c={
+    teams:+$("#cfgTeams").value, slot:+$("#cfgSlot").value, scoring:$("#cfgScoring").value,
+    qb:+$("#cfgQB").value, rb:+$("#cfgRB").value, wr:+$("#cfgWR").value, te:+$("#cfgTE").value,
+    flex:+$("#cfgFLEX").value, k:+$("#cfgK").value, dst:+$("#cfgDST").value, bn:+$("#cfgBN").value,
+    names:[...document.querySelectorAll("#teamNames input")].map(i=>i.value)
+  };
+  const structural = c.teams!==old.teams || totalRounds(c)!==totalRounds(old);
+  if(structural && S.picks.length && !confirm("Team count / roster size changed — this restarts the draft (picks are cleared). Continue?")) return;
+  if(structural) S.picks=[];
+  S.cfg=c; S.started=true; S.viewTeam=Math.min(S.viewTeam||c.slot, c.teams);
+  $("#setupModal").classList.remove("open");
+  render();
+}
+
+/* =================== CSV import =================== */
+function parseCSV(text){
+  const rows=[]; let row=[], cur="", inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(inQ){ if(ch==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=ch; }
+    else if(ch==='"') inQ=true;
+    else if(ch===',' ){ row.push(cur); cur=""; }
+    else if(ch==='\n'||ch==='\r'){ if(cur!==""||row.length){row.push(cur); rows.push(row); row=[]; cur="";} if(ch==='\r'&&text[i+1]==='\n')i++; }
+    else cur+=ch;
+  }
+  if(cur!==""||row.length){row.push(cur); rows.push(row);}
+  return rows.filter(r=>r.some(c=>c.trim()!==""));
+}
+const norm = s => String(s).toLowerCase().replace(/\b(jr|sr|ii|iii|iv|v)\b\.?/g,"").replace(/d\/st|dst|defense/g,"dst").replace(/[^a-z0-9]/g,"");
+function importCSV(text){
+  const rows=parseCSV(text);
+  if(rows.length<2){ alert("Couldn't parse that CSV."); return; }
+  const hdr=rows[0].map(h=>h.trim().toLowerCase());
+  const find=(...pats)=>hdr.findIndex(h=>pats.some(p=>h.includes(p)));
+  const iName=find("player","name"), iPos=find("pos"), iTeam=find("team","tm"), iRank=find("rk","rank","adp","overall"), iTier=find("tier");
+  if(iName<0||iPos<0){ alert("Need at least a player-name column and a position column."); return; }
+  const players=[]; let id=1;
+  for(let r=1;r<rows.length;r++){
+    const row=rows[r];
+    const name=(row[iName]||"").trim(); if(!name) continue;
+    let pos=(row[iPos]||"").trim().toUpperCase().replace(/[0-9]/g,"");
+    if(pos==="DEF"||pos==="D/ST"||pos==="D") pos="DST";
+    if(!["QB","RB","WR","TE","K","DST"].includes(pos)) continue;
+    const adp = iRank>=0 ? parseFloat(row[iRank]) : NaN;
+    players.push({id:id++, name, pos, team:(iTeam>=0?(row[iTeam]||"").trim().toUpperCase():"")||"—",
+                  adp: isFinite(adp)? adp : players.length+1,
+                  tier: iTier>=0 ? (parseInt(row[iTier])||null) : null});
+  }
+  if(players.length<20){ alert("Only found "+players.length+" usable rows — check the CSV columns."); return; }
+  players.sort((a,b)=>a.adp-b.adp);
+  // fill missing tiers: bucket by position rank
+  const posSeen={};
+  players.forEach(p=>{ posSeen[p.pos]=(posSeen[p.pos]||0)+1; if(!p.tier) p.tier=Math.ceil(posSeen[p.pos]/6); });
+  // re-match already drafted players by name
+  const oldPicks=S.picks.map(pid=>byId(pid)).filter(Boolean);
+  S.players=players;
+  S.picks=oldPicks.map(op=>{
+    let m=players.find(p=>norm(p.name)===norm(op.name));
+    if(!m){ m={id:id++, name:op.name, pos:op.pos, team:op.team, adp:999, tier:99}; players.push(m); }
+    return m.id;
+  });
+  toast(`Imported ${players.length} players.`);
+  $("#importModal").classList.remove("open");
+  render();
+}
+
+/* =================== export / load =================== */
+async function exportJSON(){
+  const payload=JSON.stringify(S,null,1);
+  const fname="draft-"+new Date().toISOString().slice(0,10)+".json";
+  // Hosted as a Claude artifact, saves go through the viewer's download prompt
+  if(window.claude && typeof window.claude.use==="function"){
+    const dl=await window.claude.use("downloads").catch(()=>null);
+    if(dl){
+      try{ await dl.save({filename:fname, data:payload}); toast("Exported "+fname); }
+      catch(e){ toast("Export cancelled."); }
+      return;
+    }
+  }
+  const blob=new Blob([payload],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=fname;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* =================== wire-up =================== */
+function boot(){
+  // Snapshot the served document before any JS mutates it — this is what
+  // cloudSave republishes (with fresh state swapped into #ffstate).
+  PRISTINE = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  document.querySelectorAll(".modal.open").forEach(m=>m.classList.remove("open"));
+  if(!load()){ S=defaultState(); }
+  if(!S.players || !S.cfg){ S=defaultState(); }
+  render();
+  cloudDirty = false; // freshly booted state is what's already stored
+  initCloud();
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState==="hidden" && cloudDirty){ clearTimeout(cloudTimer); cloudSave(); }
+  });
+  if(!S.started) openSetup();
+
+  $("#btnSettings").onclick=openSetup;
+  $("#setupCancel").onclick=()=>{ if(S.started) $("#setupModal").classList.remove("open"); };
+  $("#setupSave").onclick=saveSetup;
+  $("#btnUndo").onclick=undo;
+  $("#btnBoard").onclick=()=>{ renderBoard(); $("#boardModal").classList.add("open"); };
+  $("#boardClose").onclick=()=>$("#boardModal").classList.remove("open");
+  $("#btnReset").onclick=()=>{ if(confirm("Clear all picks (player pool and settings are kept)?")){ S.picks=[]; render(); toast("Draft reset."); } };
+  $("#btnExport").onclick=exportJSON;
+  $("#btnLoad").onclick=()=>$("#loadFile").click();
+  $("#loadFile").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    f.text().then(t=>{ try{ const d=JSON.parse(t); if(d.cfg&&d.players){ S=d; render(); toast("Draft loaded."); } else alert("Not a Draft War Room export."); }catch(err){ alert("Couldn't read that file."); } });
+    e.target.value="";
+  };
+  $("#btnImport").onclick=()=>$("#importModal").classList.add("open");
+  $("#importCancel").onclick=()=>$("#importModal").classList.remove("open");
+  $("#importGo").onclick=()=>{
+    const f=$("#csvFile").files[0];
+    if(f) f.text().then(importCSV); else importCSV($("#csvText").value);
+  };
+  $("#btnAddPlayer").onclick=()=>$("#addModal").classList.add("open");
+  $("#addCancel").onclick=()=>$("#addModal").classList.remove("open");
+  $("#addGo").onclick=()=>{
+    const name=$("#addName").value.trim(); if(!name){ alert("Name required."); return; }
+    const id=Math.max(0,...S.players.map(p=>p.id))+1;
+    const adp=+$("#addAdp").value||250;
+    S.players.push({id, name, pos:$("#addPos").value, team:($("#addTeam").value.trim().toUpperCase()||"FA"), adp, tier:9});
+    $("#addModal").classList.remove("open"); $("#addName").value="";
+    toast("Added "+name+".");
+    render();
+  };
+  $("#search").addEventListener("input", renderPlayers);
+  document.querySelectorAll(".posf").forEach(b=>b.onclick=()=>{
+    posFilter=b.dataset.pos;
+    document.querySelectorAll(".posf").forEach(x=>x.classList.toggle("active",x===b));
+    renderPlayers();
+  });
+  // close modals on backdrop click (except first-run setup)
+  document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{
+    if(e.target===m && !(m.id==="setupModal" && !S.started)) m.classList.remove("open");
+  }));
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+</script>
+</body>
+</html>
