@@ -77,16 +77,6 @@ emphasis, Inter body, Antonio eyebrows. Fonts are self-hosted; logo PNGs are der
 the official EPS masters. Shares its design system with the
 [Course Library](https://me5231979.github.io/Course_Library/).
 
-## Fantasy Draft War Room
-
-`fantasy/index.html` is a standalone fantasy football draft assistant (`/fantasy` when the
-site is served). It records every pick in a snake draft — yours and all other teams' — on a
-live board with per-team rosters, and recommends your next pick from that data: value over
-replacement by position, tier scarcity, your open roster slots, and the probability each
-player survives until your next turn. Ships with an editable 2026 preseason board;
-import fresh rankings any time via CSV (FantasyPros exports work as-is). State persists in
-`localStorage` with JSON export/load. No build step, no dependencies.
-
 ## Run
 
 Static site — no build step. Serve the repo root:
