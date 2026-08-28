@@ -114,6 +114,7 @@ tr.playerRow:hover{background:#1b2331}
 <header>
   <h1>🏈 Draft War Room</h1>
   <span class="sub" id="leagueSub"></span>
+  <span class="sub" id="saveState"></span>
   <span class="spacer"></span>
   <button id="btnBoard">Draft board</button>
   <button id="btnSettings">Settings</button>
@@ -246,6 +247,7 @@ tr.playerRow:hover{background:#1b2331}
 <div id="toast"></div>
 <input type="file" id="loadFile" accept=".json,application/json" style="display:none">
 
+<script id="ffstate" type="application/json"></script>
 <script>
 "use strict";
 /* =====================================================================
@@ -351,10 +353,69 @@ function defaultState(){
     started:false
   };
 }
-function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} }
+function save(){
+  S.savedAt = Date.now();
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
+  scheduleCloudSave();
+}
+// State can live in two places: localStorage (fast, this browser only) and the
+// #ffstate block embedded in the page itself when hosted as a Claude artifact
+// (durable, follows the artifact everywhere). Boot from whichever is newest.
 function load(){
-  try{ const raw = localStorage.getItem(LS_KEY); if(raw){ S = JSON.parse(raw); return true; } }catch(e){}
+  let local=null, embedded=null;
+  try{ const raw = localStorage.getItem(LS_KEY); if(raw) local = JSON.parse(raw); }catch(e){}
+  try{
+    const n = document.getElementById("ffstate");
+    if(n && n.textContent.trim()) embedded = JSON.parse(n.textContent);
+  }catch(e){}
+  const valid = d => d && d.cfg && d.players;
+  if(!valid(local)) local=null;
+  if(!valid(embedded)) embedded=null;
+  const best = !local ? embedded : !embedded ? local :
+    ((local.savedAt||0) >= (embedded.savedAt||0) ? local : embedded);
+  if(best){ S = best; return true; }
   return false;
+}
+function storageWorks(){
+  try{ localStorage.setItem("ffdraft.test","1"); localStorage.removeItem("ffdraft.test"); return true; }
+  catch(e){ return false; }
+}
+
+/* ---- artifact self-save: republish the page with state embedded ---- */
+let PRISTINE=null, artifactNS=undefined, cloudDirty=false, cloudTimer=null, cloudBusy=false;
+const CLOUD_DEBOUNCE_MS = 20000;
+async function initCloud(){
+  if(!(window.claude && typeof window.claude.use==="function")){ artifactNS=null; updateSaveState(); return; }
+  artifactNS = await window.claude.use("artifact").catch(()=>null);
+  updateSaveState();
+  if(artifactNS && cloudDirty) scheduleCloudSave();
+}
+function scheduleCloudSave(){
+  cloudDirty = true;
+  if(!artifactNS) return;
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(cloudSave, CLOUD_DEBOUNCE_MS);
+  updateSaveState();
+}
+async function cloudSave(){
+  if(!artifactNS || cloudBusy || !cloudDirty) return;
+  if(document.querySelector(".modal.open")){ // don't reload the page under an open dialog
+    clearTimeout(cloudTimer); cloudTimer=setTimeout(cloudSave, 5000); return;
+  }
+  cloudBusy = true; updateSaveState("saving");
+  try{
+    const json = JSON.stringify(S).replace(/</g,"\\u003c");
+    const html = PRISTINE.replace(/(<script id="ffstate"[^>]*>)[\s\S]*?(<\/script>)/, (m,a,b)=>a+json+b);
+    await artifactNS.publish(html); // every open view, this one included, reloads to the saved version
+    cloudDirty = false;
+  }catch(e){ /* conflict: another view published; the reload brings the winner */ }
+  cloudBusy = false; updateSaveState();
+}
+function updateSaveState(mode){
+  const el=document.getElementById("saveState"); if(!el) return;
+  if(artifactNS===undefined){ el.textContent=""; return; }
+  if(!artifactNS){ el.textContent = storageWorks()? "· saved in this browser" : "· ⚠ storage unavailable — use Export"; return; }
+  el.textContent = mode==="saving" ? "· saving to artifact…" : cloudDirty ? "· unsaved changes (auto-saves shortly)" : "· ✓ saved to artifact";
 }
 
 /* ======================= draft math ======================= */
@@ -767,10 +828,19 @@ async function exportJSON(){
 }
 
 /* =================== wire-up =================== */
-document.addEventListener("DOMContentLoaded", ()=>{
+function boot(){
+  // Snapshot the served document before any JS mutates it — this is what
+  // cloudSave republishes (with fresh state swapped into #ffstate).
+  PRISTINE = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  document.querySelectorAll(".modal.open").forEach(m=>m.classList.remove("open"));
   if(!load()){ S=defaultState(); }
   if(!S.players || !S.cfg){ S=defaultState(); }
   render();
+  cloudDirty = false; // freshly booted state is what's already stored
+  initCloud();
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState==="hidden" && cloudDirty){ clearTimeout(cloudTimer); cloudSave(); }
+  });
   if(!S.started) openSetup();
 
   $("#btnSettings").onclick=openSetup;
@@ -814,7 +884,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
   document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{
     if(e.target===m && !(m.id==="setupModal" && !S.started)) m.classList.remove("open");
   }));
-});
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
 </script>
 </body>
 </html>
