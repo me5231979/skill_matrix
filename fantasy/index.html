@@ -747,11 +747,22 @@ function importCSV(text){
 }
 
 /* =================== export / load =================== */
-function exportJSON(){
-  const blob=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});
+async function exportJSON(){
+  const payload=JSON.stringify(S,null,1);
+  const fname="draft-"+new Date().toISOString().slice(0,10)+".json";
+  // Hosted as a Claude artifact, saves go through the viewer's download prompt
+  if(window.claude && typeof window.claude.use==="function"){
+    const dl=await window.claude.use("downloads").catch(()=>null);
+    if(dl){
+      try{ await dl.save({filename:fname, data:payload}); toast("Exported "+fname); }
+      catch(e){ toast("Export cancelled."); }
+      return;
+    }
+  }
+  const blob=new Blob([payload],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
-  a.download="draft-"+new Date().toISOString().slice(0,10)+".json";
+  a.download=fname;
   a.click(); URL.revokeObjectURL(a.href);
 }
 
