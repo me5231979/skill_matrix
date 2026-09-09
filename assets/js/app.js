@@ -72,7 +72,7 @@
       enterTeamPath();
       document.getElementById('teamtool').scrollIntoView({ behavior: 'smooth' });
     });
-    ['hero-path', 'nav-path'].forEach(function (id) {
+    ['hero-path', 'nav-path', 'footer-path'].forEach(function (id) {
       var b = document.getElementById(id);
       if (b) b.addEventListener('click', openPathChooser);
     });
@@ -488,7 +488,22 @@
       ['Get the plan', 'Gaps become a printable development plan with Oracle Learning links. Add another person and keep going \u2014 each keeps their own ratings and plan.']
     ]
   };
+  /* The whole page follows the chosen path, not just the three step cards: the
+     how-it-works headline and lead, the switcher pills and where "Your plan" points. */
+  var ACTIVE_PATH = 'roles';
+  var HOW_HEAD = {
+    roles: ['Three steps to <em>a destination</em>.',
+      '<strong>This is the map. Oracle is the vehicle.</strong> Explore destinations and build your plan here. Then execute it in Oracle: your Talent Profile, development goals, courses and gigs all live there.'],
+    skills: ['Three steps to <em>your best fit</em>.',
+      '<strong>This is the map. Oracle is the vehicle.</strong> Start from what you do well, meet the roles that fit and build your plan here. Then execute it in Oracle: your Talent Profile, development goals, courses and gigs all live there.'],
+    team: ['Three steps to <em>a stronger team</em>.',
+      '<strong>This is the map. Oracle is the vehicle.</strong> Rate each person against their role and build their development plan here. Then they execute it in Oracle: Talent Profile, development goals, courses and gigs all live there.']
+  };
   function applyHowCopy(path) {
+    ACTIVE_PATH = path;
+    var h2 = document.getElementById('how-h2'), lead = document.getElementById('how-lead');
+    if (h2) h2.innerHTML = HOW_HEAD[path][0];
+    if (lead) lead.innerHTML = HOW_HEAD[path][1];
     HOW_COPY[path].forEach(function (c, i) {
       var el = document.querySelector('[data-how="' + (i + 1) + '"]');
       if (!el) return;
@@ -500,6 +515,29 @@
       x.classList.toggle('on', x.dataset.path === path);
     });
   }
+
+  /* Nav "Your plan" goes to the active path's plan — or to where it will appear. */
+  (function () {
+    var link = document.querySelector('.nav__links a[href="#plan"]');
+    if (!link) return;
+    link.addEventListener('click', function (e) {
+      var target;
+      if (ACTIVE_PATH === 'roles') {
+        target = document.getElementById('me-plan') ||
+          (!document.getElementById('myrole').hidden && document.getElementById('myrole'));
+      } else if (ACTIVE_PATH === 'team') {
+        target = document.getElementById('mgr-plan') ||
+          (!document.getElementById('teamtool').hidden && document.getElementById('teamtool'));
+      } else {
+        var plan = document.getElementById('plan');
+        target = (!plan.hidden && plan) ||
+          (!document.getElementById('skillsfirst').hidden && document.getElementById('skillsfirst'));
+      }
+      e.preventDefault();
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      else openPathChooser();
+    });
+  })();
 
   /* Either/or paths: one workflow per visit unless the user starts over.
      #explore (the two-role comparison) is now reached only from a skills-first match. */
