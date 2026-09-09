@@ -1,4 +1,4 @@
-# Transfer Portal — Vanderbilt Career Pathways Explorer
+# Talent Marketplace — Vanderbilt Career Pathways Explorer
 
 A single-page app built on Vanderbilt's **Skills-Based Job Architecture** (SBJA).
 

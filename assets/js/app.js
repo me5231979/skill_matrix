@@ -1,5 +1,5 @@
 /* =====================================================================
-   VANDERBILT TRANSFER PORTAL — CAREER PATHWAYS EXPLORER
+   VANDERBILT TALENT MARKETPLACE — CAREER PATHWAYS EXPLORER
    Data: assets/data/sbja.json (extracted from the SBJA workbook).
    ===================================================================== */
 (function () {
@@ -1469,13 +1469,13 @@
   }
   var PEOPLE = { list: [blankPerson()], active: 0 };
   try {
-    var savedPeople = JSON.parse(localStorage.getItem('sm_people_v1') || 'null');
+    var savedPeople = JSON.parse(sessionStorage.getItem('sm_people_v1') || 'null');
     if (savedPeople && savedPeople.list && savedPeople.list.length) PEOPLE = savedPeople;
   } catch (e) {}
   if (PEOPLE.active >= PEOPLE.list.length) PEOPLE.active = 0;
   var DEV = PEOPLE.list[PEOPLE.active];
   function saveDev() {
-    try { localStorage.setItem('sm_people_v1', JSON.stringify(PEOPLE)); } catch (e) {}
+    try { sessionStorage.setItem('sm_people_v1', JSON.stringify(PEOPLE)); } catch (e) {}
   }
 
   function personLabel(p, i) {
@@ -2224,10 +2224,12 @@
   }
   var ME = blankMe();
   try {
-    var savedMe = JSON.parse(localStorage.getItem('sm_me_v1') || 'null');
+    var savedMe = JSON.parse(sessionStorage.getItem('sm_me_v1') || 'null');
     if (savedMe && savedMe.jobRole) ME = savedMe;
   } catch (e) {}
-  function saveMe() { try { localStorage.setItem('sm_me_v1', JSON.stringify(ME)); } catch (e) {} }
+  function saveMe() { try { sessionStorage.setItem('sm_me_v1', JSON.stringify(ME)); } catch (e) {} }
+  /* Audits used to live in localStorage; scrub them so old machines don't resurrect them. */
+  try { ['sm_me_v1', 'sm_people_v1', 'sm_team_v1', 'sm_dev_v1'].forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {}
 
   function initMyRole() {
     attachRoleSearch(document.getElementById('mr-search'), document.getElementById('mr-suggest'), function (r) {
