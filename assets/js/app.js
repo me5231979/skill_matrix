@@ -483,7 +483,7 @@
       ['Get the plan', 'Choose a match and get the same printable plan: phase checklists, Oracle Learning links, curated resources and the Oracle playbook.']
     ],
     team: [
-      ['Pick the person\u2019s role', 'Select the sub-family and role level \u2014 no names, ever. Every skill mapped to that role populates automatically.'],
+      ['Find their job title', 'Search the person\u2019s job title \u2014 no names, ever. Confirm their level and every skill mapped to that role populates automatically.'],
       ['Rate and choose the direction', 'Skill by skill, set where they are and where they need to be \u2014 for the current role, the next level in the sub-family, or a transfer. Add your own development areas beyond the framework.'],
       ['Get the plan', 'Gaps become a printable development plan with Oracle Learning links. Add another person and keep going \u2014 each keeps their own ratings and plan.']
     ]
